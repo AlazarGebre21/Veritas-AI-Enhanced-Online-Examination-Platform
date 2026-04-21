@@ -1,0 +1,35 @@
+/* NotionInter — Modified Inter font used by the Notion design system
+   Google Fonts Inter is loaded via <link> in index.html for proper
+   Vite/PostCSS compatibility. @font-face below maps it to "NotionInter". */
+
+@font-face {
+  font-family: "NotionInter";
+  src: local("Inter"), local("Inter-Regular");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NotionInter";
+  src: local("Inter Medium"), local("Inter-Medium");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NotionInter";
+  src: local("Inter SemiBold"), local("Inter-SemiBold");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NotionInter";
+  src: local("Inter Bold"), local("Inter-Bold");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

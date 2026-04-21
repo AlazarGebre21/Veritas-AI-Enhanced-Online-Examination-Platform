@@ -1,0 +1,2176 @@
+﻿Addis Ababa Science and Technology University
+College of Engineering
+DEPARTMENT OF SOFTWARE ENGINEERING
+
+Vertas: AI Enhanced Online Assessment and Monitoring System
+
+	
+              Name						               ID Number
+Abraham Mulugeta
+ETS0107/14
+
+Alazar Gebre
+ETS0132/14
+
+Tadiyos Dejene
+ETS1522/14
+
+Tamirat Dejene
+ETS1518/14
+
+Yohannes Tigistu	
+ETS1703/14
+
+
+
+
+
+
+
+Advisor:__________________________________________	 Signature: __________
+      	Oct 2025Acknowledgement
+We would like to express our deepest gratitude to all those who supported us throughout the development of our final year project, Veritas: AI-Enhanced Online Assessment and Monitoring System.
+
+First and foremost, we extend our sincere appreciation to our project advisor, Mr. Muleta Taye, for their invaluable guidance, insightful feedback, and unwavering encouragement. Their expertise in software engineering and commitment to fostering innovation played a vital role in shaping the direction and quality of this project.
+
+We are also grateful to the faculty members of the Department of Software Engineering at Addis Ababa Science and Technology University for equipping us with the knowledge, skills, and academic environment necessary to undertake this work. Special appreciation is extended to the Ministry of Innovation and Technology for its Digital Ethiopia 2030 initiative, which inspired our emphasis on local data sovereignty and technological independence.
+
+Our heartfelt thanks go to the HR professionals, educators, and stakeholders who participated in interviews and surveys, providing practical insights that helped refine the system requirements. Their contributions were essential in addressing the unique challenges of the Ethiopian digital ecosystem.
+
+We would also like to acknowledge the unwavering support of our families and friends for their patience, encouragement, and understanding throughout late nights and challenging phases of the project. Their belief in us served as a constant source of motivation.
+
+Finally, we extend our sincere appreciation to our team members—Abraham Mulugeta, Alazar Gebre, Tadiyos Dejene, Tamirat Dejene, and Yohannes Tigistu—for their collaboration, shared ideas, and collective effort that brought the Veritas system to life.
+
+This project would not have been possible without the combined support of everyone mentioned above. We are truly grateful to all.
+Contents
+Vertas: AI Enhanced Online Assessment and Monitoring System	1
+Acknowledgement	2
+Abstract	1
+Chapter 1: Introduction	2
+1.1. Statement of the Problem	3
+1.2. Objectives	4
+1.2.1 General Objective	4
+1.2.2 Specific Objectives	4
+1.3 Scope and Limitations	5
+1.3.1 Scope	5
+1.3.2 Limitations	5
+1.4 Methodology	6
+1.4.1 Research and Requirements Engineering	6
+1.4.2 System Development Process	8
+Phase 1: Planning and Requirement Analysis	8
+Phase 2: System Design and Architecture	8
+Phase 3: Technical Implementation (Build)	8
+Phase 4: Quality Assurance and Testing	9
+Phase 5: Documentation	9
+1.4.3 Evaluation	9
+1.5. Plan of Activities	10
+1.5.1 Key Phases and Activities	10
+1.5.2 Timeline Overview	12
+1.5.3 Risk Management and Monitoring	12
+1.6 Budget Required	13
+1.6.1 Budget Breakdown	13
+1.6.2 Explanation of Estimates and Updates	13
+1.7 Significance of the Study	14
+1.8 Outline of the Study	15
+Chapter Two: Literature Review	16
+Overview	16
+2.1 Study Related Works	17
+2.2 Identifying Milestones of Related Literature and Finding the Gaps	17
+2.2.1 Milestones	17
+2.2.2 Gaps Identified	18
+2.3 Lessons Learned from Literature	20
+Chapter Three: Problem Analysis and Modeling	20
+3.1. Existing System and Its Problems	20
+3.1.1 Overview of the Existing System	20
+3.1.2. Identified Problems and Limitations	21
+Analytical Insights	22
+3.1.3. Visual Summary (from Topuz et al., 2022)	23
+3.2. System Requirement Specification	23
+Functional Requirements	25
+3.2.1. Enterprise Management & Multi-Tenancy Requirements	25
+3.2.2. Authentication & User Management Requirements	26
+3.2.3. Examination Creation & Management Requirements	27
+3.2.4. Candidate Examination Interface Requirements	28
+3.2.5. AI Proctoring & Monitoring Requirements	30
+3.2.6. Grading, Analytics & Certificate Requirements	31
+3.2.7. Dashboard & Reporting Requirements	32
+3.2.8. Payment & Subscription Requirements	34
+Non-Functional Requirements	36
+3.3.1. Performance & Scalability	36
+3.3.2. Security & Privacy	36
+3.3.3 Usability & Accessibility	37
+3.3.4 Reliability & Maintainability	38
+1. Identify Actors	39
+2. Identify Use Cases	39
+Super Administrator	39
+Enterprise Administrator	39
+Enterprise Staff	40
+Candidate	40
+Payment System	40
+General use case diagram	41
+1. Super Administrator – Use Case Diagram	42
+Activity Diagrams	77
+References	85
+Abstract
+The rapid expansion of digital education and remote recruitment has increased the demand for reliable, scalable, and secure online assessment systems. Traditional examination methods often face limitations such as lack of flexibility, manual administration overhead, scalability challenges, and difficulties in ensuring fairness and candidate identity verification. This report addresses these challenges by designing and documenting a comprehensive enterprise-level online assessment management system that supports multiple stakeholders, including system administrators, enterprise administrators, staff members, candidates, and external payment services.
+
+The proposed system provides a structured, role-based platform to manage the complete lifecycle of digital assessments. Key functionalities include enterprise registration and subscription management, staff and candidate management, exam creation and scheduling, candidate assignment, secure exam delivery, identity verification, automated grading, reporting, and certificate issuance. The system integrates dashboard-based analytics to support informed decision-making at both system-wide and enterprise-specific levels. A modular, use-case-driven design approach clearly defines system behavior, interactions, and responsibilities across different actors.
+
+This project presents \textit{Veritas}, an AI-enhanced online assessment and monitoring system tailored for Ethiopian enterprises and institutions. In alignment with the Digital Ethiopia 2030 Strategy, Veritas emphasizes local data sovereignty through a multi-tenant architecture, enabling independent exam environments for multiple organizations. Key features include secure authentication via enterprise IDs or tokens, continuous identity verification using face recognition, intelligent proctoring (e.g., tab-switch detection, mouse tracking, IP monitoring,...), automated grading for both objective and subjective questions using NLP models, customizable dashboards for exam management and analytics, automated certificate issuance, and simulated subscription modules supporting local payments.
+
+Developed using an Agile Scrum methodology, the prototype employs a microservices architecture (Go for performance-critical components, Python for AI modules), and has been tested for usability, security, and reliability. Evaluation demonstrates improved efficiency, reduced cheating, and enhanced trust, with AI-assisted grading minimizing human bias and bottlenecks. This work contributes to software engineering by providing a blueprint for contextually adaptable, secure assessment systems that foster technological independence in resource-constrained settings, while supporting e-learning, recruitment, and certification processes.
+
+Chapter 1: Introduction
+The rapid advancement of digital technologies has fundamentally transformed the landscape of educational and professional evaluations. Globally, the transition from traditional paper-based examinations to digital assessment platforms has been accelerated by the need for greater efficiency, scalability, and immediate feedback. This shift toward digital transformation has allowed academic institutions and enterprise sectors to adopt remote evaluation technologies that reduce logistical overhead, automate grading, and offer better reach across geographical boundaries.
+In the Ethiopian context, the adoption of online examination platforms is seeing significant growth, particularly within education and organizational recruitment sectors . As institutions strive to modernize their administrative workflows, there is an increasing reliance on digital tools to manage large-scale assessments. However, many current implementations are either generic platforms or manual processes that are not fully aligned with local infrastructural realities, such as varying internet stability and specific institutional requirements.
+The integrity of these digital assessments remains a cornerstone of their success. While the convenience of remote testing is undeniable, ensuring that a candidate’s performance truly reflects their genuine ability is a persistent challenge for educators and HR professionals alike. As the demand for objective human capital evaluation grows, there is a parallel need for systems that can provide a high degree of trust without being prohibitively expensive or technologically inaccessible in resource-constrained environments.
+The development of the Veritas system represents a response to this evolving landscape. By leveraging modern web technologies and artificial intelligence, the project aims to bridge the gap between global assessment standards and local institutional needs. This study explores the potential for a locally developed, secure, and intelligent platform that prioritizes data sovereignty and operational efficiency, ultimately contributing to the broader goal of technological independence and digital innovation within Ethiopia.
+
+1.1. Statement of the Problem
+In Ethiopia, enterprises and organizations increasingly rely on online assessments for recruitment and academic evaluations. However, there is a significant lack of comprehensive, commercially available platforms tailored to the local digital ecosystem. Currently, organizations often depend on foreign-hosted solutions which present challenges regarding data sovereignty, high subscription costs in foreign currency, and a lack of integration with local identity infrastructures. According to the Ministry of Innovation and Technology (2025), a key objective of the Digital Ethiopia 2030 Strategy is to reduce this dependency on external digital platforms and establish "Digital Sovereignty" by fostering locally developed systems that keep Ethiopian data within national borders.
+Existing digital tools are largely restricted to automating objective assessments. While these systems handle simple data well, they are insufficient for managing subjective evaluations at scale. The grading of open-ended essays and descriptive answers remains a manual, labor-intensive process. This reliance on manual grading for subjective content leads to significant bottlenecks, introduces human bias, and results in substantial delays. Current systems fail to provide an automated framework that can accurately interpret and grade complex, high-volume subjective submissions, forcing organizations to choose between the simplicity of objective tests or the inefficiency of manual review.
+While global platforms such as TestGorilla, HackerRank, and ProctorU offer sophisticated features like continuous authentication and behavior analytics, they remain largely inaccessible to most Ethiopian organizations. The primary barrier is the high cost of subscription fees required in foreign currency, which is strictly regulated and in short supply within the national economy. Furthermore, these platforms are optimized for high-bandwidth, stable international internet nodes. In the local context, high latency and connectivity fluctuations often result in session timeouts and data loss when interacting with foreign-hosted servers, thereby compromising the reliability of  assessments.
+As a result, maintaining examination credibility, preventing cheating, verifying identity, and handling large-scale automated assessments remain significant challenges for Ethiopian institutions and organizations. There is, therefore, a clear need for a secure, and inte-lligent online assessment and examination platform that provides flexibility, integrity, and scalability tailored to the needs of Ethiopian organizations and institutions .
+1.2. Objectives
+1.2.1 General Objective
+The general objective of the project is to design and develop an AI-enhanced online assessment and monitoring system.
+1.2.2 Specific Objectives
+To gather and analyze user and organizations requirements for developing a secure and intelligent online assessment system.
+To design a multi-tenant architecture that allows multiple enterprises or institutions to manage independent examination environments.
+To implement a secure authentication mechanism using enterprise-issued IDs or unique tokens to verify candidate identity.
+To authenticate the user's real identity through face recognition models that capture images at regular intervals and compare them with the image submitted during registration.
+To develop intelligent monitoring and behavior analysis features, including tab-switch detection and mouse activity tracking, ip address tracking to reduce cheating incidents.
+To integrate automated and manual grading mechanisms for evaluating exam, time utilization, and cheating scores.
+To build a customizable enterprise dashboard for managing exams, participants, and result reports with.
+To design and generate organization-specific certificates that are automatically issued to examinees upon successful completion. 
+To integrate payment and subscription management modules that support different service plans (basic, premium, enterprise).
+To evaluate the system’s usability, scalability, accuracy, and security through prototype testing and user feedback.
+To deploy a functional prototype of the system in a controlled environment for demonstration and evaluation purposes.
+1.3 Scope and Limitations
+1.3.1 Scope
+This project focuses on the design, development, and evaluation of a prototype AI-enhanced online assessment and monitoring system intended for enterprise and organizational use within the Ethiopian context. The scope of the project is limited to demonstrating the core concepts, architecture, and key functionalities of a secure and intelligent online examination platform.
+Within this scope, the project includes:
+Design of a multi-tenant system architecture that allows multiple enterprises to manage independent examination environments.
+Development of core examination management features, including exam creation, scheduling, and candidate participation.
+Implementation of basic authentication mechanisms, such as enterprise-issued credentials or unique examination tokens.
+Integration of AI-assisted smart proctoring features at a prototype level, including tab-switch detection, mouse activity tracking, and periodic image capture for identity verification.
+Implementation of automated grading for objective-type and essay based questions and basic analytics for performance evaluation and cheating indication.
+Development of role-based administrative dashboards for exam management and result visualization.
+Simulation of subscription-based access control models.
+The project scope excludes full-scale production deployment, large-scale real-world usage, legal compliance certification, and continuous system maintenance. Payment processing and cloud infrastructure are implemented at a demonstration or simulated level only.
+The system is tested and demonstrated in a controlled environment to evaluate usability, system performance, and the effectiveness of the AI-based monitoring mechanisms.
+1.3.2 Limitations
+Despite its comprehensive functionality, the project has certain technical and contextual limitations due to time, resource, and scope constraints:
+Platform Restriction: The current phase of the project focuses solely on the web application; no dedicated mobile or desktop application  version is included.
+Biometric Authentication: Advanced biometric features such as, fingerprint, or voice verification are excluded due to hardware and privacy constraints.
+Human Proctoring: The system relies solely on automated proctoring mechanisms; real-time human invigilation via webcam or video streaming is not integrated.
+Dataset and AI Model Limitations: The AI-based behavior analysis relies on lightweight, pre-trained models. As a result, its accuracy may vary depending on lighting, device camera quality, and candidate behavior diversity.
+Scalability Constraints: Large-scale, nationwide deployment and integration with government-level exam systems are beyond the current project phase but may be considered for future iterations.
+
+1.4 Methodology
+The methodology for this project is anchored in the Agile framework, specifically utilizing the Scrum methodology, to facilitate an iterative and adaptive development environment. This approach has been selected as the ideal choice over traditional linear models because the development of an AI-driven, security-critical system requires continuous refinement of complex proctoring and semantic analysis layers. By working in iterative cycles, the project can rapidly incorporate stakeholder feedback and adapt to technical challenges inherent in the Ethiopian infrastructure, ensuring that the final product is both technologically robust and contextually relevant.
+This methodology prioritizes a blend of comprehensive upfront research and an iterative development cycle encompassing design, implementation, testing, and deployment. The Agile approach specifically enables us to mitigate risks early, such as high-latency network bottlenecks or AI "false positives," by validating functional increments at the end of every sprint.
+Our methodology incorporates user-centered design principles, ensuring that stakeholder feedback is integrated during both the initial requirements gathering and the final evaluation phases. This ensures the system remains adaptable to local needs, such as strict compliance with the Ethiopian Data Protection Proclamation and maintaining stability during high-concurrency exams. By following this structured yet flexible path, the project ensures traceability, risk mitigation, and the high-quality delivery of academic objectives.
+The methodology comprises two primary components: Research and Requirements Engineering and the System Development Process, detailed in the following subsections.
+1.4.1 Research and Requirements Engineering
+The foundation of the smart proctoring system is grounded in a systematic and multi-method research process aimed at deeply understanding the security, operational, and usability requirements of target users in Ethiopia. Quantitative and qualitative techniques—including surveys, structured interviews, and comparative analysis of existing platforms—will be utilized to gather empirical and contextual insights from stakeholders involved in high-stakes online examinations.
+A. Interviews with HRs and Educators 
+This qualitative phase focuses on understanding the high-level administrative and pedagogical needs of those overseeing assessments. Interviews allow for deep-dive discussions into regulatory compliance and the "human" bottlenecks of grading that surveys might miss.
+Guiding Questions:
+What is the current average turnaround time for grading subjective/essay-based assessments, and how does this impact your recruitment/academic cycles?
+What specific behaviors do you currently define as "cheating" that are most difficult to detect in a remote setting?
+How critical is data sovereignty (storing data within Ethiopia) to your institution's legal and ethical standards?
+What are the most common technical complaints you receive from candidates during online exams?
+B. Literature Review
+A systematic review of academic papers, technical documentation, and industry reports on virtualization, AI monitoring, and NLP. To avoid "reinventing the wheel," this section ensures the project builds upon existing scientific benchmarks for AI accuracy and container security.
+Guiding Questions:
+What are the state-of-the-art benchmarks for Transformer-based models in automated subjective grading?
+How do current researchers address the trade-off between strict proctoring and user privacy?
+What are the known vulnerabilities of process-level isolation (Namespaces/Cgroups) in exam-environment sandboxing?
+What are the best practices for handling high-latency connections in real-time WebSocket communication?
+C. Observational Studies of Existing Tools A hands-on comparative analysis of global platforms (ProctorU, TestGorilla) and available local systems. Direct observation reveals the "friction points" in user experience and technical barriers (like Forex payment gates) that international tools impose on local users.
+Guiding Questions:
+At what point in the user journey does the system fail when simulated on a typical 3G/4G Ethiopian network?
+How many steps does it take for an administrator to set up a new exam, and can this be simplified for the local context?
+How does the system respond to common local hardware constraints (e.g., low-resolution webcams or limited CPU resources)?
+What specific proctoring flags are most prone to "false positives" in a typical local testing environment (e.g., background noise or lighting)?
+A detailed comparative analysis will be conducted on international solutions (e.g., ProctorU, Respondus) and local Ethiopian platforms. This will identify key gaps, such as high costs and lack of localized support in global tools, limited scalability and AI capabilities in local systems, and frequent user concerns regarding intrusiveness and false-positive rates.
+1.4.2 System Development Process
+The project follows the Software Development Life Cycle (SDLC) integrated into an Agile framework, allowing for iterative development of AI components.
+Phase 1: Planning and Requirement Analysis
+The objective is to define the project scope and technical feasibility.
+Activities: Finalizing the Product Backlog and prioritizing features for the Minimum Viable Product (MVP).
+Tools: GitHub Projects for task tracking and Trello for high-level milestone management.
+Phase 2: System Design and Architecture
+Requirements are translated into a technical blueprint.
+Architecture: An Event-Driven Microservices Architecture (Choreography-based) is adopted over a monolith. This specific pattern ensures that high-volume proctoring events are handled asynchronously through a message broker, ensuring that a failure in the proctoring log service does not crash the core examination engine or block the candidate's submission path.
+Modeling Tools: Visual Paradigm or LucidChart for UML diagrams (Use Case, Sequence, and ER Diagrams).
+UI/UX Tools: Figma is used to create interactive high-fidelity prototypes. This ensures stakeholder feedback is gathered before expensive backend development begins.
+Phase 3: Technical Implementation (Build)
+The actual coding and model training occur in this phase.
+Backend Strategy: Leveraging the microservices architecture, we adopt a dual-stack approach. Go (Golang) is utilized for high-performance, concurrency-critical services such as the Real-time Proctoring Event Streamer and the API Gateway. Meanwhile, FastAPI (Python) is used for the AI-intensive services (Subjective Grading and Anomaly Detection). This hybrid approach ensures we benefit from Go's superior throughput for network-heavy tasks and Python’s extensive ecosystem for machine learning.
+Continuous Authentication Engine: This is a core security feature implemented within the Python microservice. It utilizes Facial Recognition (OpenCV/DeepFace) and Liveness Detection to verify the candidate's identity at random intervals throughout the exam. This prevents "proxy testing" or student replacement after the initial login.
+Frontend: React is chosen over Next.js. Since Veritas is a dashboard-heavy application where SEO is irrelevant, a React SPA provides total control over client-side state, critical for real-time video handling.
+Database: PostgreSQL is utilized for its strict ACID compliance, ensuring academic records and grades are never lost or corrupted.
+AI & Communication: Transformers (BERT/RoBERTa) for semantic grading and WebSockets for low-latency proctoring logs.
+Phase 4: Quality Assurance and Testing
+Unit Testing: PyTest (Python services), Go Test (Go services), and Jest (Frontend) for isolated module validation.
+Scalability Testing: Apache JMeter to simulate 500+ concurrent users under typical Ethiopian network conditions.
+Security Testing: A "Red Team" approach to attempt bypassing proctoring (e.g., tab-switching), targeting a detection rate of >95%.
+Phase 5: Documentation
+Comprehensive documentation is developed concurrently with the implementation to ensure transparency and long-term maintainability.
+Technical Documentation: Swagger/OpenAPI (built-in with FastAPI) for backend API documentation and JSDoc for the React frontend logic.
+System Manuals: User guides for examiners (admin portal) and candidates (exam portal), focusing on troubleshooting common local network issues.
+
+1.4.3 Evaluation
+The final success of the project is measured against the initial Research Questions using the F1-Score for AI accuracy and User Acceptance Testing (UAT) surveys with the stakeholders interviewed in Section 1.4.1.
+1.5. Plan of Activities
+This section provides an updated outline of the planned activities for the development of Vertas: AI Enhanced Online Assessment and Monitoring System, incorporating details from both the initial project proposal and the current final year project report. The plan aligns with the Agile Scrum methodology emphasized in the report's methodology section (1.4), which integrates research, iterative sprints, and user-centered design for flexibility and adaptability.
+1.5.1 Key Phases and Activities
+Phase I: Requirement Analysis and Research PhaseThis phase, now considered complete or wrapping up, involved gathering stakeholder input to refine requirements, as detailed in the report (1.4.1).
+Activities:
+Conduct literature review, interviews with HR managers, and educators to quantify challenges and prioritize features.
+Define functional requirements
+Outline non-functional requirements
+Analyze existing tools
+Timeline: September 2025 to early January 2026
+Key Milestones: Finalized stakeholder feedback; approved requirements document.
+Deliverables: Updated requirements specification
+
+System Design PhaseFocuses on architectural planning, incorporating modular microservices.
+Activities:
+Design a modular, microservices-based architecture separating services
+Create relational database schema for the system components
+Develop wireframes and mockups for UI/UX 
+Plan AI integration
+Iterate designs in short sprints with team reviews.
+Timeline: Late January to Early February
+Key Milestones: Approved architecture and UI prototypes.
+Deliverables: System architecture document with diagrams; database ER diagram; UI wireframes/mockups; updated backlog incorporating report's limitations
+
+Implementation PhaseCore coding phase, updated to include facial recognition, personalized feedback, and certificate generation in iterative sprints.
+Activities:
+Frontend development and Backend development
+Proctoring and Automated grading module development
+Module integration
+Code reviews and sprint demos every week.
+Timeline: February 2025 to May 2026
+Key Milestones: Functional prototype with core features; integrated AI proctoring.
+Deliverables: Code repository; API documentation; prototype demo; interim report on new features like certificate automation.
+
+Testing PhaseMulti-level testing, updated to validate new AI elements (e.g., facial recognition accuracy) and security.
+Activities:
+Unit and Integration tests of modules
+System testing: Assess functionality, performance, and non-functional aspects.
+UAT: Pilot with enterprises/candidates for feedback on usability and automated grading fairness.
+Timeline: May 2026
+Key Milestones: 95% test coverage; UAT feedback integrated.
+Deliverables: Test plans/reports (including AI accuracy metrics); updated prototype; security audit.
+Documentation, and Finalization PhaseWrap-up, including post-prototype deployment support.
+
+Activities:
+Fix bugs from pilots; refine features
+Prepare documentation (technical/user manuals, including for facial recognition).
+Plan maintenance mechanism for updates.
+Compile final report and prepare defense.
+Timeline: May 2026
+Key Milestones: Complete documentation; project defense.
+Deliverables: Final system; manuals; project report; presentation.
+1.5.2 Timeline Overview
+
+Phase
+Task/Activity
+Start Date
+End Date
+Duration (Weeks)
+
+1. Requirement Analysis
+Research and gathering
+2025-10-01
+2025-11-03
+4
+
+2. System Design
+Architecture, database, UI
+2025-12-13
+2026-01-07
+3
+
+3. Implementation
+Frontend, backend, AI integration
+2025-02-08
+2026-04-08
+9
+
+4. Testing
+Unit, integration, system, UAT
+2026-04-09
+2026-04-20
+2
+
+5. Maintenance/Documentation
+Adjustments, docs, finalization
+2026-04-01
+2026-06-07
+9
+
+1.5.3 Risk Management and Monitoring
+Risks: Delays in AI development (e.g., OpenCV integration for facial recognition); stakeholder feedback loops; integration issues. Mitigation: 10-15% buffer per phase, regular reviews.
+Monitoring: Agile tools (e.g., Jira); monthly advisor reports.
+Overall Milestones: Prototype by March 2026; testable system by April 2026 ; completion by June 2026.
+1.6 Budget Required
+This section outlines the estimated financial resources required to develop the prototype for Vertas: AI Enhanced Online Assessment and Monitoring System. The budget is tailored for a 9-month academic cycle (November 2025 – June 2026), prioritizing cost-efficiency by leveraging open-source frameworks and university facilities. 
+
+In line with the project’s scope as an academic prototype, this budget excludes commercial deployment fees, professional cloud hosting, and additional hardware purchases (e.g.,external webcams), assuming the use of integrated laptop cameras for testing facial recognition and proctoring features. Costs are in Ethiopian Birr (ETB), reflecting current market rates in Addis Ababa.
+1.6.1 Budget Breakdown
+The table below details categories, items, quantities, unit costs, and subtotals. Prices are sourced from local providers (e.g., Ethio Telecom for data and domains) and averages for items like webcams and transport.
+/
+1.6.2 Explanation of Estimates and Updates
+Equipment Zero-Rating: External HD webcams have been removed from the budget. For the prototype phase, the team will utilize the built-in cameras of existing personal laptops. This suffices for demonstrating the facial recognition and gaze tracking algorithms in a controlled environment.
+Hosting and Software: As the system will be demonstrated locally or via free-tier services (e.g., GitHub Pages, Heroku Free, or local tunneling), the deployment and domain costs have been eliminated. The small “API/AI Credits” allocation is a safety buffer for any paid machine learning libraries or cloud processing required for heavy model training.
+Internet/Data: This remains the primary expense. Reliability is critical for Git collaboration and accessing documentation. The estimate uses Ethio Telecom’s standard 10GB monthly student-friendly packages.
+Documentation: Costs have been adjusted to reflect current printing rates in Addis Ababa for high-quality final thesis submissions and technical diagrams.
+Cost-Saving Strategies:
+Open-Source Core: The project uses Python (OpenCV/TensorFlow) and React.js to eliminate licensing fees.
+University Labs: Development and primary testing will occur in university computer labs to save on electricity and high-speed infrastructure costs.
+Student Credits: The team will apply for student developer packs (GitHub Student Developer Pack) to access free tools and training.
+
+This budget supports the project's expanded scope while remaining feasible for an undergraduate effort. Future Adjustments can be made based on actual quotes and scale up based on updated requirements and services. 
+1.7 Significance of the Study
+The significance of this study lies in its potential to bridge the critical gap between global online assessment standards and the specific infrastructural realities of the Ethiopian educational and enterprise landscape. While digital transformation is accelerating globally, the adoption of high-integrity proctoring systems in developing regions is often hindered by high subscription costs, heavy hardware requirements, and data privacy concerns. This research moves the field forward by demonstrating that robust, AI-enhanced monitoring can be achieved through localized, resource-efficient engineering.
+From an academic perspective, this research deepens the current understanding of how Microservices Architectures combining the concurrency of Go with the analytical power of Python can be applied to real-time proctoring. By integrating continuous identity verification and semantic AI grading into a cohesive framework, the study provides a blueprint for future researchers to build scalable and fair evaluation systems that move beyond simple keyword matching to genuine contextual understanding.
+The practical application of this research directly benefits HR departments and academic administrators by streamlining evaluation processes. The implementation of Transformer-based NLP for automated grading significantly reduces the administrative burden and subjective bias associated with manual evaluation. For the candidate, the significance of this work lies in the provision of a fair, transparent, and low-latency testing environment that accurately reflects their genuine abilities.
+
+
+1.8 Outline of the Study
+This study is organized into several chapters, each addressing specific aspects of the project’s background, methodology, implementation, and evaluation. The structure provides a clear roadmap for understanding how the proposed system was conceptualized, designed, and developed.
+Chapter 1: IntroductionThis chapter introduces the research background, problem statement, objectives, scope, limitations, and methodology. It outlines the motivation for developing an AI-enhanced online assessment and monitoring system and defines the framework for the study.
+Chapter 2: Literature ReviewThis section examines existing online assessment systems, smart proctoring technologies, and previous research related to AI-based monitoring and exam integrity. It identifies the gaps in current solutions and establishes the theoretical foundation for the proposed system.
+Chapter 3: System Analysis and Design This chapter details the requirements analysis, system architecture, and design specifications. It explains the functional and non-functional requirements, data flow, and overall design structure of the Vertas system.
+Chapter 4: System ImplementationThis part presents the development process, chosen technologies, and implementation of core modules such as authentication, proctoring, and automated grading. Screenshots, interface designs, and code summaries may be included to demonstrate the functionality.
+Chapter 5: System Testing and EvaluationThis chapter discusses the methods used for testing the system’s performance, accuracy, usability, and security. It includes the results from unit, integration, and user acceptance testing, as well as analysis of the system’s reliability and scalability.
+Chapter 6: Conclusion and RecommendationsThe final chapter summarizes the key findings of the study, outlines the system’s overall contributions, and provides recommendations for future enhancements and research directions.
+In conclusion, this outline not only provides a roadmap of how the project is structured but also reinforces the importance of developing secure, intelligent, and locally adaptable online assessment systems. By following this structure, the study ensures that every stage—from problem identification to system evaluation, is systematically addressed, laying the foundation for a credible and impactful contribution to the field of educational technology and enterprise assessment.
+
+
+
+
+
+
+Chapter Two: Literature Review
+Overview
+This chapter presents a critical review of the literature concerning online assessment systems, with a particular focus on their evolution during and after the COVID-19 pandemic. The section establishes the theoretical and empirical foundation for the Veritas Online Assessment system by exploring trends, challenges, and innovations in online proctoring, integrity assurance, and AI-driven automated essay scoring (AES), automated short answer grading(ASAG) and feedback generation, drawing from recent advancements in natural language processing (NLP) and large language models (LLMs).
+2.1 Study Related Works
+Topuz et al. conducted a systematic review of 22 online assessment systems to identify the emerging trends in online measurement and evaluation during the Emergency Remote Teaching (ERT) period. Their findings emphasized three major features: multi-platform compatibility, enhanced security through biometric authentication, and automated proctoring. Systems like Examity, ProctorU, and Safe Exam Browser were noted for multimodal authentication, integrating webcam, keystroke, and facial recognition.
+Complementing this, Kurniati et al. investigated challenges faced by Indonesian teachers across educational levels, highlighting infrastructure limitations, academic dishonesty, and inconsistent student discipline. Teachers employed adaptive strategies, such as shifting from objective to subjective assessments and providing localized solutions like home visits or mobile phone sharing.
+Several studies have since expanded on these foundations. Hussein et al.  evaluated commercial proctoring systems, identifying cost, accessibility, and ethical concerns as key barriers. Arnò et al. performed a detailed feature comparison of 29 systems, concluding that a hybrid model combining automated facial detection and human oversight achieved optimal balance between security and user experience. Jia and He proposed an intelligent online proctoring system (IOPS) utilizing AI for facial, eye, and voice monitoring, which successfully reduced cheating incidents in real university exams.
+Furthermore, Rahim outlined guidelines for conducting online assessments during emergency remote teaching, stressing the alignment of assessments with learning objectives and the importance of formative evaluation. More recent research by Ali et al. analyzed phased implementations of remote online assessments in medical education, revealing that mock exams and small-group training improved student satisfaction despite technological challenges.
+Building on these advancements in proctoring and assessment integrity, recent literature has explored Automated Essay Scoring (AES) and Automated Short Answer Grading (ASAG) using large language models (LLMs) to enhance evaluation efficiency for subjective questions, addressing ERT(Emergency Remote Teaching) gaps in manual grading scalability. Mizumoto and Eguchi (2023) demonstrated GPT-3's effectiveness for AES on TOEFL essays, achieving high human agreement (QWK ~0.7) through zero-shot prompting, enabling instant feedback on linguistic and content traits. Schneider et al. (2024) applied GPT-4 for ASAG, showing reliable scoring of short textual responses in educational benchmarks, particularly for rubric-based exam questions like listing key concepts.
+Mansour et al. (2024) evaluated LLMs like GPT-3.5 and Llama for proficiency essay scoring, emphasizing trait-based feedback (e.g., coherence, relevance) with variable but promising correlations to human raters. Kundu and Barbosa (2024) analyzed ChatGPT and Llama on AES datasets, noting LLMs' utility as assistants despite harsher scoring tendencies on nuanced responses. Xiao et al. (2024) proposed a human-AI collaborative framework for AES, improving efficiency by 20% through dual-process workflows that integrate LLM suggestions with educator oversight.
+
+2.2 Identifying Milestones of Related Literature and Finding the Gaps
+2.2.1 Milestones
+Phase 1: Manual Online Assessments (Pre-2020)
+Early online assessment systems focused on basic digital delivery and security. Foster and Layman (2013) compared eight online proctoring systems, analyzing features such as authentication methods, webcam monitoring, lockdown tools, and security risks. They showed that webcam-based monitoring was an important deterrent to cheating. Karim and Shukur (2016) expanded this work by studying authentication methods and proposing a preference-based model, grouping techniques into knowledge-based, possession-based, biometric, and contextual methods.
+Strengths: Provided clear frameworks for understanding early systems.Weaknesses: Mostly descriptive, limited real-world testing, and little focus on scalability or low-bandwidth environments.
+Phase 2: Emergency Remote Teaching (2020–2021)
+COVID-19 forced rapid adoption of online exams, revealing major integrity challenges. Topuz et al. (2022) reviewed systems studied during this period, identifying common features such as desktop-focused platforms, pre-exam face recognition, semi-automatic monitoring, and LMS integration (e.g., Moodle). Other studies compared commercial tools in terms of scalability, authentication, and monitoring.
+Strengths: Timely and comprehensive overview of pandemic-driven solutions.Weaknesses: Relied on self-reported data and largely ignored infrastructure limitations in developing regions.
+Phase 3: AI and Automation Integration (2021–2024)
+Machine learning enabled automated cheating detection. Jia and He (2021/2022) developed an AI-based proctoring system for real-time monitoring, while Tiong and Lee (2021) used deep learning to detect abnormal behavior and network patterns. Review studies reported improved accuracy but also highlighted false positives.
+Strengths: Shift toward proactive, automated integrity enforcement.Weaknesses: Dependence on good data and stable internet; limited attention to bias and privacy.
+Phase 4: User-Centric Design and Ethics (2024–2025)
+Recent studies focus on ethics, privacy, and user experience. Research discusses reduced video surveillance, GDPR compliance, hybrid assessment models, and the need for human oversight in AI systems. Equity and bias across diverse populations are increasingly emphasized.
+Strengths: Stronger focus on ethical and human-centered design.Weaknesses: Still early-stage, with limited empirical evidence and Western-centric perspectives.
+Phase 5: LLM-Driven Automated Scoring for Essays and Short Answers (2023–2026)
+This phase focuses on integrating large language models (LLMs) like GPT-3, GPT-4, ChatGPT, and Llama for Automated Essay Scoring (AES) and Automated Short Answer Grading (ASAG), emphasizing rubric-based evaluation, feedback generation, and human-AI collaboration. Key milestones include Mizumoto and Eguchi (2023), who demonstrated GPT-3's potential for AES on TOEFL essays with high human agreement (QWK ~0.7) via zero-shot prompting; Schneider et al. (2024), who applied GPT-4 for ASAG, achieving reliable scoring on short textual responses; Mansour et al. (2024), evaluating LLMs for proficiency essay scoring with trait-based feedback; Kundu and Barbosa (2024), finding LLMs harsher and less correlated with humans in AES but useful as assistants; and Xiao et al. (2024), proposing a dual-process human-AI framework for AES that improves efficiency and reduces misgrading through collaborative workflows.
+Strengths: This phase advances scalability and personalization in online assessments by leveraging LLMs for consistent, instant scoring and detailed feedback, enabling efficient handling of large-scale subjective responses (e.g., essays and short answers) with high agreement to human raters (QWK 0.68–0.88 across studies); it promotes accessibility through open-source models and prompting techniques, reducing educator workload while supporting diverse formats like rubric-based exam questions.
+Weaknesses: Despite progress, LLM performance is sensitive to prompt design and training biases, leading to inconsistencies in domain-specific or non-English contexts; studies show variable human-LLM correlations and potential over-harshness/leniency, with limited empirical validation in real-world, resource-constrained environments, raising concerns about reliability without human oversight.
+2.2.2 Gaps Identified
+Despite advances, significant gaps persist:
+Poor Accessibility for Students with Disabilities: A significant but often overlooked limitation in online assessment systems is their lack of accessibility for students with disabilities. Topuz et al. identified that most existing platforms employ restrictive security measures—such as forced browser lockdowns, hidden taskbars, and required software installations—that unintentionally exclude users who depend on assistive technologies like screen readers or adaptive input devices. These constraints prevent such students from navigating exams independently and raise ethical concerns about inclusivity.Hussein et al. also observed that advanced proctoring systems rarely incorporate Universal Design for Learning (UDL) principles, focusing instead on surveillance and integrity rather than equitable usability. Similarly, Rahim highlighted that during emergency remote teaching, accessibility and fairness were underemphasized, especially for learners with sensory or cognitive disabilities. Uça Güneş et al.  further confirmed that accessibility policies were inconsistent across institutions, and few systems offered accommodations such as extended time or alternative input modes. Collectively, these studies demonstrate a persistent design bias—prioritizing security and standardization over inclusivity.
+The “Security vs. Connectivity” Gap: A persistent limitation in online assessment research lies in the trade-off between exam security and network reliability. Most secure proctoring platforms depend on continuous high-speed internet and uninterrupted video streaming to verify student behavior. However, studies in developing regions reveal that weak digital infrastructure severely impedes assessment validity. Kurniati et al. found that Indonesian teachers frequently abandoned video-based testing due to poor bandwidth and device incompatibility. Similarly, Ali et al.  reported that 57 % of medical students in Pakistan experienced internet instability during live-proctored exams, resulting in high anxiety and incomplete submissions. Hussein et al.  further noted that commercial proctoring tools such as ProctorU and Respondus required intensive data streaming and high computing power, creating inequity between students with and without robust connections. Topuz et al. confirmed that even secure systems like Safe Exam Browser remain dependent on real-time connectivity. Hence, despite advances in digital invigilation, current systems lack adaptive, low-bandwidth monitoring mechanisms capable of maintaining integrity under unstable network conditions. Addressing this limitation is crucial for equitable implementation of online assessments in bandwidth-constrained environments such as Ethiopia.
+The “Intelligent Proctoring” Gap:  Another major research gap concerns the absence of mid-level intelligent proctoring systems. Existing literature illustrates a polarization between simple unproctored tools and costly AI-driven systems that require human oversight or aggressive live video analysis. Arnò et al. demonstrated that only high-end commercial platforms provide comprehensive automation, yet these remain financially inaccessible to smaller universities. Jia and He introduced an AI-based system integrating facial and voice analysis, but acknowledged privacy and scalability challenges stemming from continuous data transmission. Tiong and Lee proposed a deep-learning model for cheating detection, though it required GPU-intensive computation and complex setup. Rahim observed that many institutions reverted to Google Forms and LMS quizzes precisely because proctoring tools were technologically demanding.These findings underline the lack of accessible “passive-AI” solutions—systems that ensure exam integrity through lightweight features such as tab-switch detection, periodic image capture, or local face verification without live video streaming. Developing such balanced systems would democratize secure assessments for low-resource educational institutions.
+The “Local Customization” Gap: reviewed studies also reveal a significant contextual and regulatory gap. Current online assessment technologies are predominantly developed for Western institutions and seldom consider local privacy laws, language interfaces, or administrative workflows relevant to African higher-education systems. Topuz et al. observed that nearly all systems in their global review were hosted abroad, while Kurniati et al. highlighted the difficulties of adapting foreign platforms to local socio-technical realities. Uça Güneş et al. emphasized the absence of consistent institutional policies within emerging economies, resulting in reliance on externally governed software. Likewise, Tabassum and Ali et al. stressed that assessments remain culturally and infrastructurally mismatched to learners’ environments.Consequently, there is little evidence of indigenous, region-specific assessment frameworks tailored to comply with national data-protection regulations—such as Ethiopia’s draft Personal Data Protection Proclamation—or aligned with local HR and university workflows. This presents an opportunity for Veritas Online Assessment to pioneer a locally hosted, policy-compliant, and culturally responsive assessment ecosystem.
+ASAG(Automatic Short Answer Grading) Gaps: Research on short answers remains narrow in application, as Schneider et al. (2024) identifies variability in GPT-4 performance, leading to inconsistent scoring for domain-specific, technical responses. There is a limitation in multilingual and non-english contexts.
+AES(Automatic Essay Scoring) Gaps: Human-LLM agreement is variable and often suboptimal, with Kundu and Barbosa (2024) highlighting LLMs' tendency to be harsher on nuanced essays due to biases in training data; Mansour et al. (2024) and Mizumoto and Eguchi (2023) focus primarily on proficiency or linguistic traits, neglecting adaptation to non-English, technical domains and culturally diverse datasets, resulting in potential inequities for global users.
+2.3 Lessons Learned from Literature
+Three core insights arise:
+Infrastructure and Inclusivity Matter: Kurniati et al. and Ali et al. underscored the digital divide’s role in exam integrity, emphasizing flexible system design adaptable to varying connectivity conditions.
+Future Assessments Must Be Ethical and Data-Conscious: Works from 2024–2025, stress ethical implementation, transparent data handling, and user-centric approaches.
+Integrity Cannot Rely on Trust Alone: Research consistently shows that without technical methods, academic dishonesty is inevitable in remote settings. Teachers attempting to mitigate cheating by simply "changing question types" or "randomizing questions" found these methods insufficient without supervision. So the system must proactively detect behaviors like tab-switching and multiple face detections.
+Infrastructure is the Primary Constraint: The most frequent complaint in the literature regarding online exams is technical failure (internet failure, power outages).So The Veritas architecture must be lightweight. Using client-side AI (processing behavior on the user's device rather than streaming heavy video to a server) is a crucial strategy to ensure the system works even with unstable connections.
+User Experience Impacts Performance: Complex interfaces increase student anxiety and technical error rates. The literature suggests that students are often unfamiliar with advanced online tools. So The candidate portal must be intuitive and require minimal setup, ensuring that the cognitive load is placed on the exam content, not the software interface.
+Consistency: LLMs provide reliable and generalizable scoring across large datasets, outperforming traditional methods in efficiency for AES and ASAG.
+Human-AI Collaboration: Frameworks like dual-process models enhance accuracy and reduce errors, positioning LLMs as effective assistants rather than standalone tools in AES.
+Prompting Techniques: Zero-shot and chain-of-thought prompting significantly improve rubric-based evaluation, enabling better handling of subjective criteria in both AES and ASAG.
+Chapter Three: Problem Analysis and Modeling
+This chapter delves into the systematic analysis of the current online assessment landscape in Ethiopia, focusing on the requirements gathering process, the modeling of system behaviors, and the architectural design. It begins with an examination of existing systems and their inherent problems, followed by a detailed breakdown of functional and non-functional requirements. State diagrams, use case models, and sequence diagrams are employed to model the proposed Veritas system, ensuring alignment with stakeholder needs and Ethiopian contextual constraints. The analysis draws from the requirements engineering phase outlined in Chapter 1, incorporating insights from interviews, literature reviews, and observational studies to inform a robust, scalable design.
+3.1. Existing System and Its Problems
+3.1.1 Overview of Existing Online Assessment Systems in Ethiopia
+In the Ethiopian context, online assessment and monitoring systems are primarily characterized by a mix of foreign-hosted commercial platforms, locally adapted generic tools, and traditional manual processes. These systems are utilized across educational institutions, government agencies, and private enterprises for recruitment, certification, and academic evaluations.
+Foreign platforms such as TestGorilla, HackerRank, and ProctorU dominate the market for organizations seeking advanced features. TestGorilla, for instance, offers a suite of pre-built assessments focusing on skills like coding, cognitive abilities, and personality traits, with automated grading for objective questions and basic proctoring via webcam monitoring. HackerRank specializes in technical evaluations, providing coding challenges with real-time compilation and execution, alongside anti-cheating measures like plagiarism detection. ProctorU emphasizes live proctoring, integrating human invigilators with AI-assisted tools for identity verification and behavior analysis, such as eye-tracking and screen recording.
+Locally, many institutions rely on open-source or low-cost alternatives like Moodle or Google Forms, customized for basic quiz administration. Moodle, an open-source learning management system (LMS), supports timed quizzes, multiple-choice questions, and rudimentary proctoring through browser lockdowns. In resource-constrained settings, manual processes persist, involving paper-based exams or hybrid setups where subjective responses are emailed and graded by hand. For enterprise recruitment, tools like LinkedIn Assessments or custom spreadsheets are sometimes employed, but these lack integrated monitoring.
+These systems operate on a client-server model, with assessments delivered via web browsers or dedicated apps. Data is typically stored on cloud servers hosted abroad (e.g., AWS or Google Cloud), and features like real-time feedback are limited to objective items. Integration with local identity systems, such as Ethiopia's national ID or enterprise credentials, is often absent, leading to reliance on email-based authentication.
+3.1.2. Identified Problems and Limitations
+Despite their utility, existing systems exhibit several critical shortcomings, particularly when applied to the Ethiopian digital ecosystem. These limitations were identified through stakeholder interviews, observational studies of platforms like ProctorU and Moodle, and a comparative analysis informed by the literature review in Chapter 2. The problems can be categorized into technical, economic, operational, and ethical dimensions.
+(a) Technical Limitations
+Infrastructure Incompatibility: Many foreign platforms are optimized for high-bandwidth, stable internet connections. In Ethiopia, where internet latency averages 50-100 ms and outages are common (as per Ethio Telecom reports), this results in frequent session timeouts, data loss during submissions, and degraded proctoring quality. For example, ProctorU's live video streaming often fails on 3G/4G networks, leading to incomplete exams.
+Lack of Automated Subjective Grading: Current systems excel at objective assessments (e.g., multiple-choice via HackerRank) but rely on manual grading for essays and open-ended questions. This creates bottlenecks, with turnaround times extending to days or weeks, as noted in interviews with HR managers who reported delays impacting recruitment cycles.
+Weak Integration with Local Systems: There is no seamless linkage with Ethiopian identity infrastructures, such as the National ID system or enterprise directories. Authentication often defaults to usernames/passwords, increasing vulnerability to identity spoofing.
+
+(b) Economic Limitations
+High Subscription Costs: Platforms like TestGorilla and ProctorU require payments in foreign currency (e.g., USD), which is regulated and scarce in Ethiopia. Annual fees can exceed ETB 500,000 for enterprise plans, making them inaccessible to small institutions and startups, as highlighted in the Ministry of Innovation and Technology's 2025 report on Digital Sovereignty.
+Dependency on External Hosting: Data storage on foreign servers incurs ongoing costs and risks non-compliance with emerging data protection laws, potentially leading to fines or operational halts.
+(c) Operational Limitations
+Cheating Vulnerabilities: While some systems include basic proctoring (e.g., tab-switch detection in Safe Exam Browser), they fall short in detecting sophisticated behaviors like proxy testing or collaborative cheating. Observational studies revealed false positives in AI monitoring due to poor lighting or device quality, common in Ethiopian settings.
+Scalability Issues: Handling large-scale assessments (e.g., national exams or mass recruitment) strains these systems. Moodle, for instance, struggles with concurrency beyond 500 users without custom scaling, resulting in crashes during peak times.
+User Experience and Accessibility Gaps: Interfaces are often not localized (e.g. lacking Amharic support), and restrictive features like browser lockdowns exclude users with disabilities who rely on assistive technologies. As per Chapter 2's gaps, this prioritizes security over inclusivity, leading to higher anxiety and error rates among candidates.
+(d) Ethical and Regulatory Limitations
+Data Sovereignty Concerns: Storing sensitive assessment data abroad violates the Digital Ethiopia 2030 Strategy's emphasis on keeping Ethiopian data within national borders, exposing it to foreign jurisdiction and potential breaches.
+Bias and Privacy Issues: AI components in platforms like Jia and He's IOPS (from literature) introduce biases, such as inaccurate facial recognition for diverse ethnicities, and raise privacy concerns without clear compliance to Ethiopia's Personal Data Protection Proclamation.
+Limited Customization: Existing tools do not support multi-tenant environments for multiple organizations, nor do they offer features like automated certificate generation or subscription models tailored to local payment systems (e.g., Telebirr).
+These problems underscore the need for a tailored solution like Veritas, which addresses them through local development, AI-enhanced grading, and lightweight proctoring, as modeled in subsequent sections of this chapter.
+
+3.1.3. Visual Summary (from Topuz et al., 2022)
+/
+Fig. 3.1. Key monitoring and restriction features in current online assessment systems [1]
+3.2. System Requirement Specification
+Requirements are categorized by functional area for clarity and maintainability. Requirement IDs follow the convention:
+FR-[CATEGORY]-[NNN] for Functional Requirements
+NFR-[SUBCATEGORY]-[NNN] for Non-Functional Requirements
+Priority levels:
+Mandatory = Must be implemented for the system to meet core objectives
+Desirable = Strongly required but could be deferred to a later phase if necessary
+Optional = Nice-to-have / planned for future enhancement
+Verification Method: Test = Functional/Acceptance testing, Demonstration = UI/Admin review, Inspection = Code/configuration review, Analysis = Performance measurement or audit.Functional Requirements
+3.2.1. Enterprise Management & Multi-Tenancy Requirements
+Requirement ID
+Requirement Title
+Description
+Priority
+VM
+
+FR-MT-001
+Multi-tenant architecture
+The system shall completely isolate data, configurations, users, exams, and results between different enterprises/organizations.
+Mandatory
+Test / Inspection
+
+FR-MT-002
+Enterprise registration
+The system shall allow organizations to self-register with company details, contact person, and desired subscription plan.
+Mandatory
+Test
+
+FR-MT-003
+Enterprise account approval
+System administrator shall review and approve/reject enterprise registration requests.
+Mandatory
+Demonstration
+
+FR-MT-004
+Enterprise profile management
+Approved enterprises shall be able to update their profile, branding (logo, colors), and contact details.
+Mandatory
+Test
+
+FR-MT-005
+Subscription tier enforcement
+The system shall enforce feature restrictions based on the enterprise's subscription tier (Basic, Premium, Enterprise).
+Mandatory
+Test
+
+FR-MT-006
+Tenant Deletion/Suspension
+System administrator shall be able to suspend an enterprise account (locking out all associated users) and/or permanently delete an enterprise and all associated data after a 90-day retention period
+Mandatory
+Demonstration
+
+
+3.2.2 Authentication & User Management Requirements
+Requirement ID
+Requirement Title
+Description
+Priority
+VM
+
+FR-AUTH-001
+Role-based access control
+The system shall support roles: Super Admin, Enterprise Admin, Enterprise Staff, Candidate (temporary).
+Mandatory
+Test
+
+FR-AUTH-002
+Enterprise-issued credential login
+Candidates shall log in using enterprise-issued unique token or ID (no personal email/password required).
+Mandatory
+Test
+
+FR-AUTH-004
+Enterprise admin/user management
+Enterprise admins shall create/manage their staff accounts and permissions.
+Mandatory
+Test
+
+FR-AUTH-005
+Face registration during exam onboarding
+During exam start, candidates shall submit a live facial image that is stored as reference for the session.
+Mandatory
+Test
+
+FR-AUTH-006
+Periodic face verification (Premium+)
+The system shall periodically capture facial images during exam and compare with registration image using face recognition (available only for Premium/Enterprise plans).
+Desirable
+Test
+
+FR-AUTH-007
+Session timeout & re-authentication
+Inactive sessions shall timeout after a configurable period and require re-authentication.
+Mandatory
+Test
+
+
+3.2.3. Examination Creation & Management Requirements
+Requirement ID
+Requirement Title
+Description
+Priority
+VM
+
+FR-EXM-001
+Question Bank & Metadata Management
+Enterprise Admins shall create, categorize, and manage central question banks. The system must support the following question types: Multiple Choice (MCQ), True/False, Short Answer, and Essay. Each question must be assigned mandatory metadata for Topic/Category, Difficulty Level (e.g., Easy, Medium, Hard), and Media Support (allowing image, audio, or video attachments).
+Mandatory
+Test
+
+FR-EXM-002
+Advanced Exam Configuration Wizard
+The system shall provide a multi-step wizard to create exams with comprehensive settings: overall Exam Duration, Passing Score percentage, Negative Marking rules, and Targeted Randomization. Targeted Randomization must allow the Admin to define the exam structure by drawing N questions from specific categories or difficulty levels (e.g., 5 Easy questions from "Topic A," 10 Medium questions from "Topic B").
+Mandatory
+Demonstration
+
+FR-EXM-003
+Strict Scheduling & Status Control
+Admins shall precisely schedule exams with definite start date/time and end date/time, define available Invitation Methods (Email, Link, Token), and set the Maximum Allowed Participants. The system must automatically manage and display the exam's status lifecycle: Scheduled, Active, Closed, and Archived.
+Mandatory
+Test
+
+FR-EXM-004
+Bulk Candidate Enrollment & Credential Generation
+Admins shall upload a CSV file or manually input candidate details. The system shall validate the uploaded data (e.g., checking for unique identifiers) and automatically generate unique, secure exam links or tokens for each candidate, sending the credentials via email.
+Mandatory
+Test
+
+FR-EXM-005
+Exam Template Cloning & Reuse
+Admins shall be able to save any configured exam as a reusable template for future use. The system must also provide a Cloning function to duplicate all settings, question selections, and organization branding from any existing exam (Active or Closed) into a new, editable draft.
+Mandatory
+Demonstration
+
+
+3.2.4. Candidate Examination Interface Requirements
+Requirement ID
+Requirement Title
+Description
+Priority
+VM
+
+FR-CAND-001
+Secure Web Browser Mode & Warning
+The exam interface shall enforce full-screen mode and use JavaScript/browser APIs to disable right-click, copy-paste, and common browser shortcuts (e.g., Ctrl+C). A prominent, persistent warning banner shall inform the candidate that switching tabs/applications will be logged and may lead to disqualification.
+Mandatory
+Test
+
+FR-CAND-002
+Server-Enforced Real-Time Timer
+A strict countdown timer shall be displayed prominently. The remaining time shall be tracked and strictly enforced server-side to prevent client-side manipulation. The server shall reject answers submitted even milliseconds after the scheduled end time.
+Mandatory
+Test
+
+FR-CAND-003
+Question Navigation & Review
+Candidates shall navigate questions sequentially or via a navigation index. They must be able to mark questions for review and receive a clear confirmation prompt before final submission or when time expires.
+Mandatory
+Demonstration
+
+FR-CAND-004
+Auto-Save & Submission Confirmation
+Answers shall be auto-saved locally (using IndexedDB/LocalStorage) and synced to the server at least every 60 seconds. A comprehensive submission confirmation screen detailing the number of answered/unanswered questions must appear before final submission.
+Mandatory
+Test
+
+FR-CAND-005
+Graceful Handling of Connectivity Issues
+The system shall detect loss of connection and immediately queue answers locally using an offline-first approach (Service Workers/IndexedDB). When the connection restores, the system shall automatically and silently sync all queued data to the server and notify the candidate.
+Mandatory
+Test
+
+FR-CAND-006
+Accessibility & Readability Controls
+The interface shall conform to at least WCAG 2.1 AA standards. Candidates shall have simple controls to adjust font size, color contrast (dark/light mode), and use standard keyboard navigation for accessibility.
+Mandatory
+Inspection
+
+FR-CAND-007
+Secure Session Termination
+If a major proctoring violation (e.g., identity mismatch (FR-PROC-004)) is flagged, the system shall provide the Enterprise Admin the option to force-terminate the candidate's session immediately. The candidate must receive a non-specific notification of termination.
+Mandatory
+Demonstration
+
+
+3.2.5. AI Proctoring & Monitoring Requirements
+Requirement ID
+Requirement Title
+Description
+Priority
+VM
+
+FR-PROC-001
+Tab/window switch detection
+The system shall detect and log every tab/window switch or application change during exam.
+Mandatory
+Test
+
+FR-PROC-002
+Mouse activity monitoring
+The system shall monitor mouse movement patterns and flag prolonged inactivity or unusual behavior.
+Mandatory
+Test
+
+FR-PROC-003
+Webcam-based face detection
+System shall continuously verify that a face is present in the webcam feed (Basic+ plans).
+Mandatory
+Test
+
+FR-PROC-004
+Facial identity verification (Premium+)
+The system shall periodically verify that the detected face matches the registered face (Premium/Enterprise only).
+Desirable
+Test
+
+FR-PROC-005
+Multiple face detection
+The system shall flag if more than one face is detected in the frame.
+Desirable
+Test
+
+FR-PROC-006
+Proctoring event logging
+All proctoring events shall be logged with timestamp, severity, and optional screenshot.
+Mandatory
+Inspection
+
+FR-PROC-007
+Cheating probability score
+The system shall calculate an overall cheating probability score based on all proctoring events.
+Mandatory
+Test
+
+
+3.2.6. Grading, Analytics & Certificate Requirements
+Requirement ID
+Requirement Title
+Description
+Priority
+VM
+
+FR-GRAD-001
+Automatic grading for subjective/objective questions
+The system shall automatically grade MCQ, true/false, fill-in-blank, short answers/essays, etc
+Mandatory
+Test
+
+FR-GRAD-002
+Blind grading
+When a subjective answer is routed for mandatory human review (due to low AI Confidence), the reviewer shall only see the candidate's response and the question rubric, and must not see the candidate's name or any AI-assigned score until the manual grade is submitted.
+Mandatory
+Demonstration
+
+FR-GRAD-003
+AI-assisted result analytics
+The system shall provide detailed analytics: score distribution, time per question, cheating score impact, ranking.
+Mandatory
+Demonstration
+
+FR-GRAD-004
+Personalized feedback
+Candidates shall receive personalized feedback reports (score, correct answers, cheating flags, ranking).
+Desirable
+Demonstration
+
+FR-GRAD-005
+Automatic certificate generation
+System shall generate and deliver customizable PDF certificates to passing candidates (with organization branding, QR code for verification).
+Mandatory
+Test
+
+
+3.2.7. Dashboard & Reporting Requirements
+Requirement ID
+Requirement Title
+Description
+Priority
+VM
+
+FR-DASH-001
+Role-Based Dashboards & Customization
+Super Admin, Enterprise Admin, and Staff shall have customized, widget-based dashboards showing relevant key metrics (KPIs) and quick links. Enterprise Admins shall be able to configure or reorder the widgets displayed on their dashboard.
+Mandatory
+Demonstration
+
+FR-DASH-002
+Real-Time Exam Monitoring Dashboard
+Enterprise Admins shall view live exams, active candidates, and proctoring flags in real-time. The dashboard shall feature low-latency updates (max 5-second latency) and color-coded severity indicators for proctoring events.
+Mandatory
+Demonstration / Test
+
+FR-DASH-003
+Asynchronous Comprehensive Reporting
+The system shall provide comprehensive reports for exam results, proctoring logs, and candidate performance. For reports exceeding 500 records, generation shall be asynchronous (user is notified via email/in-app when the report is ready).
+Mandatory
+Test
+
+FR-DASH-004
+Granular Data Export Formats
+Reports shall be exportable in multiple formats: PDF (formatted, summary), Excel/CSV (raw data for analysis), and JSON/API endpoint (for integration with Enterprise BI tools - Enterprise-tier feature).
+Mandatory
+Test
+
+FR-DASH-005
+Audit Log & Activity Tracking
+Super Admins and Enterprise Admins shall have a dedicated report/dashboard to view a complete, immutable audit trail of all critical actions (e.g., user creation, exam changes, deletion, payment history) with timestamp and actor details.
+Mandatory
+Inspection
+
+FR-DASH-006
+Performance & Trend Analytics
+Enterprise Admins shall access analytics dashboards to track historical trends (e.g., month-over-month exam volume, average scores over time) and view performance benchmarks against other Enterprise exams (anonymously).
+Desirable
+Demonstration
+
+FR-DASH-007
+Custom Report Builder
+The system shall provide an interface that allows Enterprise Admins to define and save custom reports by selecting specific filters, fields, and grouping criteria (e.g., performance by department/location).
+Desirable
+Demonstration
+
+
+3.2.8. Payment & Subscription Requirements
+Requirement ID
+Requirement Title
+Description
+Priority
+VM
+
+FR-PAY-001
+Gateway Integration & Localization
+The system shall integrate with the specified Ethiopian payment gateways (Telebirr, CBE Birr ) and support local currency (ETB) transactions.
+Mandatory
+Test
+
+FR-PAY-002
+Secure Transaction Handling
+The system shall comply with PCI DSS Level 2 (or equivalent standard for handling payment tokens/data) and ensure all payment data transmission is encrypted using TLS 1.2 or higher.
+Mandatory
+Inspection / Audit
+
+FR-PAY-003
+Subscription Plan Management
+Super Admin shall define, modify, activate, and deactivate subscription plans, including features, usage limits (max users, max exams), and pricing structures.
+Mandatory
+Demonstration
+
+FR-PAY-004
+Automatic Recurring Billing & Dunning
+The system shall automatically handle recurring billing and renewal. It must implement a dunning process to manage failed payments, including retries and automated notification of the Enterprise Admin.
+Mandatory
+Test
+
+FR-PAY-005
+Upgrade/Downgrade Management
+The system shall allow Enterprise Admins to upgrade or downgrade their subscription plan, with proration calculated and applied automatically for the remaining period of the current billing cycle.
+Mandatory
+Test
+
+FR-PAY-006
+Invoice & Tax Compliance
+The system shall automatically generate and deliver a detailed, legally compliant invoice (including applicable Ethiopian taxes or VAT) upon every payment or billing event (new subscription, renewal, proration).
+Mandatory
+Test / Demonstration
+
+FR-PAY-007
+Billing History & Management
+Enterprise Admins shall have a dedicated portal to view their complete billing history, download all past invoices (FR-PAY-006), and update their payment methods.
+Mandatory
+Demonstration
+
+FR-PAY-008
+Account Suspension Workflow
+In the event of persistent payment failure (after the dunning process), the system shall automatically trigger the suspension of the Enterprise account, notifying the Enterprise Admin 48 hours prior to the action.
+Mandatory
+Demonstration
+
+
+
+Non-Functional Requirements
+3.3.1. Performance & Scalability
+Requirement ID
+Description
+Priority
+VM
+
+NFR-PERF-001
+The system shall support at least 1,000 concurrent candidates during peak exam periods.
+Mandatory
+Analysis / Load Test
+
+NFR-PERF-002
+Page load time ≤ 3 seconds under normal load.
+Mandatory
+Analysis
+
+NFR-PERF-003
+Proctoring events shall be processed and logged in real-time (< 2 seconds delay).
+Mandatory
+Test
+
+
+3.3.2. Security & Privacy
+Requirement ID
+Description
+Priority
+VM
+
+NFR-SEC-001
+All data in transit shall be encrypted with HTTPS/TLS 1.3.
+Mandatory
+Inspection
+
+NFR-SEC-002
+Data at rest shall be encrypted.
+Mandatory
+Inspection
+
+NFR-SEC-003
+Compliance with Ethiopian Personal Data Protection Proclamation and GDPR principles.
+Mandatory
+Inspection / Audit
+
+NFR-SEC-004
+Audit logs for all critical actions (login, exam start, proctoring flags, result access).
+Mandatory
+Inspection
+
+
+3.3.3 Usability & Accessibility
+Requirement ID
+Description
+Priority
+VM
+
+NFR-USAB-001
+Interface shall be intuitive and require minimal training (< 15 minutes for new enterprise admins).
+Mandatory
+User Testing
+
+NFR-USAB-002
+The system shall be fully functional on latest versions of Chrome, Firefox, Edge  Browsers .
+Mandatory
+Test
+
+NFR-USAB-003
+Support Amharic and English languages (UI and reports).
+Desirable
+Demonstration
+
+
+3.3.4 Reliability & Maintainability
+Requirement ID
+Description
+Priority
+VM
+
+NFR-REL-001
+System uptime ≥ 99.5% (excluding scheduled maintenance).
+Mandatory
+Analysis
+
+NFR-REL-002
+Automated backups daily with 30-day retention.
+Mandatory
+Inspection
+
+1. Identify Actors
+Super Administrator: Manages the overall platform, including approving enterprise registrations, suspending accounts, defining subscription plans, and overseeing system-wide operations.
+Enterprise Administrator: Manages the enterprise's assessment environment, including creating and scheduling exams, managing staff and candidates, viewing reports, and handling their subscription.
+Enterprise Staff: Assists in enterprise-specific tasks such as exam management and result visualization under the supervision of the Enterprise Administrator.
+Candidate: Participates in assessments by taking exams, submitting answers, and receiving results and certificates.
+Payment System: External system that processes payments for subscriptions.
+2. Identify Use Cases
+Use cases are grouped by primary actor.
+Super Administrator
+Approve Enterprise Registration
+Suspend Enterprise Account
+Manage Subscription Plans
+View System Dashboard
+Enterprise Administrator
+Register Enterprise
+Login
+Manage Staff
+Create Exam
+Schedule Exam
+Assign Candidates
+View Dashboard
+Generate Report
+Manage Enterprise Subscription
+Enterprise Staff
+Login
+Manage Exams
+View Reports
+Candidate
+Register Candidate
+Login
+Verify Identity
+Start Exam
+Submit Exam
+View Results
+Receive Certificate
+Payment System
+Process Payment
+General use case diagram
+/
+
+
+
+Super Administrator Use Case Diagram/
+
+Field
+Details
+
+Use Case ID
+UC-01
+
+Use Case Name
+Approve Enterprise Registration
+
+Primary Actor
+Super Administrator
+
+Secondary Actor(s)
+None
+
+Description
+Reviews and approves or rejects enterprise registration requests.
+
+Preconditions
+- Enterprise registration request exists.
+
+Postconditions
+- Enterprise account is approved or rejected.
+
+Main Flow (Basic Flow)
+1. Super Administrator accesses pending registrations. 
+2. The system displays registration details. 
+3. Super Administrator reviews details. 
+4. The system processes approval or rejection. 
+5. The system notifies the enterprise.
+
+Alternative Flow(s)
+A1: Reject registration - System records reason for rejection.
+
+Exception Flow(s)
+E1: No pending requests - System displays message.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-02
+
+Use Case Name
+Suspend Enterprise Account
+
+Primary Actor
+Super Administrator
+
+Secondary Actor(s)
+None
+
+Description
+Suspends or deletes an enterprise account, locking out associated users.
+
+Preconditions
+- Enterprise account exists.
+
+Postconditions
+- Enterprise account is suspended or deleted.
+
+Main Flow (Basic Flow)
+1. Super Administrator selects enterprise. 2. The system displays account details. 3. Super Administrator initiates suspension. 4. The system applies suspension. 5. The system confirms action.
+
+Alternative Flow(s)
+A1: Permanent deletion - System deletes account permanently.
+
+Exception Flow(s)
+E1: Account not found - System displays error.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-03
+
+Use Case Name
+Manage Subscription Plans
+
+Primary Actor
+Super Administrator
+
+Secondary Actor(s)
+None
+
+Description
+Defines, modifies, activates, or deactivates subscription plans.
+
+Preconditions
+- Super Administrator is logged in.
+
+Postconditions
+- Subscription plans are updated.
+
+Main Flow (Basic Flow)
+1. Super Administrator accesses plan management. 2. System displays current plans. 3. Super Administrator modifies plan. 4. System saves changes. 5. System confirms update.
+
+Alternative Flow(s)
+A1: Create new plan - System prompts for new plan details.
+
+Exception Flow(s)
+E1: Invalid plan details - System notifies and returns to step 3.
+
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-04
+
+Use Case Name
+View System Dashboard
+
+Primary Actor
+Super Administrator
+
+Secondary Actor(s)
+None
+
+Description
+Displays system-wide metrics and key performance indicators.
+
+Preconditions
+- Super Administrator is logged in.
+
+Postconditions
+- System dashboard information is presented.
+
+Main Flow (Basic Flow)
+1. Super Administrator accesses dashboard. 2. System retrieves and displays data. 3. Super Administrator views information.
+
+Alternative Flow(s)
+None
+
+Exception Flow(s)
+E1: No data available - System displays empty dashboard message.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+
+
+Enterprise Administrator use case diagram ( tame Ehen diagram asgebaw on the pdf ke chalk)/
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-05
+
+Use Case Name
+Register Enterprise
+
+Primary Actor
+Enterprise Administrator
+
+Secondary Actor(s)
+None
+
+Description
+Submits a request to set up a new enterprise environment.
+
+Preconditions
+- The enterprise does not have an existing account.
+
+Postconditions
+- Registration request is submitted for approval.
+
+Main Flow (Basic Flow)
+1. Enterprise Administrator initiates registration. 2. System prompts for enterprise details. 3. Enterprise Administrator provides required details. 4. System validates the details. 5. System submits request for approval.
+
+Alternative Flow(s)
+A1: Invalid details provided - System notifies of errors and returns to step 3.
+
+Exception Flow(s)
+E1: Registration fails due to system error - System displays error message and suggests retry.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-06
+
+Use Case Name
+Login
+
+Primary Actor
+Enterprise Administrator
+
+Secondary Actor(s)
+Enterprise Staff, Candidate
+
+Description
+Authenticates a user to access the system based on role.
+
+Preconditions
+- The user has a registered and approved account.
+
+Postconditions
+- The user is authenticated and granted role-based access.
+
+Main Flow (Basic Flow)
+1. User initiates login. 2. System prompts for credentials. 3. User provides credentials. 4. System verifies credentials. 5. The system grants access.
+
+Alternative Flow(s)
+A1: Forgot credentials - System provides recovery option.
+
+Exception Flow(s)
+E1: Invalid credentials - System displays error and allows retry.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-07
+
+Use Case Name
+Manage Staff
+
+Primary Actor
+Enterprise Administrator
+
+Secondary Actor(s)
+None
+
+Description
+Creates, modifies, or removes staff accounts and permissions within the enterprise.
+
+Preconditions
+- Enterprise Administrator is logged in.
+
+Postconditions
+- Staff list is updated.
+
+Main Flow (Basic Flow)
+1. Enterprise Administrator selects manage staff. 2. System displays staff list. 3. Enterprise Administrator performs action on staff. 4. System updates the staff information. 5. System confirms changes.
+
+Alternative Flow(s)
+A1: Assign permissions - System allows setting role-based permissions.
+
+Exception Flow(s)
+E1: Invalid action - System displays error and returns to step 3.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-08
+
+Use Case Name
+Create Exam
+
+Primary Actor
+Enterprise Administrator
+
+Secondary Actor(s)
+None
+
+Description
+Creates a new assessment with questions and settings.
+
+Preconditions
+- Enterprise Administrator is logged in.
+
+Postconditions
+- New exam is added to the system.
+
+Main Flow (Basic Flow)
+1. Enterprise Administrator initiates exam creation. 2. System prompts for exam details and questions. 3. Enterprise Administrator provides details. 4. System saves the exam. 5. System confirms creation.
+
+Alternative Flow(s)
+A1: Set randomization rules - System allows configuring question randomization.
+
+Exception Flow(s)
+E1: Incomplete details - System notifies and returns to step 3.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-09
+
+Use Case Name
+Schedule Exam
+
+Primary Actor
+Enterprise Administrator
+
+Secondary Actor(s)
+None
+
+Description
+Sets timing and availability for an exam.
+
+Preconditions
+- Enterprise Administrator is logged in. - Exam exists.
+
+Postconditions
+- Exam is scheduled.
+
+Main Flow (Basic Flow)
+1. Enterprise Administrator selects exam to schedule. 2. System prompts for schedule details. 3. Enterprise Administrator provides details. 4. System updates schedule. 5. System confirms scheduling.
+
+Alternative Flow(s)
+None
+
+Exception Flow(s)
+E1: Conflicting schedule - System notifies and returns to step 3.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-10
+
+Use Case Name
+Assign Candidates
+
+Primary Actor
+Enterprise Administrator
+
+Secondary Actor(s)
+None
+
+Description
+Assigns candidates to a scheduled exam.
+
+Preconditions
+- Enterprise Administrator is logged in. - Exam is scheduled.
+
+Postconditions
+- Candidates are assigned to the exam.
+
+Main Flow (Basic Flow)
+1. Enterprise Administrator selects exam. 2. System displays candidate list. 3. Enterprise Administrator selects candidates. 4. System assigns candidates. 5. System confirms assignment.
+
+Alternative Flow(s)
+A1: Invite new candidates - System allows adding new candidates.
+
+Exception Flow(s)
+E1: No candidates available - System prompts to add candidates.
+
+Use Case Diagram
+/
+
+
+
+Field
+Details
+
+Use Case ID
+UC-11
+
+Use Case Name
+View Dashboard
+
+Primary Actor
+Enterprise Administrator
+
+Secondary Actor(s)
+None
+
+Description
+Displays enterprise-specific overview of exams, participants, and results.
+
+Preconditions
+- Enterprise Administrator is logged in.
+
+Postconditions
+- Dashboard information is presented.
+
+Main Flow (Basic Flow)
+1. Enterprise Administrator accesses dashboard. 2. System retrieves and displays data. 3. Enterprise Administrator views information.
+
+Alternative Flow(s)
+None
+
+Exception Flow(s)
+E1: No data available - System displays empty dashboard message.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-12
+
+Use Case Name
+Generate Report
+
+Primary Actor
+Enterprise Administrator
+
+Secondary Actor(s)
+None
+
+Description
+Produces reports on exam results and analytics for the enterprise.
+
+Preconditions
+- Enterprise Administrator is logged in. - Exam data exists.
+
+Postconditions
+- Report is generated.
+
+Main Flow (Basic Flow)
+1. Enterprise Administrator requests report. 2. System prompts for report criteria. 3. Enterprise Administrator provides criteria. 4. System generates report. 5. System presents report.
+
+Alternative Flow(s)
+A1: Analytics report - System includes performance analytics.
+
+Exception Flow(s)
+E1: Insufficient data - System notifies and suggests alternatives.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-13
+
+Use Case Name
+Manage Enterprise Subscription
+
+Primary Actor
+Enterprise Administrator
+
+Secondary Actor(s)
+None
+
+Description
+Upgrades, downgrades, or manages the enterprise's subscription plan.
+
+Preconditions
+- Enterprise Administrator is logged in.
+
+Postconditions
+- Subscription is updated.
+
+Main Flow (Basic Flow)
+1. Enterprise Administrator accesses subscription management. 2. System displays current plan and options. 3. Enterprise Administrator selects change. 4. System processes update. 5. System confirms change.
+
+Alternative Flow(s)
+A1: Upgrade plan - System enables additional features.
+
+Exception Flow(s)
+E1: Payment required - System redirects to payment.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-14
+
+Use Case Name
+Login
+
+Primary Actor
+Enterprise Staff
+
+Secondary Actor(s)
+Enterprise Administrator, Candidate
+
+Description
+Authenticates a user to access the system based on role.
+
+Preconditions
+- User has a registered and approved account.
+
+Postconditions
+- User is authenticated and granted role-based access.
+
+Main Flow (Basic Flow)
+1. User initiates login. 2. System prompts for credentials. 3. User provides credentials. 4. System verifies credentials. 5. System grants access.
+
+Alternative Flow(s)
+A1: Forgot credentials - System provides recovery option.
+
+Exception Flow(s)
+E1: Invalid credentials - System displays error and allows retry.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Enterprise Staff use Case diagram/
+
+Field
+Details
+
+Use Case ID
+UC-15
+
+Use Case Name
+Manage Exams
+
+Primary Actor
+Enterprise Staff
+
+Secondary Actor(s)
+None
+
+Description
+Handles exam creation, scheduling, and management within permissions.
+
+Preconditions
+- Enterprise Staff is logged in.
+
+Postconditions
+- Exam is managed.
+
+Main Flow (Basic Flow)
+1. Enterprise Staff selects exam management. 2. System displays available exams. 3. Enterprise Staff performs action. 4. System updates exam. 5. System confirms changes.
+
+Alternative Flow(s)
+None
+
+Exception Flow(s)
+E1: Permission denied - System notifies of lack of access.
+
+Use Case Diagram
+/
+
+
+
+Field
+Details
+
+Use Case ID
+UC-16
+
+Use Case Name
+View Reports
+
+Primary Actor
+Enterprise Staff
+
+Secondary Actor(s)
+None
+
+Description
+Views reports on exam results and analytics.
+
+Preconditions
+- Enterprise Staff is logged in. - Report data exists.
+
+Postconditions
+- Report is viewed.
+
+Main Flow (Basic Flow)
+1. Enterprise Staff requests report. 2. System displays report options. 3. Enterprise Staff selects criteria. 4. System presents report. 5. Enterprise Staff views report.
+
+Alternative Flow(s)
+None
+
+Exception Flow(s)
+E1: No access to data - System notifies of permissions.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+Candidate Use Case Diagram/
+
+Field
+Details
+
+Use Case ID
+UC-17
+
+Use Case Name
+Register Candidate
+
+Primary Actor
+Candidate
+
+Secondary Actor(s)
+None
+
+Description
+Allows a candidate to create an account for assessments.
+
+Preconditions
+- Candidate does not have an account.
+
+Postconditions
+- Candidate account is created.
+
+Main Flow (Basic Flow)
+1. Candidate initiates registration. 2. System prompts for details. 3. Candidate provides details. 4. System validates details. 5. System creates account.
+
+Alternative Flow(s)
+A1: Use enterprise-issued ID - System verifies ID.
+
+Exception Flow(s)
+E1: Duplicate account - System notifies and suggests login.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-18
+
+Use Case Name
+Login
+
+Primary Actor
+Candidate
+
+Secondary Actor(s)
+Enterprise Administrator, Enterprise Staff
+
+Description
+Authenticates a user to access the system based on role.
+
+Preconditions
+- User has a registered and approved account.
+
+Postconditions
+- User is authenticated and granted role-based access.
+
+Main Flow (Basic Flow)
+1. User initiates login. 2. System prompts for credentials. 3. User provides credentials. 4. System verifies credentials. 5. System grants access.
+
+Alternative Flow(s)
+A1: Forgot credentials - System provides recovery option.
+
+Exception Flow(s)
+E1: Invalid credentials - System displays error and allows retry.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-19
+
+Use Case Name
+Verify Identity
+
+Primary Actor
+Candidate
+
+Secondary Actor(s)
+None
+
+Description
+Confirms the candidate's identity during assessment.
+
+Preconditions
+- Candidate is logged in.
+
+Postconditions
+- Identity is verified.
+
+Main Flow (Basic Flow)
+1. Candidate initiates verification. 2. System captures image. 3. Candidate allows capture. 4. System compares image. 5. System confirms verification.
+
+Alternative Flow(s)
+None
+
+Exception Flow(s)
+E1: Verification fails - System notifies and allows retry.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-20
+
+Use Case Name
+Start Exam
+
+Primary Actor
+Candidate
+
+Secondary Actor(s)
+None
+
+Description
+Begins the assessment session.
+
+Preconditions
+- Candidate is assigned to exam. - Exam is scheduled and available.
+
+Postconditions
+- Exam session is active.
+
+Main Flow (Basic Flow)
+1. Candidate selects exam. 2. System checks eligibility. 3. Candidate starts exam. 4. System presents questions. 5. Exam begins.
+
+Alternative Flow(s)
+A1: Activate monitoring - System starts tracking behavior.
+
+Exception Flow(s)
+E1: Exam not available - System notifies of schedule.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-21
+
+Use Case Name
+Submit Exam
+
+Primary Actor
+Candidate
+
+Secondary Actor(s)
+None
+
+Description
+Submits answers for grading.
+
+Preconditions
+- Exam session is active.
+
+Postconditions
+- Answers are submitted.
+
+Main Flow (Basic Flow)
+1. Candidate completes answers. 2. System prompts for submission. 3. Candidate confirms submission. 4. System records answers. 5. System ends session.
+
+Alternative Flow(s)
+A1: Auto-submit on time expiry - System submits automatically.
+
+Exception Flow(s)
+E1: Incomplete submission - System warns before ending.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-22
+
+Use Case Name
+View Results
+
+Primary Actor
+Candidate
+
+Secondary Actor(s)
+None
+
+Description
+Displays personal assessment results and feedback.
+
+Preconditions
+- Exam is submitted.
+
+Postconditions
+- Results are presented.
+
+Main Flow (Basic Flow)
+1. Candidate requests results. 2. System retrieves results. 3. Candidate views results and feedback.
+
+Alternative Flow(s)
+A1: Receive personalized feedback - System provides insights.
+
+Exception Flow(s)
+E1: Results not ready - System notifies of processing.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-23
+
+Use Case Name
+Receive Certificate
+
+Primary Actor
+Candidate
+
+Secondary Actor(s)
+None
+
+Description
+Issues certificate upon successful completion.
+
+Preconditions
+- Results indicate success.
+
+Postconditions
+- Certificate is provided.
+
+Main Flow (Basic Flow)
+1. Candidate qualifies for certificate. 2. System generates certificate. 3. Candidate receives certificate.
+
+Alternative Flow(s)
+None
+
+Exception Flow(s)
+E1: Not qualified - System notifies of requirements.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Field
+Details
+
+Use Case ID
+UC-24
+
+Use Case Name
+Process Payment
+
+Primary Actor
+Payment System
+
+Secondary Actor(s)
+None
+
+Description
+Handles payment for subscription changes or plans.
+
+Preconditions
+- Payment is required for action.
+
+Postconditions
+- Payment is processed.
+
+Main Flow
+1. The system initiates payment. 
+2. Payment System processes details. 
+3. Payment System confirms transaction.
+
+Alternative Flow(s)
+None
+
+Exception Flow(s)
+E1: Payment fails - Payment System notifies error.
+
+Use Case Diagram
+/
+
+
+
+
+
+
+
+
+
+Sequence Diagrams/
+/
+/
+/
+/
+/
+/
+/
+/
+/
+Enterprise Account creation 
+The Enterprise Account Life Cycle diagram illustrates a hybrid-flow process governing an organization’s journey within the Veritas system. It begins with a vertical approval phase where a Pending Approval registration is reviewed by administrators for activation or rejection. Once in a Fully Functional state, the account enters a horizontal operational phase where data is strictly separated. Administrators can toggle the account into a Suspended state to temporarily restrict access without data loss. Finally, the lifecycle concludes with an account closure process that includes a mandatory 90-day retention period for regulatory compliance and recovery, followed by a permanent purge of all organization records.
+/
+
+Exam creation flow
+The Exam Status Lifecycle diagram illustrates the progression of an assessment through the Veritas system, transitioning from an initial administrative setup phase to a live operational phase and eventual data preservation. The process begins in the Draft state, where questions and randomization rules are configured, before moving to the Scheduled state once the timing and candidate enrollment are finalized. On reaching the predefined start time, the system automatically triggers the Active state, enabling real-time monitoring and proctoring for candidates. Upon conclusion, the exam enters the Closed state to facilitate automated AI grading, finally moving to the Archived status where results are preserved as read-only historical records for auditing purposes.
+/
+Candidate examination flow 
+The Candidate Examination Flow diagram illustrates the student’s journey through a secure assessment session . The process moves from Awaiting Start to an Active Exam state, where the system manages question navigation and background data syncing. To ensure stability on unreliable networks, a Connection Lost state allows for local answer queuing and automatic background synchronization once the connection is restored. The session can be abruptly ended via a Forced Terminated state if a major integrity violation is detected; otherwise, it proceeds to a Reviewing phase before finalization. The lifecycle concludes at the Submitted state, marking the successful and secure completion of the exam.
+
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ai proctoring module state flow
+The AI Proctoring & Monitoring diagram illustrates the continuous background surveillance logic used to maintain exam integrity. The process begins in an Active Monitoring state, where the system performs real-time analysis of webcam feeds, mouse movements, and browser activity. When a deviation—such as a tab switch or facial absence—is identified, the system transitions to an Anomaly Detected phase to calculate a risk score and capture evidence. While minor issues allow the system to return to active tracking, persistent or high-severity behaviors move the session into a Flagged state. If the cumulative cheating probability exceeds a set threshold, the system triggers a Critical Violation, alerting administrators and potentially terminating the session to prevent further compromise.
+
+
+
+/
+
+
+
+
+Grading module flow 
+The Grading & Results Lifecycle diagram illustrates the progression from exam submission to performance reporting. Upon submission, the Pending Grading state uses AI to evaluate responses, routing low-confidence subjective answers to a Manual Review phase for blind human grading. The process then moves to Analytics Calculation, where the system generates rankings and performs a variance analysis to compare human grades against initial AI scores. The lifecycle concludes in the Reporting phase with the delivery of personalized feedback and the optional generation of branded certificates for passing candidates.
+
+
+/
+Activity Diagrams
+Activity diagrams illustrate the dynamic behavior of the system by modeling workflows, decision points, and parallel activities involved in the AI-Enhanced Online Assessment and Monitoring System. These diagrams provide a clear, step-by-step representation of how different users interact with the system and how the system responds to various conditions. Activity diagrams are particularly effective in representing complex processes such as online examinations, AI-based proctoring, automated grading, and administrative decision-making, where conditional logic and exception handling are essential.
+The system’s activity diagrams are organized into four main workflows:
+Enterprise Registration & Authentication
+This activity diagram illustrates the process through which an enterprise registers and gains access to the system. The workflow begins when an organization submits its registration details. The system then forwards the request for administrative approval. A decision node determines whether the registration is approved or rejected. If approved, the enterprise selects a subscription plan and completes payment before accessing the system dashboard. If the payment fails or the registration is rejected, the system notifies the enterprise accordingly and terminates the process. This workflow ensures controlled system access and subscription enforcement.
+/
+Exam Creation & Scheduling
+This activity diagram represents the steps followed by an administrator to create and schedule an examination. The process starts with the administrator logging into the system and opening the exam creation module. The administrator configures exam parameters such as question types, duration, passing score, and randomization rules. A decision point determines whether candidates are added immediately or the exam is saved as a draft. Once candidates are assigned and the schedule is confirmed, the exam is published. This workflow supports flexibility while maintaining structured exam configuration.
+/
+Candidate Exam + AI Proctoring
+This activity diagram describes the flow of events when a candidate takes an examination. The process begins when the candidate logs in using a secure token or credentials. The system performs identity verification using facial recognition before allowing exam access. During the exam, AI-based proctoring continuously monitors candidate behavior. A decision node evaluates whether suspicious behavior is detected. If a violation occurs, the system logs the event and may terminate the exam depending on severity. Otherwise, the candidate continues until submission or time expiration. This workflow emphasizes exam integrity and real-time monitoring.
+
+/
+Grading + Certificate Generation
+This activity diagram illustrates the post-exam evaluation process. It begins when an exam submission is received by the system. Objective questions are graded automatically, while subjective answers, if present, are forwarded for manual blind grading. The system then calculates the final score and analyzes proctoring logs to determine cheating probability. A decision point checks whether the candidate meets both academic and integrity requirements. Successful candidates receive a digital certificate, while unsuccessful or suspicious cases are flagged for review. This workflow ensures fair assessment and result transparency.
+/
+3.5. Model Verification and ValidationChapter 4: System Design
+References 
+[1] A. C. Topuz, E. Saka, Ö. F. Fatsa, and E. Kurşun, “Emerging trends of online assessment systems in the emergency remote teaching period,” Smart Learning Environments, vol. 9, no. 17, pp. 1–21, 2022. [Online]. Available: https://doi.org/10.1186/s40561-022-00199-6
+[2] D. Kurniati, A. Riyono, and B. Utomo, “Challenges in online assessment: The case of Indonesian teachers,” Int. J. Soc. Sci., vol. 2, no. 5, pp. 2063–2068, 2023. [Online]. Available: https://doi.org/10.53625/ijss.v2i5.4811
+[3] M. Hussein, J. Yusuf, A. Deb, L. Fong, and S. Naidu, “An evaluation of online proctoring tools,” Open Praxis, vol. 12, no. 4, pp. 485–499, 2020. [Online]. Available: https://doi.org/10.5944/OPENPRAXIS.12.4.1113
+[4] S. Arnò et al., “State-of-the-art of commercial proctoring systems and their use in academic online exams,” Int. J. Distance Educ. Technol., vol. 19, no. 2, pp. 1–20, 2021. [Online]. Available: https://doi.org/10.4018/IJDET.20210401.oa3
+[5] J. Jia and Y. He, “The design, implementation and pilot application of an intelligent online proctoring system for online exams,” Interactive Technology and Smart Education, vol. 18, no. 3, 2021. [Online]. Available: https://doi.org/10.1108/ITSE-12-2020-0246
+[6] A. F. A. Rahim, “Guidelines for online assessment in emergency remote teaching during the COVID-19 pandemic,” Educ. Med. J., vol. 12, no. 2, 2020. [Online]. Available: https://doi.org/10.21315/eimj2020.12.2.6
+[7] S. Ali et al., “Navigating the transition to remote online examinations in undergraduate medical education in a resource-limited setting,” Cureus, vol. 17, no. 5, 2025. [Online]. Available: https://doi.org/10.7759/cureus.84480
+[8] L. C. O. Tiong and H. Lee, “E-cheating prevention measures: Detection of cheating at online examinations using deep learning approach,” arXiv preprint, 2021. [Online]. Available: https://arxiv.org/abs/2101.09841
+[9] E. P. Uça Güneş et al., “A case on remote supervised exam practices during the pandemic,” Open Praxis, vol. 16, no. 4, 2024. [Online]. Available: https://doi.org/10.55982/openpraxis.16.4.691
+[10] S. Tabassum, “Student perceptions of assessment techniques in e-learning for different LMSs in English language teaching (ELT),” S3R Academia Review, vol. 5, 2025. [Online]. Available: https://doi.org/10.70682/s3r.2025.05
+[11] D. Ramesh and S. K. Sanampudi, “An automated essay scoring system: a systematic literature review,” Artif. Intell. Rev., vol. 55, no. 3, pp. 2495–2527, Mar. 2022. [Online]. Available: https://doi.org/10.1007/s10462-021-10068-2
+[12] J. S. B. Bui and J. S. Barrot, “Using generative artificial intelligence as an automated essay scoring tool: a comparative study,” Innov. Lang. Learn. Teach., 2025. [Online]. Available: https://doi.org/10.1080/17501229.2025.2521003
+[13] N. Alsaiari, S. El-Haggar, A. AlSaqqaf, S. Khan, and A. AlSaqqaf, “Leveraging prompt-based LLMs for automated scoring and feedback generation in higher education,” Comput. Educ., vol. 223, p. 105262, 2025. [Online]. Available: https://doi.org/10.1016/j.compedu.2025.105262
+[14] V. Kumar and D. Boulanger, “Explainable automated essay scoring: Deep learning really has pedagogical value,” Front. Educ., vol. 5, p. 572367, Nov. 2020. [Online]. Available: https://doi.org/10.3389/feduc.2020.572367
+[15] M. Uto, “A review of deep-neural automated essay scoring models,” Behaviormetrika, vol. 48, no. 2, pp. 459–484, Jul. 2021. [Online]. Available: https://doi.org/10.1007/s41237-021-00142-y
+[16] B. Gaudeau, “Beyond the gold standard in analytic automated essay scoring,” in Proc. 63rd Annu. Meeting Assoc. Compute. Linguist. Student Res. Workshop, Jul. 2025, pp. 9–16. [Online]. Available: https://aclanthology.org/2025.acl-srw.2
+[17] A. B. García-Varela, J. J. García-Amado, and A. del Olmo, “ChatGPT as a stable and fair tool for automated essay scoring,” Educ. Sci., vol. 15, no. 8, p. 946, Aug. 2025. [Online]. Available: https://doi.org/10.3390/educsci15080946
+[18] Kundu, A., & Barbosa, D. (2024). Are large language models good essay graders? arXiv preprint arXiv:2409.13120. https://arxiv.org/abs/2409.13120
+
+[19]Mansour, W. A., Albatarni, S., Eltanbouly, S., & Elsayed, T. (2024). Can large language models automatically score proficiency of written essays? In Proceedings of LREC-COLING 2024 (pp. 2777–2786). https://aclanthology.org/2024.lrec-main.247
+
+[20] Mizumoto, A., & Eguchi, M. (2023). Exploring the potential of using an AI language model for automated essay scoring. Research Methods in Applied Linguistics, 2(2), 100050. https://doi.org/10.1016/j.rmal.2023.100050
+
+[21] Schneider, J., Schenk, B., Niklaus, C., & Vlachos, M. (2024). Short answer scoring with GPT-4. Proceedings of the Eleventh ACM Conference on Learning @ Scale. https://dl.acm.org/doi/10.1145/3657604.3664685
+[22] Xiao, C., et al. (2024). Human-AI collaborative essay scoring: A dual-process framework with LLMs. arXiv preprint arXiv:2401.06431. https://arxiv.org/abs/2401.06431
+	
+
