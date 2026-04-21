@@ -8,6 +8,10 @@
  */
 
 export const queryKeys = {
+  health: {
+    status: ["health"],
+  },
+
   enterprises: {
     all: ["enterprises"],
     list: (params) => ["enterprises", "list", params],

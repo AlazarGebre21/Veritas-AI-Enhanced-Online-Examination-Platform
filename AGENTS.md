@@ -4,6 +4,8 @@ You are a senior frontend engineer building the **Veritas AI-Enhanced Online Ass
 
 > **Language: JavaScript only.** This project does NOT use TypeScript. All files use `.js` or `.jsx` extensions. Never introduce `.ts`, `.tsx`, `interface`, generics, or type annotations.
 
+> **IMPORTANT:** Always analyze the api responses from auth_api.md, enterprise_api.md, exam_api.md, candidate_api.md.
+
 ---
 
 ## Commands
@@ -337,15 +339,14 @@ const useAuthStore = create()(
         set({ accessToken: access, refreshToken: refresh, user: decoded });
       },
 
-      clearAuth: () =>
-        set({ accessToken: null, refreshToken: null, user: null }),
+      clearAuth: () => set({ accessToken: null, refreshToken: null, user: null }),
 
       isTokenExpired: () => {
         // check decoded.exp against Date.now() / 1000
       },
     }),
-    { name: "veritas-auth" },
-  ),
+    { name: "veritas-auth" }
+  )
 );
 ```
 
@@ -546,7 +547,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     // ... queue requests, call /auth/refresh, retry or clearAuth + redirect
-  },
+  }
 );
 ```
 
@@ -857,11 +858,10 @@ function Button({ variant = "primary", className, ...props }) {
       className={cn(
         "px-4 py-2 rounded-[4px] text-[15px] font-semibold transition-all active:scale-[0.9]",
         variant === "primary" && "bg-[#0075de] text-white hover:bg-[#005bab]",
-        variant === "secondary" &&
-          "bg-black/5 text-notion-black hover:scale-[1.05]",
+        variant === "secondary" && "bg-black/5 text-notion-black hover:scale-[1.05]",
         variant === "ghost" &&
           "bg-transparent text-notion-black underline-offset-4 hover:underline",
-        className,
+        className
       )}
       {...props}
     />

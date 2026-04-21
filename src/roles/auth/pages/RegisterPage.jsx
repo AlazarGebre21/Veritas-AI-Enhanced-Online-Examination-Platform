@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { data, Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -35,7 +35,7 @@ export default function RegisterPage() {
   const mutation = useMutation({
     mutationFn: enterpriseApi.register,
     onSuccess: () => {
-      toast.success("Enterprise registered successfully. Please sign in.");
+      toast.success("Enterprise registered successfully. Please sign in with the organization email.");
       navigate(ROUTES.LOGIN);
     },
     onError: (err) => {
@@ -44,7 +44,14 @@ export default function RegisterPage() {
   });
 
   function onSubmit(values) {
-    mutation.mutate(values);
+    mutation.mutate(values, {
+  onSuccess: (data) => {
+    console.log("Success:", data);
+  },
+  onError: (error) => {
+    console.log("Error:", error);
+  },
+});
   }
 
   return (
