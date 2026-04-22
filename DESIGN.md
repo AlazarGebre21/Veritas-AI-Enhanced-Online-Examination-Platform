@@ -44,6 +44,7 @@ What makes Notion's visual language distinctive is its border philosophy. Rather
 - **Teal** (`#2a9d99`): Success states, positive indicators.
 - **Green** (`#1aae39`): Confirmation, completion badges.
 - **Orange** (`#dd5b00`): Warning states, attention indicators.
+- **Destructive** (`#eb5757`): Irreversible actions, delete buttons, high-risk states.
 - **Pink** (`#ff64c8`): Decorative accent, feature highlights.
 - **Purple** (`#391c57`): Premium features, deep accents.
 - **Brown** (`#523410`): Earthy accent, warm feature sections.

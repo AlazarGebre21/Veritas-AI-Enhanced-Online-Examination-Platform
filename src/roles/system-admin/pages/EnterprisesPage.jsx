@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEnterprises } from "../hooks/useEnterprises.js";
 import { DataTable } from "@/components/shared/DataTable.jsx";
 import {Input, Badge } from "@/components/ui/index.js";
@@ -20,55 +20,34 @@ export default function EnterprisesPage() {
     {
       header: "Workspace",
       className: "w-1/3 min-w-[200px]",
-      accessor: (row) => {
-        // Handle possible casing or nested response
-        const item = row.enterprise || row.node || row;
-        const displayName = item.displayName || item.display_name || item.DisplayName || item.name || "Unknown";
-        const slug = item.slug || item.Slug || "";
-        return (
-          <div>
-            <div className="font-semibold text-[15px] text-notion-blue">{displayName}</div>
-            <div className="text-[13px] text-warm-gray-500">{slug ? `${slug}.veritas.com` : ".veritas.com"}</div>
-          </div>
-        );
-      },
+      accessor: (row) => (
+        <div>
+          <div className="font-semibold text-[15px] text-notion-blue">{row.displayName || "Unknown"}</div>
+          <div className="text-[13px] text-warm-gray-500">{row.slug ? `${row.slug}.veritas.com` : ".veritas.com"}</div>
+        </div>
+      ),
     },
     {
       header: "Status",
       accessor: (row) => {
-        const item = row.enterprise || row.node || row;
-        const status = item.status || item.Status || "";
         let variant = "neutral";
-        const normalizedStatus = status.toLowerCase();
+        if (row.status === ENTERPRISE_STATUS.ACTIVE) variant = "success";
+        if (row.status === ENTERPRISE_STATUS.PENDING_APPROVAL) variant = "warning";
+        if (row.status === ENTERPRISE_STATUS.SUSPENDED) variant = "destructive";
         
-        if (normalizedStatus === "active") {
-          variant = "success";
-        } else if (normalizedStatus === "pendingapproval" || normalizedStatus === "pending_approval") {
-          variant = "warning";
-        } else if (normalizedStatus === "suspended") {
-          variant = "destructive";
-        }
-        
-        // Format status for display nicely if missing or weird casing
-        const displayStatus = status ? status.replace(/_/g, ' ') : "Unknown";
+        // Add spaces before uppercase letters for nicer display (e.g., PendingApproval -> Pending Approval)
+        const displayStatus = row.status ? row.status.replace(/([A-Z])/g, ' $1').trim() : "Unknown";
         
         return <Badge variant={variant}>{displayStatus}</Badge>;
       },
     },
     {
       header: "Contact Email",
-      accessor: (row) => {
-        const item = row.enterprise || row.node || row;
-        return item.contactEmail || item.contact_email || item.ContactEmail || "N/A";
-      },
+      accessor: "contactEmail",
     },
     {
       header: "Created",
-      accessor: (row) => {
-        const item = row.enterprise || row.node || row;
-        const dateStr = item.createdAt || item.created_at || item.CreatedAt;
-        return dateStr ? formatDate(dateStr) : "N/A";
-      },
+      accessor: (row) => row.createdAt ? formatDate(row.createdAt) : "N/A",
     },
   ];
 

@@ -22,6 +22,8 @@
   --color-teal: #2a9d99;
   --color-success: #1aae39;
   --color-warning: #dd5b00;
+  --color-destructive: #eb5757;
+  --color-destructive-bg: #fff5f5;
 
   /* Border */
   --color-whisper: rgba(0, 0, 0, 0.1);

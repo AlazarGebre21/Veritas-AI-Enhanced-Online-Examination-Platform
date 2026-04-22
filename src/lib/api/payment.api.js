@@ -47,4 +47,17 @@ export const paymentApi = {
     const { data } = await apiClient.get(`/invoices/${invoiceId}`);
     return data;
   },
+
+  /**
+   * Upgrade enterprise subscription → returns checkout URL.
+   * @param {string} enterpriseId
+   * @param {string} planId
+   * @returns {Promise<{ checkout_url: string }>}
+   */
+  upgradeSubscription: async (enterpriseId, planId) => {
+    const { data } = await apiClient.post(`/subscriptions/${enterpriseId}/upgrade`, {
+      plan_id: planId,
+    });
+    return data;
+  },
 };
