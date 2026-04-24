@@ -20,6 +20,7 @@ export const queryKeys = {
     summary: (id) => ["enterprises", id, "summary"],
     subscription: (id) => ["enterprises", id, "subscription"],
     auditLogs: (id, params) => ["enterprises", id, "audit-logs", params],
+    usersAll: (id) => ["enterprises", id, "users"],
     users: (id, params) => ["enterprises", id, "users", params],
   },
 

@@ -25,6 +25,7 @@ export const ROUTES = {
   STAFF: "/staff",
   CANDIDATES: "/candidates",
   QUESTIONS: "/questions",
+  QUESTIONS_SUBJECT: "/questions/subject/:subjectName",
   QUESTION_DETAIL: "/questions/:id",
   EXAMS: "/exams",
   EXAM_NEW: "/exams/new",

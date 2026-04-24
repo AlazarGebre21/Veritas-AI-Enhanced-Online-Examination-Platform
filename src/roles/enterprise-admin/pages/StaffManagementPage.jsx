@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,11 +11,13 @@ import {
   UserX,
   Copy,
   Check,
+  Pencil,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useEnterpriseUsers } from "../hooks/useEnterpriseUsers.js";
 import {
   useCreateUser,
+  useUpdateUser,
   useDeactivateUser,
   useResetUserPassword,
 } from "../hooks/useStaffMutations.js";
@@ -30,6 +32,17 @@ const inviteSchema = z.object({
   last_name: z.string().min(1, "Last name is required"),
   password: z.string().min(8, "Min 8 characters"),
   role: z.enum(["EnterpriseAdmin", "EnterpriseStaff"]),
+  honorific: z.string().optional(),
+  phone: z.string().optional(),
+});
+
+// ── Zod schema for "Edit Staff" form ────────────────────────────────────
+const editSchema = z.object({
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
+  role: z.enum(["EnterpriseAdmin", "EnterpriseStaff"]),
+  honorific: z.string().optional(),
+  phone: z.string().optional(),
 });
 
 // ── Columns ─────────────────────────────────────────────────────────────
@@ -39,7 +52,7 @@ const buildColumns = (onAction) => [
     accessor: (row) => (
       <div>
         <p className="font-medium text-notion-black text-[14px]">
-          {row.firstName} {row.lastName}
+          {row.honorific ? `${row.honorific} ` : ""}{row.firstName} {row.lastName}
         </p>
         <p className="text-[12px] text-warm-gray-500">{row.email}</p>
       </div>
@@ -101,6 +114,12 @@ function ActionMenu({ user, onAction }) {
           {/* Backdrop */}
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-8 z-50 w-48 bg-white border border-whisper rounded-comfortable shadow-deep py-1">
+            <button
+              onClick={() => { onAction("edit", user); setOpen(false); }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-[13px] text-warm-gray-500 hover:bg-warm-white hover:text-notion-black transition-colors"
+            >
+              <Pencil size={14} /> Edit
+            </button>
             {user.isActive && (
               <button
                 onClick={() => { onAction("deactivate", user); setOpen(false); }}
@@ -128,23 +147,28 @@ export default function StaffManagementPage() {
   const enterpriseId = user?.enterpriseId;
 
   const [page, setPage] = useState(1);
-  const LIMIT = 15;
+  const LIMIT = 10;
   const { data, isLoading } = useEnterpriseUsers(enterpriseId, { page, limit: LIMIT, sort: "created_at", sort_dir: "desc" });
   const users = data?.data || [];
   const meta = data?.metadata;
 
   // ── Modals state
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
   const [tempPassword, setTempPassword] = useState(null);
   const [copied, setCopied] = useState(false);
 
   // ── Mutations
   const createUser = useCreateUser(enterpriseId);
+  const updateUser = useUpdateUser(enterpriseId);
   const deactivateUser = useDeactivateUser(enterpriseId);
   const resetPassword = useResetUserPassword(enterpriseId);
 
   // ── Action handler
   function handleAction(action, targetUser) {
+    if (action === "edit") {
+      setEditTarget(targetUser);
+    }
     if (action === "deactivate") {
       if (window.confirm(`Deactivate ${targetUser.firstName} ${targetUser.lastName}?`)) {
         deactivateUser.mutate(targetUser.id);
@@ -170,12 +194,54 @@ export default function StaffManagementPage() {
   } = useForm({ resolver: zodResolver(inviteSchema), defaultValues: { role: "EnterpriseStaff" } });
 
   function onInvite(values) {
-    createUser.mutate(values, {
+    // Strip empty optional fields so the API doesn't receive empty strings
+    const payload = { ...values };
+    if (!payload.honorific) delete payload.honorific;
+    if (!payload.phone) delete payload.phone;
+
+    createUser.mutate(payload, {
       onSuccess: () => {
         setInviteOpen(false);
         reset();
       },
     });
+  }
+
+  // ── Edit form
+  const {
+    register: editRegister,
+    handleSubmit: editHandleSubmit,
+    reset: editReset,
+    formState: { errors: editErrors },
+  } = useForm({ resolver: zodResolver(editSchema) });
+
+  // Populate edit form when a target is selected
+  useEffect(() => {
+    if (editTarget) {
+      editReset({
+        first_name: editTarget.firstName || "",
+        last_name: editTarget.lastName || "",
+        role: editTarget.role || "EnterpriseStaff",
+        honorific: editTarget.honorific || "",
+        phone: editTarget.phone || "",
+      });
+    }
+  }, [editTarget, editReset]);
+
+  function onEdit(values) {
+    const payload = { ...values };
+    if (!payload.honorific) delete payload.honorific;
+    if (!payload.phone) delete payload.phone;
+
+    updateUser.mutate(
+      { userId: editTarget.id, payload },
+      {
+        onSuccess: () => {
+          setEditTarget(null);
+          editReset();
+        },
+      },
+    );
   }
 
   function handleCopy() {
@@ -232,6 +298,30 @@ export default function StaffManagementPage() {
       <Modal isOpen={inviteOpen} onClose={() => { setInviteOpen(false); reset(); }} title="Invite Staff Member">
         <form onSubmit={handleSubmit(onInvite)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[14px] font-medium text-notion-black mb-1.5">Honorific</label>
+              <select
+                {...register("honorific")}
+                className="w-full border border-[#ddd] rounded-micro px-3.5 py-2 text-[14px] text-notion-black focus:outline-none focus:border-notion-blue focus:ring-2 focus:ring-notion-blue/20 transition-all bg-white appearance-none"
+              >
+                <option value="">None</option>
+                <option value="Mr">Mr</option>
+                <option value="Mrs">Mrs</option>
+                <option value="Ms">Ms</option>
+                <option value="Dr">Dr</option>
+                <option value="Prof">Prof</option>
+              </select>
+            </div>
+            <Input
+              label="Phone"
+              id="invite_phone"
+              type="tel"
+              placeholder="+251 9XX XXX XXX"
+              error={errors.phone?.message}
+              {...register("phone")}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <Input
               label="First Name"
               id="first_name"
@@ -286,6 +376,77 @@ export default function StaffManagementPage() {
             </Button>
             <Button type="submit" disabled={createUser.isPending}>
               {createUser.isPending ? "Creating…" : "Send Invite"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* ── Edit Staff Modal ───────────────────────────────────────────── */}
+      <Modal isOpen={!!editTarget} onClose={() => { setEditTarget(null); editReset(); }} title="Edit Staff Member">
+        <form onSubmit={editHandleSubmit(onEdit)} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[14px] font-medium text-notion-black mb-1.5">Honorific</label>
+              <select
+                {...editRegister("honorific")}
+                className="w-full border border-[#ddd] rounded-micro px-3.5 py-2 text-[14px] text-notion-black focus:outline-none focus:border-notion-blue focus:ring-2 focus:ring-notion-blue/20 transition-all bg-white appearance-none"
+              >
+                <option value="">None</option>
+                <option value="Mr">Mr</option>
+                <option value="Mrs">Mrs</option>
+                <option value="Ms">Ms</option>
+                <option value="Dr">Dr</option>
+                <option value="Prof">Prof</option>
+              </select>
+            </div>
+            <Input
+              label="Phone"
+              id="edit_phone"
+              type="tel"
+              placeholder="+251 9XX XXX XXX"
+              error={editErrors.phone?.message}
+              {...editRegister("phone")}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="First Name"
+              id="edit_first_name"
+              placeholder="Jane"
+              error={editErrors.first_name?.message}
+              {...editRegister("first_name")}
+            />
+            <Input
+              label="Last Name"
+              id="edit_last_name"
+              placeholder="Doe"
+              error={editErrors.last_name?.message}
+              {...editRegister("last_name")}
+            />
+          </div>
+          <div>
+            <label className="block text-[14px] font-medium text-notion-black mb-1.5">Role</label>
+            <select
+              {...editRegister("role")}
+              className="w-full border border-[#ddd] rounded-micro px-3.5 py-2 text-[14px] text-notion-black focus:outline-none focus:border-notion-blue focus:ring-2 focus:ring-notion-blue/20 transition-all bg-white appearance-none"
+            >
+              <option value="EnterpriseStaff">Staff</option>
+              <option value="EnterpriseAdmin">Admin</option>
+            </select>
+          </div>
+
+          {updateUser.isError && (
+            <p className="text-warning text-[13px]">
+              {updateUser.error?.response?.data?.error || "Failed to update user."}
+            </p>
+          )}
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button type="button" variant="secondary" onClick={() => { setEditTarget(null); editReset(); }}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={updateUser.isPending}>
+              {updateUser.isPending ? "Saving…" : "Save Changes"}
             </Button>
           </div>
         </form>

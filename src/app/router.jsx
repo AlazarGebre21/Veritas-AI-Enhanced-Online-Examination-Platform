@@ -61,6 +61,9 @@ const ExamMonitoringPage = lazy(() =>
 const QuestionsPage = lazy(() =>
   import("@/roles/enterprise-admin/pages/QuestionsPage.jsx")
 );
+const SubjectQuestionsPage = lazy(() =>
+  import("@/roles/enterprise-admin/pages/SubjectQuestionsPage.jsx")
+);
 const QuestionDetailPage = lazy(() =>
   import("@/roles/enterprise-admin/pages/QuestionDetailPage.jsx")
 );
@@ -159,6 +162,7 @@ export const router = createBrowserRouter([
           { path: ROUTES.STAFF, element: <Page><StaffManagementPage /></Page> },
           { path: ROUTES.CANDIDATES, element: <Page><CandidatesPage /></Page> },
           { path: ROUTES.QUESTIONS, element: <Page><QuestionsPage /></Page> },
+          { path: ROUTES.QUESTIONS_SUBJECT, element: <Page><SubjectQuestionsPage /></Page> },
           { path: ROUTES.QUESTION_DETAIL, element: <Page><QuestionDetailPage /></Page> },
           { path: ROUTES.EXAMS, element: <Page><ExamsPage /></Page> },
           { path: ROUTES.EXAM_NEW, element: <Page><ExamCreatePage /></Page> },

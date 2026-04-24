@@ -13,7 +13,7 @@ export function useCreateUser(enterpriseId) {
   return useMutation({
     mutationFn: (payload) => enterpriseApi.createUser(enterpriseId, payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.enterprises.users(enterpriseId) });
+      qc.invalidateQueries({ queryKey: queryKeys.enterprises.usersAll(enterpriseId) });
     },
   });
 }
@@ -24,7 +24,7 @@ export function useUpdateUser(enterpriseId) {
   return useMutation({
     mutationFn: ({ userId, payload }) => enterpriseApi.updateUser(enterpriseId, userId, payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.enterprises.users(enterpriseId) });
+      qc.invalidateQueries({ queryKey: queryKeys.enterprises.usersAll(enterpriseId) });
     },
   });
 }
@@ -35,7 +35,7 @@ export function useDeactivateUser(enterpriseId) {
   return useMutation({
     mutationFn: (userId) => enterpriseApi.deactivateUser(enterpriseId, userId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.enterprises.users(enterpriseId) });
+      qc.invalidateQueries({ queryKey: queryKeys.enterprises.usersAll(enterpriseId) });
     },
   });
 }

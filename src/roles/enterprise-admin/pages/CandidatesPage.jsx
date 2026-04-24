@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,10 +10,12 @@ import {
   FileSpreadsheet,
   AlertCircle,
   CheckCircle2,
+  Pencil,
 } from "lucide-react";
 import {
   useCandidates,
   useCreateCandidate,
+  useUpdateCandidate,
   useDeactivateCandidate,
   useBulkUploadCandidates,
 } from "../hooks/useCandidates.js";
@@ -95,6 +97,12 @@ function CandidateActionMenu({ candidate, onAction }) {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-8 z-50 w-44 bg-white border border-whisper rounded-comfortable shadow-deep py-1">
+            <button
+              onClick={() => { onAction("edit", candidate); setOpen(false); }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-[13px] text-warm-gray-500 hover:bg-warm-white hover:text-notion-black transition-colors"
+            >
+              <Pencil size={14} /> Edit
+            </button>
             {candidate.isActive && (
               <button
                 onClick={() => { onAction("deactivate", candidate); setOpen(false); }}
@@ -121,14 +129,19 @@ export default function CandidatesPage() {
   // ── Modals
   const [createOpen, setCreateOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
 
   // ── Mutations
   const createCandidate = useCreateCandidate();
+  const updateCandidate = useUpdateCandidate();
   const deactivateCandidate = useDeactivateCandidate();
   const bulkUpload = useBulkUploadCandidates();
 
   // ── Action handler
   function handleAction(action, candidate) {
+    if (action === "edit") {
+      setEditTarget(candidate);
+    }
     if (action === "deactivate") {
       if (window.confirm(`Deactivate ${candidate.firstName} ${candidate.lastName}?`)) {
         deactivateCandidate.mutate(candidate.id);
@@ -150,6 +163,38 @@ export default function CandidatesPage() {
     createCandidate.mutate(values, {
       onSuccess: () => { setCreateOpen(false); reset(); },
     });
+  }
+
+  // ── Edit form
+  const {
+    register: editRegister,
+    handleSubmit: editHandleSubmit,
+    reset: editReset,
+    formState: { errors: editErrors },
+  } = useForm({ resolver: zodResolver(candidateSchema) });
+
+  // Populate edit form when a target is selected
+  useEffect(() => {
+    if (editTarget) {
+      editReset({
+        firstName: editTarget.firstName || "",
+        lastName: editTarget.lastName || "",
+        email: editTarget.email || "",
+        externalId: editTarget.externalId || "",
+      });
+    }
+  }, [editTarget, editReset]);
+
+  function onEditSubmit(values) {
+    updateCandidate.mutate(
+      { id: editTarget.id, payload: values },
+      {
+        onSuccess: () => {
+          setEditTarget(null);
+          editReset();
+        },
+      }
+    );
   }
 
   return (
@@ -253,6 +298,57 @@ export default function CandidatesPage() {
             </Button>
             <Button type="submit" disabled={createCandidate.isPending}>
               {createCandidate.isPending ? "Creating..." : "Add Candidate"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* ── Edit Candidate Modal ───────────────────────────────────────── */}
+      <Modal isOpen={!!editTarget} onClose={() => { setEditTarget(null); editReset(); }} title="Edit Candidate">
+        <form onSubmit={editHandleSubmit(onEditSubmit)} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="First Name"
+              id="edit-candidate-firstName"
+              placeholder="Jane"
+              error={editErrors.firstName?.message}
+              {...editRegister("firstName")}
+            />
+            <Input
+              label="Last Name"
+              id="edit-candidate-lastName"
+              placeholder="Doe"
+              error={editErrors.lastName?.message}
+              {...editRegister("lastName")}
+            />
+          </div>
+          <Input
+            label="Email (optional)"
+            id="edit-candidate-email"
+            type="email"
+            placeholder="jane@example.com"
+            error={editErrors.email?.message}
+            {...editRegister("email")}
+          />
+          <Input
+            label="External ID (optional)"
+            id="edit-candidate-externalId"
+            placeholder="e.g. student number"
+            {...editRegister("externalId")}
+          />
+
+          {updateCandidate.isError && (
+            <p className="text-warning text-[13px]">
+              {updateCandidate.error?.response?.data?.error || "Failed to update candidate."}
+            </p>
+          )}
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button type="button" variant="secondary" onClick={() => { setEditTarget(null); editReset(); }}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={updateCandidate.isPending}>
+              {updateCandidate.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>
