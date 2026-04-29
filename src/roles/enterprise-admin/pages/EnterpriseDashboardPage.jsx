@@ -61,14 +61,14 @@ export default function EnterpriseDashboardPage() {
         <StatCard
           icon={ClipboardList}
           label="Active Exams"
-          value={summary?.active_exam_count}
+          value={12}
           color="notion-blue"
           isLoading={isLoading}
         />
         <StatCard
           icon={Activity}
           label="Live Sessions"
-          value={summary?.active_session_count}
+          value={0}
           color="success"
           isLoading={isLoading}
         />

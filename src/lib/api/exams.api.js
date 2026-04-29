@@ -16,7 +16,7 @@ import { apiClient } from "./client.js";
  * @property {string} templateSourceId
  * @property {Record<string, any>} settings
  * @property {any[]} questions
- * @property {any[]} randomizationRules
+
  * @property {string} createdAt
  * @property {string} updatedAt
  * @property {string} createdBy
@@ -58,7 +58,7 @@ export const examApi = {
   },
 
   /**
-   * Get an exam by ID (includes questions and rules).
+   * Get an exam by ID (includes questions).
    * @param {string} id
    * @returns {Promise<Exam>}
    */
@@ -172,37 +172,5 @@ export const examApi = {
     await apiClient.patch(`/exams/${examId}/questions/${questionId}`, payload);
   },
 
-  // ── Randomization Rules ───────────────────────────────────────────────────
 
-  /**
-   * Add a randomization rule to an exam.
-   * @param {string} examId
-   * @param {{ topic: string, difficulty: string, questionCount: number }} payload
-   * @returns {Promise<any>}
-   */
-  addRule: async (examId, payload) => {
-    const { data } = await apiClient.post(`/exams/${examId}/rules`, payload);
-    return data;
-  },
-
-  /**
-   * Delete a randomization rule from an exam.
-   * @param {string} examId
-   * @param {string} ruleId
-   * @returns {Promise<void>}
-   */
-  deleteRule: async (examId, ruleId) => {
-    await apiClient.delete(`/exams/${examId}/rules/${ruleId}`);
-  },
-
-  /**
-   * Update a randomization rule.
-   * @param {string} examId
-   * @param {string} ruleId
-   * @param {{ topic?: string, difficulty?: string, questionCount?: number }} payload
-   * @returns {Promise<void>}
-   */
-  updateRule: async (examId, ruleId, payload) => {
-    await apiClient.patch(`/exams/${examId}/rules/${ruleId}`, payload);
-  },
 };

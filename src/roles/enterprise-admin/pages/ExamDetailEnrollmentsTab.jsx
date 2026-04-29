@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Copy, Check, RefreshCw, RotateCcw, Ban, Search } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Copy, Check, RefreshCw, RotateCcw, Ban, Search, Loader2 } from "lucide-react";
 import {
   useExamEnrollments, useEnrollCandidates,
   useRegenerateToken, useResetAttempts, useRevokeEnrollment,
@@ -13,14 +13,28 @@ export function ExamEnrollmentsTab({ examId }) {
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
-  const [tokenDisplay, setTokenDisplay] = useState(null); // { enrollmentId, token }
+  const [tokenDisplay, setTokenDisplay] = useState(null);
   const [copied, setCopied] = useState(false);
 
+  // Enrolled list
   const { data, isLoading } = useExamEnrollments(examId);
   const enrollments = data?.data || [];
 
-  const { data: candData } = useCandidates({ limit: 100, search });
-  const candidates = candData?.data || [];
+  // Fetch ALL candidates once — client-side search filtering (no server-side search param)
+  const { data: candData, isLoading: candLoading } = useCandidates({ limit: 1000 });
+  const allCandidates = candData?.data || [];
+
+  // Client-side filter
+  const filteredCandidates = useMemo(() => {
+    if (!search.trim()) return allCandidates;
+    const q = search.toLowerCase();
+    return allCandidates.filter(
+      (c) =>
+        c.firstName?.toLowerCase().includes(q) ||
+        c.lastName?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q)
+    );
+  }, [allCandidates, search]);
 
   const enroll = useEnrollCandidates(examId);
   const regenerate = useRegenerateToken();
@@ -34,7 +48,12 @@ export function ExamEnrollmentsTab({ examId }) {
         maxAttempts: 1,
         tokenExpiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
       },
-      { onSuccess: () => { setSelected([]); setEnrollOpen(false); } }
+      {
+        onSuccess: () => {
+          setSelected([]);
+          setEnrollOpen(false);
+        },
+      }
     );
   }
 
@@ -52,98 +71,164 @@ export function ExamEnrollmentsTab({ examId }) {
 
   return (
     <div className="space-y-4">
+      {/* Header row */}
       <div className="flex items-center justify-between">
-        <p className="text-[14px] text-warm-gray-500">{enrollments.length} enrolled candidate{enrollments.length !== 1 ? "s" : ""}</p>
+        <p className="text-[14px] text-warm-gray-500">
+          {enrollments.length} enrolled candidate{enrollments.length !== 1 ? "s" : ""}
+        </p>
         <Button onClick={() => setEnrollOpen(true)}>
-          <Search size={14} className="mr-1.5" /> Enroll Candidates
+          + Enroll Candidates
         </Button>
       </div>
 
+      {/* Enrolled list */}
       {isLoading ? (
         <div className="space-y-2">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
       ) : enrollments.length === 0 ? (
         <p className="text-center text-[13px] text-warm-gray-500 py-10 border border-dashed border-whisper rounded-comfortable">
-          No candidates enrolled. Click "Enroll Candidates" to get started.
+          No candidates enrolled. Click &quot;Enroll Candidates&quot; to get started.
         </p>
       ) : (
         <div className="border border-whisper rounded-comfortable overflow-hidden divide-y divide-whisper">
-          {enrollments.map((e) => (
-            <div key={e.id} className="flex items-center justify-between px-4 py-3 hover:bg-warm-white/50 transition-colors">
-              <div>
-                <p className="text-[14px] font-medium text-notion-black">
-                  {e.candidate?.firstName} {e.candidate?.lastName}
-                </p>
-                <div className="flex items-center gap-3 mt-0.5 text-[11px] text-warm-gray-500">
-                  <span>Attempts: {e.attemptsUsed}/{e.maxAttempts}</span>
-                  <span>Expires: {formatDate(e.tokenExpiresAt)}</span>
-                  <Badge variant={e.isRevoked ? "neutral" : "success"}>
-                    {e.isRevoked ? "Revoked" : "Active"}
-                  </Badge>
+          {enrollments.map((e) => {
+            const candidate = allCandidates.find((c) => c.id === e.candidateId);
+            return (
+              <div key={e.id} className="flex items-center justify-between px-4 py-3.5 hover:bg-warm-white/50 transition-colors">
+                <div className="min-w-0">
+                  <p className="text-[14px] font-medium text-notion-black">
+                    {candidate
+                      ? `${candidate.firstName} ${candidate.lastName}`
+                      : e.candidateId}
+                  </p>
+                  <div className="flex items-center gap-3 mt-0.5 text-[11px] text-warm-gray-500">
+                    <span>Attempts: {e.attemptsUsed ?? 0}/{e.maxAttempts}</span>
+                    {e.tokenExpiresAt && <span>Expires: {formatDate(e.tokenExpiresAt)}</span>}
+                    <Badge variant={e.isRevoked ? "neutral" : "success"}>
+                      {e.isRevoked ? "Revoked" : "Active"}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0 ml-4">
+                  <button
+                    onClick={() => handleRegenerate(e.id)}
+                    title="Regenerate access token"
+                    className="p-2 rounded-micro text-warm-gray-400 hover:text-notion-blue hover:bg-notion-blue/5 transition-colors"
+                  >
+                    <RefreshCw size={17} />
+                  </button>
+                  <button
+                    onClick={() => resetAttempts.mutate(e.id)}
+                    title="Reset attempts to zero"
+                    className="p-2 rounded-micro text-warm-gray-400 hover:text-notion-blue hover:bg-notion-blue/5 transition-colors"
+                  >
+                    <RotateCcw size={17} />
+                  </button>
+                  {!e.isRevoked && (
+                    <button
+                      onClick={() => revoke.mutate(e.id)}
+                      title="Revoke access"
+                      className="p-2 rounded-micro text-warm-gray-400 hover:text-destructive hover:bg-destructive/5 transition-colors"
+                    >
+                      <Ban size={17} />
+                    </button>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-1 shrink-0 ml-3">
-                <button onClick={() => handleRegenerate(e.id)} title="Regenerate token"
-                  className="p-1.5 text-warm-gray-300 hover:text-notion-blue transition-colors rounded-micro hover:bg-warm-white">
-                  <RefreshCw size={13} />
-                </button>
-                <button onClick={() => resetAttempts.mutate(e.id)} title="Reset attempts"
-                  className="p-1.5 text-warm-gray-300 hover:text-notion-blue transition-colors rounded-micro hover:bg-warm-white">
-                  <RotateCcw size={13} />
-                </button>
-                {!e.isRevoked && (
-                  <button onClick={() => revoke.mutate(e.id)} title="Revoke access"
-                    className="p-1.5 text-warm-gray-300 hover:text-destructive transition-colors rounded-micro hover:bg-warm-white">
-                    <Ban size={13} />
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* Enroll Modal */}
-      <Modal isOpen={enrollOpen} onClose={() => setEnrollOpen(false)} title="Enroll Candidates">
+      {/* ── Enroll Modal ──────────────────────────────────────────────── */}
+      <Modal isOpen={enrollOpen} onClose={() => { setEnrollOpen(false); setSelected([]); setSearch(""); }} title="Enroll Candidates">
         <div className="space-y-3">
+          {/* Search — client-side */}
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray-300" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search candidates..."
-              className="w-full pl-9 pr-3 py-2 text-[13px] border border-[#ddd] rounded-micro focus:outline-none focus:border-notion-blue focus:ring-2 focus:ring-notion-blue/20" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Filter by name or email..."
+              className="w-full pl-9 pr-3 py-2 text-[13px] border border-[#ddd] rounded-micro focus:outline-none focus:border-notion-blue focus:ring-2 focus:ring-notion-blue/20"
+            />
           </div>
-          <div className="max-h-56 overflow-y-auto space-y-1 border border-whisper rounded-micro p-2">
-            {candidates.map((c) => {
-              const alreadyEnrolled = enrollments.some((e) => e.candidateId === c.id);
-              const isSel = selected.includes(c.id);
-              return (
-                <label key={c.id} className={`flex items-center gap-2 p-2 rounded-micro cursor-pointer transition-colors ${isSel ? "bg-notion-blue/5" : "hover:bg-warm-white"} ${alreadyEnrolled ? "opacity-40 cursor-not-allowed" : ""}`}>
-                  <input type="checkbox" disabled={alreadyEnrolled} checked={isSel}
-                    onChange={() => setSelected((prev) => isSel ? prev.filter((x) => x !== c.id) : [...prev, c.id])}
-                    className="w-3.5 h-3.5" />
-                  <span className="text-[13px] text-notion-black">{c.firstName} {c.lastName}</span>
-                  {alreadyEnrolled && <Badge variant="success">Enrolled</Badge>}
-                </label>
-              );
-            })}
+
+          <div className="max-h-60 overflow-y-auto space-y-1 border border-whisper rounded-micro p-2">
+            {candLoading ? (
+              <div className="flex justify-center py-6"><Loader2 className="animate-spin text-warm-gray-300" size={20} /></div>
+            ) : filteredCandidates.length === 0 ? (
+              <p className="text-center text-[13px] text-warm-gray-500 py-4">No candidates match your search.</p>
+            ) : (
+              filteredCandidates.map((c) => {
+                const alreadyEnrolled = enrollments.some((e) => e.candidateId === c.id);
+                const isSel = selected.includes(c.id);
+                return (
+                  <label
+                    key={c.id}
+                    className={`flex items-center gap-2.5 p-2.5 rounded-micro transition-colors ${
+                      isSel ? "bg-notion-blue/5" : "hover:bg-warm-white"
+                    } ${alreadyEnrolled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+                  >
+                    <input
+                      type="checkbox"
+                      disabled={alreadyEnrolled}
+                      checked={isSel}
+                      onChange={() =>
+                        setSelected((prev) =>
+                          isSel ? prev.filter((x) => x !== c.id) : [...prev, c.id]
+                        )
+                      }
+                      className="w-3.5 h-3.5 shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-medium text-notion-black">
+                        {c.firstName} {c.lastName}
+                      </p>
+                      {c.email && <p className="text-[11px] text-warm-gray-500 truncate">{c.email}</p>}
+                    </div>
+                    {alreadyEnrolled && <Badge variant="success">Enrolled</Badge>}
+                  </label>
+                );
+              })
+            )}
           </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="secondary" onClick={() => setEnrollOpen(false)}>Cancel</Button>
-            <Button onClick={handleEnroll} disabled={!selected.length || enroll.isPending}>
-              {enroll.isPending ? "Enrolling..." : `Enroll ${selected.length || ""}`.trim()}
-            </Button>
+
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-[12px] text-warm-gray-500">{selected.length} selected</p>
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => { setEnrollOpen(false); setSelected([]); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleEnroll} disabled={!selected.length || enroll.isPending}>
+                {enroll.isPending ? "Enrolling..." : `Enroll ${selected.length || ""}`.trim()}
+              </Button>
+            </div>
           </div>
+
+          {enroll.isError && (
+            <p className="text-[12px] text-destructive">
+              {enroll.error?.response?.data?.error || "Failed to enroll candidates."}
+            </p>
+          )}
         </div>
       </Modal>
 
-      {/* Token Modal */}
-      <Modal isOpen={!!tokenDisplay} onClose={() => setTokenDisplay(null)} title="Access Token">
+      {/* ── Token Modal ───────────────────────────────────────────────── */}
+      <Modal isOpen={!!tokenDisplay} onClose={() => setTokenDisplay(null)} title="New Access Token">
         <div className="space-y-4">
-          <p className="text-[14px] text-warm-gray-500">Share this token securely — it will not be shown again.</p>
+          <p className="text-[14px] text-warm-gray-500">
+            Share this token securely with the candidate. It will <strong>not</strong> be shown again.
+          </p>
           <div className="flex items-center gap-2 bg-warm-white border border-whisper rounded-micro px-4 py-3">
-            <code className="flex-1 text-[14px] font-mono text-notion-black select-all break-all">
+            <code className="flex-1 text-[13px] font-mono text-notion-black select-all break-all">
               {tokenDisplay?.token}
             </code>
-            <button onClick={handleCopy} className="p-1.5 text-warm-gray-500 hover:text-notion-black transition-colors shrink-0">
-              {copied ? <Check size={15} className="text-success" /> : <Copy size={15} />}
+            <button
+              onClick={handleCopy}
+              className="p-1.5 text-warm-gray-500 hover:text-notion-black transition-colors shrink-0"
+            >
+              {copied ? <Check size={16} className="text-success" /> : <Copy size={16} />}
             </button>
           </div>
           <div className="flex justify-end">

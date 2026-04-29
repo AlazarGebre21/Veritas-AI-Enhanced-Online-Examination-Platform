@@ -15,14 +15,13 @@ import { ROUTES } from "@/config/routes.js";
 import { formatDate } from "@/lib/utils/date.js";
 
 // ── Status config ─────────────────────────────────────────────────────────
-const STATUS_TABS = ["All", "Draft", "Scheduled", "Active", "Closed", "Archived"];
+const STATUS_TABS = ["All", "Draft", "Scheduled", "Active", "Closed"];
 
 const STATUS_VARIANT = {
   Draft: "neutral",
   Scheduled: "info",
   Active: "success",
   Closed: "neutral",
-  Archived: "neutral",
 };
 
 const STATUS_DOT = {
@@ -30,7 +29,6 @@ const STATUS_DOT = {
   Scheduled: "bg-notion-blue",
   Active: "bg-success animate-pulse",
   Closed: "bg-warm-gray-300",
-  Archived: "bg-warm-gray-300",
 };
 
 export default function ExamsPage() {
@@ -84,7 +82,7 @@ export default function ExamsPage() {
       </div>
 
       {/* ── Status Filter Tabs ───────────────────────────────────────────── */}
-      <div className="flex items-center gap-1 border-b border-whisper -mb-2 overflow-x-auto">
+      <div className="flex items-center gap-1 border-b border-whisper mb-4 overflow-x-auto">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab}

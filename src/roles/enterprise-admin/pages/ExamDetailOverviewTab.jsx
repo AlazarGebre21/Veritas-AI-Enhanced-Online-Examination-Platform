@@ -52,17 +52,30 @@ export function ExamOverviewTab({ exam, examId }) {
 
   const settings = exam.settings || {};
 
+  const hasSchedule = !!(exam.scheduledStart && exam.scheduledEnd);
+
   return (
     <div className="space-y-6">
       {/* Action bar */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
         {isDraft && (
           <>
-            <Button onClick={() => publishExam.mutate(examId)} disabled={publishExam.isPending}>
-              {publishExam.isPending ? "Publishing..." : "🚀 Publish"}
-            </Button>
+            <div className="relative group">
+              <Button
+                onClick={() => publishExam.mutate(examId)}
+                disabled={publishExam.isPending || !hasSchedule}
+                className={!hasSchedule ? "opacity-50 cursor-not-allowed" : ""}
+              >
+                {publishExam.isPending ? "Publishing..." : "🚀 Publish"}
+              </Button>
+              {!hasSchedule && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-notion-black text-white text-[11px] rounded-micro whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  Set access window first
+                </div>
+              )}
+            </div>
             <Button variant="secondary" onClick={() => setScheduleOpen(true)}>
-              📅 Schedule
+              📅 {hasSchedule ? "Edit Schedule" : "Set Access Window ⚠️"}
             </Button>
           </>
         )}
@@ -74,18 +87,17 @@ export function ExamOverviewTab({ exam, examId }) {
         <Button variant="secondary" onClick={() => setCloneOpen(true)}>
           <Copy size={14} className="mr-1.5" /> Clone
         </Button>
-        {isDraft && (
-          <button onClick={handleDelete}
-            className="px-3 py-2 text-[13px] font-medium text-destructive border border-destructive/30 rounded-micro hover:bg-destructive/5 transition-colors flex items-center gap-1.5">
-            <Trash2 size={14} /> Delete
-          </button>
-        )}
         <button
           onClick={() => navigate(ROUTES.EXAM_MONITOR.replace(":id", examId))}
           className="px-3 py-2 text-[13px] font-medium text-warm-gray-500 border border-whisper rounded-micro hover:bg-warm-white transition-colors flex items-center gap-1.5">
           <BarChart2 size={14} /> Live Monitor
         </button>
+        <button onClick={handleDelete}
+          className="px-3 py-2 text-[13px] font-medium text-destructive border border-destructive/30 rounded-micro hover:bg-destructive/5 transition-colors flex items-center gap-1.5">
+          <Trash2 size={14} /> Delete
+        </button>
       </div>
+
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">

@@ -97,7 +97,7 @@ export function useAddExamQuestions(examId) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload) => examApi.addQuestions(examId, payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.exams.questions(examId) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["exams", examId, "questions"], exact: false }),
   });
 }
 
@@ -105,7 +105,7 @@ export function useRemoveExamQuestion(examId) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (questionId) => examApi.removeQuestion(examId, questionId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.exams.questions(examId) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["exams", examId, "questions"], exact: false }),
   });
 }
 
@@ -117,31 +117,7 @@ export function useUpdateExamQuestionMapping(examId) {
   });
 }
 
-// ── Randomization Rules ───────────────────────────────────────────────────
 
-export function useAddExamRule(examId) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (payload) => examApi.addRule(examId, payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.exams.detail(examId) }),
-  });
-}
-
-export function useDeleteExamRule(examId) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (ruleId) => examApi.deleteRule(examId, ruleId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.exams.detail(examId) }),
-  });
-}
-
-export function useUpdateExamRule(examId) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ ruleId, payload }) => examApi.updateRule(examId, ruleId, payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.exams.detail(examId) }),
-  });
-}
 
 // ── Enrollments ───────────────────────────────────────────────────────────
 
@@ -157,7 +133,9 @@ export function useEnrollCandidates(examId) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload) => enrollmentApi.enrollCandidates(examId, payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.exams.enrollments(examId) }),
+    // Use prefix invalidation (exact: false) so ALL enrollment queries for this
+    // exam are invalidated regardless of what params each query was called with.
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["exams", examId, "enrollments"], exact: false }),
   });
 }
 
@@ -177,7 +155,7 @@ export function useRevokeEnrollment(examId) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id) => enrollmentApi.revoke(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.exams.enrollments(examId) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["exams", examId, "enrollments"], exact: false }),
   });
 }
 

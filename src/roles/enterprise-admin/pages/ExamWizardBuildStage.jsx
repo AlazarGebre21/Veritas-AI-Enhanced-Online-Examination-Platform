@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Plus, Trash2, ChevronRight, ChevronLeft, Search, Loader2 } from "lucide-react";
-import { useAddExamQuestions, useRemoveExamQuestion, useAddExamRule, useDeleteExamRule, useExamQuestions, useEnrollCandidates, useExamEnrollments, useRevokeEnrollment } from "../hooks/useExams.js";
+import { useAddExamQuestions, useRemoveExamQuestion, useExamQuestions, useEnrollCandidates, useExamEnrollments, useRevokeEnrollment } from "../hooks/useExams.js";
 import { useQuestions } from "../hooks/useQuestions.js";
 import { useCandidates } from "../hooks/useCandidates.js";
 import { Button, Input, Badge } from "@/components/ui/index.js";
 
-const DIFFICULTIES = ["Easy", "Medium", "Hard"];
-const TYPES = ["MCQ", "TrueFalse", "ShortAnswer", "Essay"];
+
 
 export function BuildEnrollStage({ examId, onNext, onBack }) {
   const [activeTab, setActiveTab] = useState("questions");
@@ -50,10 +49,9 @@ export function BuildEnrollStage({ examId, onNext, onBack }) {
 
 // ── Questions Tab ─────────────────────────────────────────────────────────
 function QuestionsTab({ examId }) {
-  const [view, setView] = useState("attached"); // "attached" | "pick" | "rules"
+  const [view, setView] = useState("attached"); // "attached" | "pick"
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
-  const [ruleForm, setRuleForm] = useState({ topic: "", difficulty: "Easy", type: "MCQ", count: 5 });
 
   const { data: attachedData, isLoading: loadingAttached } = useExamQuestions(examId);
   const attached = attachedData?.data || [];
@@ -63,8 +61,6 @@ function QuestionsTab({ examId }) {
 
   const addQuestions = useAddExamQuestions(examId);
   const removeQuestion = useRemoveExamQuestion(examId);
-  const addRule = useAddExamRule(examId);
-  const deleteRule = useDeleteExamRule(examId);
 
   function handleAdd() {
     if (!selected.length) return;
@@ -74,17 +70,13 @@ function QuestionsTab({ examId }) {
     );
   }
 
-  function handleAddRule() {
-    addRule.mutate({ topic: ruleForm.topic, difficulty: ruleForm.difficulty, type: ruleForm.type, count: Number(ruleForm.count) },
-      { onSuccess: () => setView("attached") }
-    );
-  }
+
 
   return (
     <div className="space-y-4">
       {/* Sub-nav */}
       <div className="flex gap-2">
-        {[["attached", "Attached Questions"], ["pick", "Pick from Bank"], ["rules", "Add Rule"]].map(([v, label]) => (
+        {[["attached", "Attached Questions"], ["pick", "Pick from Bank"]].map(([v, label]) => (
           <button key={v} onClick={() => setView(v)}
             className={`px-3 py-1.5 text-[12px] font-medium rounded-micro border transition-colors ${
               view === v ? "border-notion-blue bg-notion-blue/5 text-notion-blue" : "border-whisper text-warm-gray-500 hover:border-warm-gray-300"
@@ -99,7 +91,7 @@ function QuestionsTab({ examId }) {
         <div className="space-y-2">
           {loadingAttached ? <Loader2 className="animate-spin text-warm-gray-300 mx-auto" /> :
             attached.length === 0 ? (
-              <p className="text-[13px] text-warm-gray-500 text-center py-6">No questions attached yet. Pick from your bank or add a randomization rule.</p>
+              <p className="text-[13px] text-warm-gray-500 text-center py-6">No questions attached yet. Pick from the bank to get started.</p>
             ) : attached.map((item) => (
               <div key={item.id} className="flex items-center justify-between p-3 border border-whisper rounded-micro bg-warm-white/30">
                 <div className="min-w-0">
@@ -160,38 +152,7 @@ function QuestionsTab({ examId }) {
         </div>
       )}
 
-      {/* Add rule */}
-      {view === "rules" && (
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <Input label="Topic" id="rule-topic" value={ruleForm.topic}
-              onChange={(e) => setRuleForm((p) => ({ ...p, topic: e.target.value }))}
-              placeholder="e.g. Algebra" />
-            <Input label="Count" id="rule-count" type="number" min={1} value={ruleForm.count}
-              onChange={(e) => setRuleForm((p) => ({ ...p, count: e.target.value }))} />
-            <div>
-              <label className="block text-[14px] font-medium text-notion-black mb-1.5">Difficulty</label>
-              <select value={ruleForm.difficulty} onChange={(e) => setRuleForm((p) => ({ ...p, difficulty: e.target.value }))}
-                className="w-full border border-[#ddd] rounded-micro px-3 py-2 text-[13px] focus:outline-none focus:border-notion-blue bg-white">
-                {DIFFICULTIES.map((d) => <option key={d}>{d}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[14px] font-medium text-notion-black mb-1.5">Type</label>
-              <select value={ruleForm.type} onChange={(e) => setRuleForm((p) => ({ ...p, type: e.target.value }))}
-                className="w-full border border-[#ddd] rounded-micro px-3 py-2 text-[13px] focus:outline-none focus:border-notion-blue bg-white">
-                {TYPES.map((t) => <option key={t}>{t}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="secondary" onClick={() => setView("attached")}>Cancel</Button>
-            <Button onClick={handleAddRule} disabled={!ruleForm.topic || addRule.isPending}>
-              {addRule.isPending ? "Adding..." : "Add Rule"}
-            </Button>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }
