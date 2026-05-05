@@ -40,6 +40,17 @@ export function useDeactivateUser(enterpriseId) {
   });
 }
 
+/** Reactivate a previously deactivated user. */
+export function useActivateUser(enterpriseId) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (userId) => enterpriseApi.activateUser(enterpriseId, userId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.enterprises.usersAll(enterpriseId) });
+    },
+  });
+}
+
 /** Reset a user's password → returns { temporary_password }. */
 export function useResetUserPassword(enterpriseId) {
   const qc = useQueryClient();

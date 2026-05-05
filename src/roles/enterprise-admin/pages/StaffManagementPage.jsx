@@ -9,9 +9,10 @@ import {
   MoreHorizontal,
   KeyRound,
   UserX,
-  Copy,
-  Check,
+  UserCheck,
+  CheckCircle,
   Pencil,
+  X,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useEnterpriseUsers } from "../hooks/useEnterpriseUsers.js";
@@ -19,6 +20,7 @@ import {
   useCreateUser,
   useUpdateUser,
   useDeactivateUser,
+  useActivateUser,
   useResetUserPassword,
 } from "../hooks/useStaffMutations.js";
 import { DataTable } from "@/components/shared/DataTable.jsx";
@@ -120,12 +122,19 @@ function ActionMenu({ user, onAction }) {
             >
               <Pencil size={14} /> Edit
             </button>
-            {user.isActive && (
+            {user.isActive ? (
               <button
                 onClick={() => { onAction("deactivate", user); setOpen(false); }}
                 className="flex items-center gap-2 w-full px-3 py-2 text-[13px] text-warm-gray-500 hover:bg-warm-white hover:text-notion-black transition-colors"
               >
                 <UserX size={14} /> Deactivate
+              </button>
+            ) : (
+              <button
+                onClick={() => { onAction("activate", user); setOpen(false); }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-[13px] text-warm-gray-500 hover:bg-warm-white hover:text-notion-black transition-colors"
+              >
+                <UserCheck size={14} /> Activate
               </button>
             )}
             <button
@@ -155,13 +164,13 @@ export default function StaffManagementPage() {
   // ── Modals state
   const [inviteOpen, setInviteOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
-  const [tempPassword, setTempPassword] = useState(null);
-  const [copied, setCopied] = useState(false);
+  const [successMsg, setSuccessMsg] = useState(null);
 
   // ── Mutations
   const createUser = useCreateUser(enterpriseId);
   const updateUser = useUpdateUser(enterpriseId);
   const deactivateUser = useDeactivateUser(enterpriseId);
+  const activateUser = useActivateUser(enterpriseId);
   const resetPassword = useResetUserPassword(enterpriseId);
 
   // ── Action handler
@@ -174,10 +183,18 @@ export default function StaffManagementPage() {
         deactivateUser.mutate(targetUser.id);
       }
     }
+    if (action === "activate") {
+      if (window.confirm(`Reactivate ${targetUser.firstName} ${targetUser.lastName}? This will restore their login access.`)) {
+        activateUser.mutate(targetUser.id);
+      }
+    }
     if (action === "reset-password") {
-      if (window.confirm(`Reset password for ${targetUser.email}? A temporary password will be generated.`)) {
+      if (window.confirm(`Reset password for ${targetUser.email}? A temporary password will be sent to their email.`)) {
         resetPassword.mutate(targetUser.id, {
-          onSuccess: (res) => setTempPassword(res.temporary_password),
+          onSuccess: () => {
+            setSuccessMsg("Password reset successful. A temporary password has been sent to the user\u0027s email.");
+            setTimeout(() => setSuccessMsg(null), 5000);
+          },
         });
       }
     }
@@ -203,6 +220,8 @@ export default function StaffManagementPage() {
       onSuccess: () => {
         setInviteOpen(false);
         reset();
+        setSuccessMsg("Invite sent! A temporary password has been sent to the user\u0027s email.");
+        setTimeout(() => setSuccessMsg(null), 5000);
       },
     });
   }
@@ -244,11 +263,7 @@ export default function StaffManagementPage() {
     );
   }
 
-  function handleCopy() {
-    navigator.clipboard.writeText(tempPassword);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
+
 
   return (
     <div className="space-y-6">
@@ -452,29 +467,19 @@ export default function StaffManagementPage() {
         </form>
       </Modal>
 
-      {/* ── Temp Password Modal ────────────────────────────────────────── */}
-      <Modal isOpen={!!tempPassword} onClose={() => setTempPassword(null)} title="Temporary Password">
-        <div className="space-y-4">
-          <p className="text-[14px] text-warm-gray-500">
-            The users password has been reset. Share this temporary password securely — it will not be shown again.
-          </p>
-          <div className="flex items-center gap-2 bg-warm-white border border-whisper rounded-micro px-4 py-3">
-            <code className="flex-1 text-[15px] font-mono text-notion-black tracking-wide select-all">
-              {tempPassword}
-            </code>
-            <button
-              onClick={handleCopy}
-              className="p-1.5 rounded-micro text-warm-gray-500 hover:text-notion-black hover:bg-white transition-colors"
-              title="Copy to clipboard"
-            >
-              {copied ? <Check size={16} className="text-success" /> : <Copy size={16} />}
-            </button>
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={() => setTempPassword(null)}>Done</Button>
-          </div>
+      {/* ── Success Toast ────────────────────────────────────────────── */}
+      {successMsg && (
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-success rounded-comfortable shadow-deep px-5 py-4">
+          <CheckCircle size={20} className="text-white shrink-0" />
+          <p className="text-[14px] text-white">{successMsg}</p>
+          <button
+            onClick={() => setSuccessMsg(null)}
+            className="p-1 rounded-micro text-white/70 hover:text-white transition-colors shrink-0"
+          >
+            <X size={16} />
+          </button>
         </div>
-      </Modal>
+      )}
     </div>
   );
 }

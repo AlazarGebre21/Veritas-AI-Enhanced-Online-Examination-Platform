@@ -22,7 +22,7 @@ export const Button = forwardRef(
         className={cn(
           "inline-flex items-center justify-center font-medium transition-all rounded-micro disabled:opacity-60 disabled:cursor-not-allowed",
           // Variants
-          variant === "primary" && "bg-notion-blue text-white hover:bg-active-blue active:scale-[0.98]",
+          variant === "primary" && "bg-brand-primary text-white hover:bg-brand-secondary active:scale-[0.98]",
           variant === "secondary" && "bg-warm-white text-notion-black hover:bg-[#e4e2e0] active:scale-[0.98]",
           variant === "ghost" && "bg-transparent text-warm-gray-500 hover:text-notion-black hover:bg-warm-white",
           variant === "danger" && "bg-transparent text-destructive hover:bg-destructive/10",

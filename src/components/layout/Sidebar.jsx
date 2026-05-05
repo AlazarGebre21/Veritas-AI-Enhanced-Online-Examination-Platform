@@ -60,14 +60,14 @@ export default function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-40 flex flex-col bg-white border-r border-whisper",
+        "fixed inset-y-0 left-0 z-40 flex flex-col bg-brand-sidebar border-r border-whisper",
         "transition-all duration-200",
         sidebarOpen ? "w-64" : "w-16"
       )}
     >
       {/* Logo */}
       <div className="flex items-center gap-3 h-14 px-4 border-b border-whisper shrink-0">
-        <div className="w-7 h-7 rounded bg-notion-blue flex items-center justify-center text-white font-bold text-sm shrink-0">
+        <div className="w-7 h-7 rounded bg-brand-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
           V
         </div>
         {sidebarOpen && (

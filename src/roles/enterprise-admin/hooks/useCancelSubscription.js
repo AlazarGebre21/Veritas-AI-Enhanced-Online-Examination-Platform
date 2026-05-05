@@ -5,18 +5,18 @@ import { toast } from "sonner";
 import { normalizeError } from "@/lib/utils/errorNormalizer.js";
 
 /**
- * Hook to cancel an enterprise's subscription (admin).
+ * Hook for enterprise admin to cancel their own subscription.
  */
-export function useCancelSubscription() {
+export function useCancelSubscription(enterpriseId) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ enterpriseId, cancelAtPeriodEnd = true }) =>
+    mutationFn: ({ cancelAtPeriodEnd = true } = {}) =>
       paymentApi.cancelSubscription(enterpriseId, { cancel_at_period_end: cancelAtPeriodEnd }),
-    onSuccess: (_, { enterpriseId }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.payments.subscription(enterpriseId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.enterprises.status(enterpriseId) });
-      toast.success("Subscription cancelled");
+      queryClient.invalidateQueries({ queryKey: queryKeys.payments.billingSummary });
+      toast.success("Subscription cancellation scheduled");
     },
     onError: (err) => {
       toast.error(normalizeError(err, "Failed to cancel subscription"));

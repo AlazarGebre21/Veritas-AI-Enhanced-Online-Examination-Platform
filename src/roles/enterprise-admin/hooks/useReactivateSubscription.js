@@ -5,20 +5,20 @@ import { toast } from "sonner";
 import { normalizeError } from "@/lib/utils/errorNormalizer.js";
 
 /**
- * Hook to manually override an enterprise's subscription (admin only).
+ * Hook for enterprise admin to reactivate a subscription scheduled for cancellation.
  */
-export function useUpdateSubscription() {
+export function useReactivateSubscription(enterpriseId) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ enterpriseId, data }) => paymentApi.overrideSubscription(enterpriseId, data),
-    onSuccess: (_, { enterpriseId }) => {
+    mutationFn: () => paymentApi.reactivateSubscription(enterpriseId),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.payments.subscription(enterpriseId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.enterprises.detail(enterpriseId) });
-      toast.success("Subscription updated successfully");
+      queryClient.invalidateQueries({ queryKey: queryKeys.payments.billingSummary });
+      toast.success("Subscription reactivated");
     },
     onError: (err) => {
-      toast.error(normalizeError(err, "Failed to update subscription"));
+      toast.error(normalizeError(err, "Failed to reactivate subscription"));
     },
   });
 }

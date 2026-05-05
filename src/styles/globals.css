@@ -20,6 +20,16 @@
   --color-badge-text: #097fe8;
   --color-focus-blue: #097fe8;
   --color-teal: #2a9d99;
+
+  /* Brand theming — overridden at runtime by BrandingProvider */
+  --color-brand-primary: #0075de;
+  --color-brand-secondary: #005bab;
+  --color-brand-bg: #f6f5f4;
+  --color-brand-sidebar: #ffffff;
+  --color-brand-text: rgba(0, 0, 0, 0.95);
+  --font-brand: "NotionInter", "Inter", -apple-system, system-ui, "Segoe UI",
+    Helvetica, Arial, sans-serif;
+
   --color-success: #1aae39;
   --color-warning: #dd5b00;
   --color-destructive: #eb5757;

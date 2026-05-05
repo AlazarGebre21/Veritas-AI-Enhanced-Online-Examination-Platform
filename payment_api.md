@@ -1,4 +1,4 @@
-# GET /invoices
+# GET /invoices EnterpriseAdmin Endpoint
 
 ## 📌 Description
 
@@ -65,7 +65,7 @@ Returns invoices for the specified enterprise.
 }
 ```
 
-# GET /invoices/{invoiceId}
+# GET /invoices/{invoiceId} EnterpriseAdmin Endpoint
 
 ## 📌 Description
 
@@ -109,7 +109,7 @@ Fetch a single invoice by invoice ID.
 }
 ```
 
-# GET /payments/history
+# GET /payments/history EnterpriseAdmin Endpoint
 
 ## 📌 Description
 
@@ -174,7 +174,7 @@ Returns payment history for the specified enterprise.
 }
 ```
 
-# GET /payments/{paymentId}
+# GET /payments/{paymentId} EnterpriseAdmin and SystemAdmin Endpoint
 
 ## 📌 Description
 
@@ -217,7 +217,7 @@ Accessible by enterprise admins or system admins.
 }
 ```
 
-# POST /admin/subscriptions/{enterpriseId}
+# POST /admin/subscriptions/{enterpriseId} SystemAdmin Endpoint
 
 ## 📌 Description
 
@@ -249,7 +249,7 @@ This operation is performed **without calling external payment providers (e.g., 
 }
 ```
 
-# GET /subscriptions/plans
+# GET /subscriptions/plans PUBLIC Endpoint
 
 ## 📌 Description
 
@@ -309,7 +309,7 @@ Returns all available subscription plans.
 }
 ```
 
-# GET /subscriptions/{enterpriseId}
+# GET /subscriptions/{enterpriseId} EnterpriseAdmin and SystemAdmin Endpoint
 
 ## 📌 Description
 
@@ -351,7 +351,7 @@ Returns the current active subscription state for a specific enterprise.
 }
 ```
 
-# POST /subscriptions/{enterpriseId}/cancel
+# POST /subscriptions/{enterpriseId}/cancel EnterpriseAdmin Endpoint
 
 ## 📌 Description
 
@@ -379,7 +379,7 @@ Cancels an enterprise subscription either immediately or at the end of the curre
 }
 ```
 
-# POST /subscriptions/{enterpriseId}/reactivate
+# POST /subscriptions/{enterpriseId}/reactivate EnterpriseAdmin Endpoint
 
 ## 📌 Description
 
@@ -403,7 +403,7 @@ This cancels the pending period-end cancellation and keeps the subscription acti
 - The request was successful.
 - No response body is returned.
 
-# POST /subscriptions/{enterpriseId}/upgrade
+# POST /subscriptions/{enterpriseId}/upgrade EnterpriseAdmin Endpoint
 
 ## 📌 Description
 
@@ -430,6 +430,39 @@ Creates a payment provider checkout session to upgrade an enterprise subscriptio
   "plan_id": "string"
 }
 ```
+
+# POST /webhooks/stripe PUBLIC Endpoint
+
+## 📌 Description
+
+Handles incoming Stripe webhook events.  
+This endpoint validates the webhook signature and processes the event payload.
+
+---
+
+## 🔐 Headers
+
+| Name             | Type   | Required | Description              |
+| ---------------- | ------ | -------- | ------------------------ |
+| Stripe-Signature | string | ✅ Yes   | Stripe webhook signature |
+
+---
+
+## 📦 Request Body
+
+**Content-Type:** `application/json`
+
+### Example Payload
+
+```json
+
+  string
+
+```
+
+## Response
+
+- ok
 
 # POST /admin/invoices/{invoiceId}/refund SystemAdmin Endpoint
 

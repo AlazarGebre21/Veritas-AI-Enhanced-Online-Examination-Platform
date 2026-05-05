@@ -18,7 +18,6 @@ export const queryKeys = {
     detail: (id) => ["enterprises", id],
     status: (id) => ["enterprises", id, "status"],
     summary: (id) => ["enterprises", id, "summary"],
-    subscription: (id) => ["enterprises", id, "subscription"],
     auditLogs: (id, params) => ["enterprises", id, "audit-logs", params],
     usersAll: (id) => ["enterprises", id, "users"],
     users: (id, params) => ["enterprises", id, "users", params],
@@ -62,7 +61,11 @@ export const queryKeys = {
 
   payments: {
     plans: ["subscriptions", "plans"],
-    history: (enterpriseId) => ["payments", "history", enterpriseId],
+    adminPlans: (params) => ["admin", "plans", params],
+    subscription: (enterpriseId) => ["subscriptions", enterpriseId],
+    history: (params) => ["payments", "history", params],
     invoice: (id) => ["invoices", id],
+    invoices: (params) => ["invoices", "list", params],
+    billingSummary: ["billing", "summary"],
   },
 };

@@ -11,7 +11,7 @@ export default function Topbar() {
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
 
   return (
-    <header className="h-14 flex items-center gap-4 px-6 border-b border-whisper bg-white shrink-0">
+    <header className="h-14 flex items-center gap-4 px-6 border-b border-whisper bg-brand-sidebar shrink-0">
       <button
         onClick={toggleSidebar}
         className="p-1 rounded-[4px] text-warm-gray-500 hover:text-notion-black hover:bg-warm-white transition-colors"

@@ -36,7 +36,7 @@ export const Input = forwardRef(
               "w-full border rounded-micro px-3.5 py-2 text-[14px] text-notion-black placeholder:text-warm-gray-300 transition-all focus:outline-none focus:ring-2",
               error 
                 ? "border-warning focus:border-warning focus:ring-warning/20 bg-warning/5"
-                : "border-[#ddd] focus:border-notion-blue focus:ring-notion-blue/20",
+                : "border-[#ddd] focus:border-brand-primary focus:ring-brand-primary/20",
               isPassword && "pr-10", // extra padding for the absolute icon
               className
             )}

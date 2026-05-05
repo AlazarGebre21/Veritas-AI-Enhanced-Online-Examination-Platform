@@ -1,16 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import { enterpriseApi } from "@/lib/api/enterprises.api.js";
+import { paymentApi } from "@/lib/api/payment.api.js";
 import { queryKeys } from "@/lib/api/queryKeys.js";
 
 /**
  * Fetches enterprise subscription details.
- * Returns: subscription_plan_id, subscription_status, current_period_start/end.
+ * Uses the new /subscriptions/{enterpriseId} endpoint.
  * @param {string} enterpriseId
  */
 export function useEnterpriseSubscription(enterpriseId) {
   return useQuery({
-    queryKey: queryKeys.enterprises.subscription(enterpriseId),
-    queryFn: () => enterpriseApi.getSubscription(enterpriseId),
+    queryKey: queryKeys.payments.subscription(enterpriseId),
+    queryFn: () => paymentApi.getSubscription(enterpriseId),
     enabled: !!enterpriseId,
     staleTime: 60 * 1000,
   });

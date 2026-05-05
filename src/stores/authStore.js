@@ -37,7 +37,14 @@ export const useAuthStore = create()(
        */
       setTokens: (access, refresh) => {
         const decoded = jwtDecode(access);
-        set({ accessToken: access, refreshToken: refresh, user: decoded });
+        const user = {
+          ...decoded,
+          firstName: decoded.firstName || decoded.first_name,
+          lastName: decoded.lastName || decoded.last_name,
+          enterpriseId: decoded.enterpriseId || decoded.enterprise_id,
+          email: decoded.email,
+        };
+        set({ accessToken: access, refreshToken: refresh, user });
       },
 
       /** Clear all auth state — called on logout or failed refresh */

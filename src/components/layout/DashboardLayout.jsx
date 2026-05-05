@@ -1,18 +1,27 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar.jsx";
 import Topbar from "./Topbar.jsx";
+import BrandingProvider from "@/components/shared/BrandingProvider.jsx";
+import { useAuthStore } from "@/stores/authStore.js";
 import { useUiStore } from "@/stores/uiStore.js";
+import { USER_ROLES } from "@/config/constants.js";
 import { cn } from "@/lib/utils/cn.js";
 
 /**
  * Shared layout for all authenticated dashboard views.
  * Contains the sidebar, topbar, and main content area.
+ * Wraps enterprise roles with BrandingProvider for dynamic theming.
  */
 export default function DashboardLayout() {
   const sidebarOpen = useUiStore((s) => s.sidebarOpen);
+  const userRole = useAuthStore((s) => s.user?.role);
 
-  return (
-    <div className="flex h-screen overflow-hidden bg-warm-white">
+  const isEnterprise =
+    userRole === USER_ROLES.ENTERPRISE_ADMIN ||
+    userRole === USER_ROLES.ENTERPRISE_STAFF;
+
+  const layout = (
+    <div className="flex h-screen overflow-hidden bg-brand-bg text-brand-text" style={{ fontFamily: "var(--font-brand)" }}>
       <Sidebar />
       <div
         className={cn(
@@ -27,4 +36,7 @@ export default function DashboardLayout() {
       </div>
     </div>
   );
+
+  // Wrap with BrandingProvider only for enterprise roles
+  return isEnterprise ? <BrandingProvider>{layout}</BrandingProvider> : layout;
 }

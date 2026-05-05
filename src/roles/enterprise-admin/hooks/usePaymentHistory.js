@@ -3,13 +3,13 @@ import { paymentApi } from "@/lib/api/payment.api.js";
 import { queryKeys } from "@/lib/api/queryKeys.js";
 
 /**
- * Hook to fetch all subscription plans (admin endpoint — includes inactive).
+ * Fetches paginated payment history for the authenticated enterprise.
  * @param {{ page?: number, limit?: number, sort?: string, sort_dir?: string }} [params]
  */
-export function useSubscriptionPlans(params) {
+export function usePaymentHistory(params) {
   return useQuery({
-    queryKey: queryKeys.payments.adminPlans(params),
-    queryFn: () => paymentApi.listAdminPlans(params),
-    staleTime: 5 * 60 * 1000,
+    queryKey: queryKeys.payments.history(params),
+    queryFn: () => paymentApi.getPaymentHistory(params),
+    placeholderData: (prev) => prev,
   });
 }

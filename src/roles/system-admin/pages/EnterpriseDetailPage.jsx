@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, Building2, UserCircle, Calendar, Hash, Phone, MapPin, Globe, CheckCircle, RefreshCw, Trash2, ShieldAlert, History, ExternalLink, Activity } from "lucide-react";
+import { ArrowLeft, Mail, Building2, UserCircle, Calendar, Hash, Phone, MapPin, Globe, CheckCircle, RefreshCw, Trash2, ShieldAlert, History, ExternalLink, Activity, Zap, Play } from "lucide-react";
 import { toast } from "sonner";
 import { useEnterpriseDetail } from "../hooks/useEnterpriseDetail.js";
 import { useApproveEnterprise } from "../hooks/useApproveEnterprise.js";
@@ -10,10 +11,10 @@ import { useRestoreEnterprise } from "../hooks/useRestoreEnterprise.js";
 import { useEnterpriseStatus } from "../hooks/useEnterpriseStatus.js";
 import { useEnterpriseSubscription } from "../hooks/useEnterpriseSubscription.js";
 import { useCancelSubscription } from "../hooks/useCancelSubscription.js";
-import { useRenewSubscription } from "../hooks/useRenewSubscription.js";
-import { useSuspendPayment } from "../hooks/useSuspendPayment.js";
 import { useUpdateSubscription } from "../hooks/useUpdateSubscription.js";
-import { Card, CardContent, Button, Badge, Skeleton } from "@/components/ui/index.js";
+import { useStartTrial } from "../hooks/useStartTrial.js";
+import { useSubscriptionPlans } from "../hooks/useSubscriptionPlans.js";
+import { Card, CardContent, Button, Badge, Skeleton, Modal, Input } from "@/components/ui/index.js";
 import { ROUTES } from "@/config/routes.js";
 import { ENTERPRISE_STATUS } from "@/config/constants.js";
 import { formatDate } from "@/lib/utils/date.js";
@@ -33,9 +34,18 @@ export default function EnterpriseDetailPage() {
   const hardDeleteMutation = useHardDeleteEnterprise();
   const restoreMutation = useRestoreEnterprise();
   const cancelSubMutation = useCancelSubscription();
-  const renewSubMutation = useRenewSubscription();
-  const suspendPaymentMutation = useSuspendPayment();
   const updateSubMutation = useUpdateSubscription();
+  const startTrialMutation = useStartTrial();
+  const { data: plansData } = useSubscriptionPlans({ limit: 50 });
+  const availablePlans = plansData?.data ?? [];
+
+  // Override subscription modal state
+  const [showOverrideModal, setShowOverrideModal] = useState(false);
+  const [overrideForm, setOverrideForm] = useState({ plan_id: "", status: "Active", period_start: "", period_end: "" });
+
+  // Start trial modal state
+  const [showTrialModal, setShowTrialModal] = useState(false);
+  const [trialForm, setTrialForm] = useState({ plan_id: "", trial_days: "14" });
 
   async function handleAction(mutation, label, confirmMessage) {
     if (confirmMessage && !window.confirm(confirmMessage)) return;
@@ -224,23 +234,26 @@ export default function EnterpriseDetailPage() {
                 <div>
                   <p className="text-xs text-warm-gray-300 font-medium uppercase">Status</p>
                   <p className="text-[14px] font-medium text-notion-black flex items-center gap-2">
-                    {subscriptionInfo?.subscription_status  || "N/A"}
-                    {subscriptionInfo?.subscription_status === "Trial" && (
+                    {subscriptionInfo?.status || "N/A"}
+                    {subscriptionInfo?.status === "Trial" && (
                       <Badge variant="warning" className="text-[10px] py-0 px-1.5 h-4">Trial</Badge>
+                    )}
+                    {subscriptionInfo?.cancel_at_period_end && (
+                      <Badge variant="neutral" className="text-[10px] py-0 px-1.5 h-4">Cancelling</Badge>
                     )}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-warm-gray-300 font-medium uppercase">Plan</p>
+                  <p className="text-xs text-warm-gray-300 font-medium uppercase">Plan ID</p>
                   <p className="text-[14px] text-warm-gray-500 font-mono text-xs">
-                    {subscriptionInfo?.subscription_plan_id || "Free"}
+                    {subscriptionInfo?.plan_id || "None"}
                   </p>
                 </div>
-                {subscriptionInfo?.current_period_end && (
+                {subscriptionInfo?.current_period_start && (
                   <div>
-                    <p className="text-xs text-warm-gray-300 font-medium uppercase">Current Period Ends</p>
+                    <p className="text-xs text-warm-gray-300 font-medium uppercase">Period</p>
                     <p className="text-[14px] text-warm-gray-500">
-                      {formatDate(subscriptionInfo.current_period_end)}
+                      {formatDate(subscriptionInfo.current_period_start)} — {formatDate(subscriptionInfo.current_period_end)}
                     </p>
                   </div>
                 )}
@@ -250,27 +263,34 @@ export default function EnterpriseDetailPage() {
                     variant="secondary" 
                     size="sm" 
                     className="w-full justify-start gap-2"
-                    onClick={() => handleAction(renewSubMutation, "Renewal")}
-                    isLoading={renewSubMutation.isPending}
+                    onClick={() => {
+                      setOverrideForm({ plan_id: subscriptionInfo?.plan_id || "", status: subscriptionInfo?.status || "Active", period_start: "", period_end: "" });
+                      setShowOverrideModal(true);
+                    }}
                   >
-                    <RefreshCw size={14} />
-                    Renew Period
+                    <Zap size={14} />
+                    Override Subscription
                   </Button>
-                  
+
                   <Button 
                     variant="secondary" 
                     size="sm" 
                     className="w-full justify-start gap-2"
-                    onClick={() => handleAction(suspendPaymentMutation, "Payment Suspension")}
-                    isLoading={suspendPaymentMutation.isPending}
+                    onClick={() => {
+                      setTrialForm({ plan_id: "", trial_days: "14" });
+                      setShowTrialModal(true);
+                    }}
                   >
-                    <ShieldAlert size={14} />
-                    Suspend Payment
+                    <Play size={14} />
+                    Start Trial
                   </Button>
 
                   <Button 
                     className="w-full justify-start gap-2 bg-white border border-destructive/20 text-warm-gray-500 hover:text-destructive hover:bg-destructive-bg hover:border-destructive/40 transition-all whitespace-nowrap text-[13px]"
-                    onClick={() => handleAction(cancelSubMutation, "Cancellation", "Are you sure you want to cancel this subscription?")}
+                    onClick={() => {
+                      if (!window.confirm("Are you sure you want to cancel this subscription?")) return;
+                      cancelSubMutation.mutate({ enterpriseId: id, cancelAtPeriodEnd: true });
+                    }}
                     isLoading={cancelSubMutation.isPending}
                   >
                     <Trash2 size={14} />
@@ -353,6 +373,114 @@ export default function EnterpriseDetailPage() {
           </Card>
         </div>
       </div>
+
+      {/* Override Subscription Modal */}
+      <Modal isOpen={showOverrideModal} onClose={() => setShowOverrideModal(false)} title="Override Subscription">
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              await updateSubMutation.mutateAsync({ enterpriseId: id, data: overrideForm });
+              setShowOverrideModal(false);
+            } catch { /* handled by hook */ }
+          }}
+          className="space-y-4"
+        >
+          <div>
+            <label className="block text-[14px] font-medium text-notion-black mb-1.5">Plan</label>
+            <select
+              value={overrideForm.plan_id}
+              onChange={(e) => setOverrideForm((p) => ({ ...p, plan_id: e.target.value }))}
+              className="w-full border border-[#ddd] rounded-micro px-3.5 py-2 text-[14px] text-notion-black focus:outline-none focus:ring-2 focus:border-notion-blue focus:ring-notion-blue/20 bg-white"
+              required
+            >
+              <option value="">Select a plan…</option>
+              {availablePlans.map((p) => (
+                <option key={p.id} value={p.id}>{p.name} — {p.slug}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[14px] font-medium text-notion-black mb-1.5">Status</label>
+            <select
+              value={overrideForm.status}
+              onChange={(e) => setOverrideForm((p) => ({ ...p, status: e.target.value }))}
+              className="w-full border border-[#ddd] rounded-micro px-3.5 py-2 text-[14px] text-notion-black focus:outline-none focus:ring-2 focus:border-notion-blue focus:ring-notion-blue/20 bg-white"
+            >
+              <option value="Active">Active</option>
+              <option value="Trial">Trial</option>
+              <option value="PastDue">Past Due</option>
+              <option value="Cancelled">Cancelled</option>
+              <option value="Expired">Expired</option>
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Period Start"
+              type="date"
+              value={overrideForm.period_start}
+              onChange={(e) => setOverrideForm((p) => ({ ...p, period_start: e.target.value }))}
+              required
+            />
+            <Input
+              label="Period End"
+              type="date"
+              value={overrideForm.period_end}
+              onChange={(e) => setOverrideForm((p) => ({ ...p, period_end: e.target.value }))}
+              required
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-3 border-t border-whisper">
+            <Button type="button" variant="secondary" onClick={() => setShowOverrideModal(false)}>Cancel</Button>
+            <Button type="submit" isLoading={updateSubMutation.isPending}>Override</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Start Trial Modal */}
+      <Modal isOpen={showTrialModal} onClose={() => setShowTrialModal(false)} title="Start Free Trial">
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              await startTrialMutation.mutateAsync({
+                enterpriseId: id,
+                data: { plan_id: trialForm.plan_id, trial_days: Number(trialForm.trial_days) || 14 },
+              });
+              setShowTrialModal(false);
+            } catch { /* handled by hook */ }
+          }}
+          className="space-y-4"
+        >
+          <div>
+            <label className="block text-[14px] font-medium text-notion-black mb-1.5">Plan</label>
+            <select
+              value={trialForm.plan_id}
+              onChange={(e) => setTrialForm((p) => ({ ...p, plan_id: e.target.value }))}
+              className="w-full border border-[#ddd] rounded-micro px-3.5 py-2 text-[14px] text-notion-black focus:outline-none focus:ring-2 focus:border-notion-blue focus:ring-notion-blue/20 bg-white"
+              required
+            >
+              <option value="">Select a plan…</option>
+              {availablePlans.map((p) => (
+                <option key={p.id} value={p.id}>{p.name} — {p.slug}</option>
+              ))}
+            </select>
+          </div>
+          <Input
+            label="Trial Duration (days)"
+            type="number"
+            min="1"
+            max="365"
+            value={trialForm.trial_days}
+            onChange={(e) => setTrialForm((p) => ({ ...p, trial_days: e.target.value }))}
+            required
+          />
+          <div className="flex justify-end gap-3 pt-3 border-t border-whisper">
+            <Button type="button" variant="secondary" onClick={() => setShowTrialModal(false)}>Cancel</Button>
+            <Button type="submit" isLoading={startTrialMutation.isPending}>Start Trial</Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -15,13 +15,14 @@ import { ROUTES } from "@/config/routes.js";
 import { formatDate } from "@/lib/utils/date.js";
 
 // ── Status config ─────────────────────────────────────────────────────────
-const STATUS_TABS = ["All", "Draft", "Scheduled", "Active", "Closed"];
+const STATUS_TABS = ["All", "Draft", "Scheduled", "Active", "Closed", "Archived"];
 
 const STATUS_VARIANT = {
   Draft: "neutral",
   Scheduled: "info",
   Active: "success",
   Closed: "neutral",
+  Archived: "neutral",
 };
 
 const STATUS_DOT = {
@@ -29,6 +30,7 @@ const STATUS_DOT = {
   Scheduled: "bg-notion-blue",
   Active: "bg-success animate-pulse",
   Closed: "bg-warm-gray-300",
+  Archived: "bg-warm-gray-300",
 };
 
 export default function ExamsPage() {
@@ -40,7 +42,7 @@ export default function ExamsPage() {
   const allExams = data?.data || [];
 
   // Filter by status
-  const filtered = useMemo(
+  const filtered = useMemo(   
     () => statusFilter === "All" ? allExams : allExams.filter((e) => e.status === statusFilter),
     [allExams, statusFilter]
   );

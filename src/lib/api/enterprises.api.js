@@ -127,62 +127,6 @@ export const enterpriseApi = {
     return data;
   },
 
-  /**
-   * Get subscription info for an enterprise.
-   * @param {string} id
-   * @returns {Promise<any>}
-   */
-  getSubscription: async (id) => {
-    const { data } = await apiClient.get(`/enterprises/${id}/subscription`);
-    return data;
-  },
-
-  /**
-   * Validate custom domain DNS records.
-   * @param {string} id
-   * @returns {Promise<any>}
-   */
-  validateDomain: async (id) => {
-    const { data } = await apiClient.post(`/enterprises/${id}/validate-domain`);
-    return data;
-  },
-
-  /**
-   * Update enterprise subscription plan, status, and period.
-   * @param {string} id
-   * @param {Object} data
-   * @returns {Promise<void>}
-   */
-  updateSubscription: async (id, data) => {
-    await apiClient.post(`/enterprises/${id}/subscription`, data);
-  },
-
-  /**
-   * Cancel the current enterprise subscription.
-   * @param {string} id
-   * @returns {Promise<void>}
-   */
-  cancelSubscription: async (id) => {
-    await apiClient.post(`/enterprises/${id}/subscription/cancel`);
-  },
-
-  /**
-   * Renew the current enterprise subscription period.
-   * @param {string} id
-   * @returns {Promise<void>}
-   */
-  renewSubscription: async (id) => {
-    await apiClient.post(`/enterprises/${id}/subscription/renew`);
-  },
-
-  /**
-   * Suspend enterprise subscription due to payment failure.
-   * @param {string} id
-   * @returns {Promise<void>}
-   */
-  suspendPayment: async (id) => {
-    await apiClient.post(`/enterprises/${id}/suspend-payment`);
-  },
 
   // ── Enterprise Admin Methods ────────────────────────────────────────────
 
@@ -223,6 +167,21 @@ export const enterpriseApi = {
    */
   updateBranding: async (id, payload) => {
     await apiClient.patch(`/enterprises/${id}/branding`, payload);
+  },
+
+  /**
+   * Upload enterprise logo image (png, jpg, jpeg — max 3 MB).
+   * @param {string} id
+   * @param {File} file
+   * @returns {Promise<any>}
+   */
+  uploadLogo: async (id, file) => {
+    const formData = new FormData();
+    formData.append("logo", file);
+    const { data } = await apiClient.post(`/enterprises/${id}/logo`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
   },
 
   /**
@@ -299,6 +258,16 @@ export const enterpriseApi = {
    */
   deactivateUser: async (enterpriseId, userId) => {
     await apiClient.patch(`/enterprises/${enterpriseId}/users/${userId}/deactivate`);
+  },
+
+  /**
+   * Reactivate a previously deactivated user.
+   * @param {string} enterpriseId
+   * @param {string} userId
+   * @returns {Promise<void>}
+   */
+  activateUser: async (enterpriseId, userId) => {
+    await apiClient.patch(`/enterprises/${enterpriseId}/users/${userId}/activate`);
   },
 
   /**

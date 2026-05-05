@@ -29,12 +29,12 @@ function subBadgeVariant(status) {
 export default function EnterpriseDashboardPage() {
   const user = useAuthStore((s) => s.user);
   const enterpriseId = user?.enterpriseId;
-
   const { data: enterprise, isLoading: entLoading } = useMyEnterprise();
   const { data: summary, isLoading: sumLoading } = useEnterpriseSummary(enterpriseId);
   const { data: subscription, isLoading: subLoading } = useEnterpriseSubscription(enterpriseId);
 
   const isLoading = entLoading || sumLoading;
+
 
   return (
     <div className="space-y-8">
@@ -61,14 +61,14 @@ export default function EnterpriseDashboardPage() {
         <StatCard
           icon={ClipboardList}
           label="Active Exams"
-          value={12}
+          value={summary?.active_exam_count}
           color="notion-blue"
           isLoading={isLoading}
         />
         <StatCard
           icon={Activity}
           label="Live Sessions"
-          value={0}
+          value={summary?.active_session_count}
           color="success"
           isLoading={isLoading}
         />
@@ -82,9 +82,9 @@ export default function EnterpriseDashboardPage() {
         <StatCard
           icon={CreditCard}
           label="Subscription"
-          value={summary?.subscription_status || subscription?.subscription_status || "—"}
+          value={summary?.subscription?.status || "—"}
           isStatus
-          statusVariant={subBadgeVariant(summary?.subscription_status || subscription?.subscription_status)}
+          statusVariant={subBadgeVariant(summary?.subscription?.status)}
           color="[#9333ea]"
           isLoading={isLoading || subLoading}
         />
