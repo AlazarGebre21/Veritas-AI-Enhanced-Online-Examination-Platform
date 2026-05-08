@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,8 +9,12 @@ import {
   Trash2,
   CheckCircle2,
   Circle,
+  Upload,
+  FileImage,
+  X,
+  AlertCircle,
 } from "lucide-react";
-import { useQuestion, useCreateQuestion, useUpdateQuestion } from "../hooks/useQuestions.js";
+import { useQuestion, useCreateQuestion, useUpdateQuestion, useUploadQuestionMedia } from "../hooks/useQuestions.js";
 import { Button, Input, Badge, Skeleton } from "@/components/ui/index.js";
 import { Card, CardContent } from "@/components/ui/index.js";
 import { ROUTES } from "@/config/routes.js";
@@ -56,6 +60,7 @@ export default function QuestionDetailPage() {
   // Mutations
   const createQuestion = useCreateQuestion();
   const updateQuestion = useUpdateQuestion();
+  const uploadQuestionMedia = useUploadQuestionMedia();
   const saving = createQuestion.isPending || updateQuestion.isPending;
 
   // Options state (managed outside react-hook-form for dynamic list)
@@ -94,7 +99,40 @@ export default function QuestionDetailPage() {
   });
 
   const questionType = watch("type");
+  const watchedMediaUrl = watch("mediaUrl");
   const needsOptions = questionType === "MCQ" || questionType === "TrueFalse";
+
+  // ── Media upload refs / state ─────────────────────────────────────────
+  const mediaFileRef = useRef(null);
+  const [mediaDragOver, setMediaDragOver] = useState(false);
+
+  function handleMediaFile(file) {
+    if (!file) return;
+    const accepted = ["image/", "video/", "application/pdf"];
+    if (!accepted.some((t) => file.type.startsWith(t))) {
+      alert("Please upload an image, video, or PDF.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size must be under 5 MB.");
+      return;
+    }
+    uploadQuestionMedia.mutate(
+      { questionId: id, file },
+      {
+        onSuccess: (res) => {
+          const url = res?.mediaUrl ?? res?.data?.mediaUrl ?? "";
+          if (url) setValue("mediaUrl", url);
+        },
+      }
+    );
+  }
+
+  function handleMediaDrop(e) {
+    e.preventDefault();
+    setMediaDragOver(false);
+    handleMediaFile(e.dataTransfer.files[0]);
+  }
 
   // Populate form when editing
   useEffect(() => {
@@ -386,12 +424,94 @@ export default function QuestionDetailPage() {
                   {...register("topic")}
                 />
                 
-                <Input
-                  label="Media URL (optional)"
-                  id="q-media"
-                  placeholder="https://..."
-                  {...register("mediaUrl")}
-                />
+                {/* ── Media upload / URL ──────────────────────────────── */}
+                {isNew ? (
+                  <Input
+                    label="Media URL (optional)"
+                    id="q-media"
+                    placeholder="https://..."
+                    {...register("mediaUrl")}
+                  />
+                ) : (
+                  <div>
+                    <label className="block text-[14px] font-medium text-notion-black mb-1.5">
+                      Media (optional)
+                    </label>
+
+                    {/* Current media preview */}
+                    {watchedMediaUrl && (
+                      <div className="mb-3 flex items-center gap-2 p-2.5 rounded-micro border border-whisper bg-warm-white/60">
+                        <FileImage size={15} className="text-notion-blue shrink-0" />
+                        <a
+                          href={watchedMediaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[12px] text-notion-blue hover:underline truncate flex-1"
+                        >
+                          {watchedMediaUrl}
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => setValue("mediaUrl", "")}
+                          className="p-0.5 text-warm-gray-300 hover:text-destructive transition-colors shrink-0"
+                          title="Remove media"
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Drop zone */}
+                    <div
+                      onDragOver={(e) => { e.preventDefault(); setMediaDragOver(true); }}
+                      onDragLeave={() => setMediaDragOver(false)}
+                      onDrop={handleMediaDrop}
+                      onClick={() => mediaFileRef.current?.click()}
+                      className={`border-2 border-dashed rounded-micro p-5 text-center cursor-pointer transition-colors ${
+                        mediaDragOver
+                          ? "border-notion-blue bg-notion-blue/5"
+                          : "border-whisper hover:border-warm-gray-300 bg-warm-white/50"
+                      }`}
+                    >
+                      <input
+                        ref={mediaFileRef}
+                        type="file"
+                        accept="image/*,video/*,.pdf"
+                        className="hidden"
+                        onChange={(e) => handleMediaFile(e.target.files?.[0])}
+                      />
+                      <Upload size={20} className="mx-auto text-warm-gray-300 mb-2" />
+                      {uploadQuestionMedia.isPending ? (
+                        <p className="text-[13px] text-warm-gray-500">Uploading…</p>
+                      ) : (
+                        <>
+                          <p className="text-[13px] text-warm-gray-500">
+                            Drop a file or{" "}
+                            <span className="text-notion-blue font-medium">browse</span>
+                          </p>
+                          <p className="text-[11px] text-warm-gray-300 mt-1">
+                            Image, video or PDF · Max 5 MB
+                          </p>
+                        </>
+                      )}
+                    </div>
+
+                    {uploadQuestionMedia.isError && (
+                      <p className="flex items-center gap-1 text-[12px] text-destructive mt-1.5">
+                        <AlertCircle size={12} />
+                        {uploadQuestionMedia.error?.response?.data?.error || "Upload failed."}
+                      </p>
+                    )}
+                    {uploadQuestionMedia.isSuccess && (
+                      <p className="flex items-center gap-1 text-[12px] text-success mt-1.5">
+                        <CheckCircle2 size={12} /> Media uploaded successfully.
+                      </p>
+                    )}
+
+                    {/* Hidden field keeps the URL in the form payload */}
+                    <input type="hidden" {...register("mediaUrl")} />
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4 pt-2 border-t border-whisper mt-2">
                   <Input

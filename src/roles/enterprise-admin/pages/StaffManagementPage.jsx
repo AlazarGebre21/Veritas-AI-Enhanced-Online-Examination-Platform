@@ -13,6 +13,7 @@ import {
   CheckCircle,
   Pencil,
   X,
+  Trash,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useEnterpriseUsers } from "../hooks/useEnterpriseUsers.js";
@@ -22,6 +23,7 @@ import {
   useDeactivateUser,
   useActivateUser,
   useResetUserPassword,
+  useDeleteEnterpriseUser,
 } from "../hooks/useStaffMutations.js";
 import { DataTable } from "@/components/shared/DataTable.jsx";
 import { Button, Input, Badge, Modal } from "@/components/ui/index.js";
@@ -143,6 +145,12 @@ function ActionMenu({ user, onAction }) {
             >
               <KeyRound size={14} /> Reset Password
             </button>
+            <button
+              onClick={() => { onAction("delete", user); setOpen(false); }}
+              className= "flex items-center gap-2 w-full px-3 py-2 text-[13px] text-warm-gray-500 hover:bg-red-500 hover:text-notion-black transition-colors"
+            >
+              <Trash size={14} /> Delete
+            </button>
           </div>
         </>
       )}
@@ -171,6 +179,7 @@ export default function StaffManagementPage() {
   const updateUser = useUpdateUser(enterpriseId);
   const deactivateUser = useDeactivateUser(enterpriseId);
   const activateUser = useActivateUser(enterpriseId);
+  const deleteUser = useDeleteEnterpriseUser(enterpriseId);
   const resetPassword = useResetUserPassword(enterpriseId);
 
   // ── Action handler
@@ -186,6 +195,11 @@ export default function StaffManagementPage() {
     if (action === "activate") {
       if (window.confirm(`Reactivate ${targetUser.firstName} ${targetUser.lastName}? This will restore their login access.`)) {
         activateUser.mutate(targetUser.id);
+      }
+    }
+    if (action === "delete") {
+      if (window.confirm(`Are you sure you want to delete ${targetUser.firstName} ${targetUser.lastName}?`)) {
+        deleteUser.mutate(targetUser.id);
       }
     }
     if (action === "reset-password") {

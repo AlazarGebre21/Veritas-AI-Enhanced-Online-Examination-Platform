@@ -33,8 +33,8 @@ export default function EnterpriseDashboardPage() {
   const { data: summary, isLoading: sumLoading } = useEnterpriseSummary(enterpriseId);
   const { data: subscription, isLoading: subLoading } = useEnterpriseSubscription(enterpriseId);
 
-  const isLoading = entLoading || sumLoading;
-
+  const isLoading = entLoading || sumLoading;  
+  
 
   return (
     <div className="space-y-8">
@@ -44,7 +44,7 @@ export default function EnterpriseDashboardPage() {
           {entLoading ? (
             <Skeleton className="h-8 w-64" />
           ) : (
-            <>Welcome back, {user?.firstName} 👋</>
+            <>Welcome back, {enterprise?.legalName}👋</>
           )}
         </h1>
         <p className="text-warm-gray-500 text-[15px] mt-1">

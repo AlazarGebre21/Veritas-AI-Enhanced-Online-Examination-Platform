@@ -93,4 +93,19 @@ export const questionApi = {
   delete: async (id) => {
     await apiClient.delete(`/questions/${id}`);
   },
+
+  /**
+   * Upload media (image, video, PDF) for a question. Max 5 MB.
+   * @param {string} questionId
+   * @param {File} file
+   * @returns {Promise<{ mediaUrl: string }>}
+   */
+  uploadMedia: async (questionId, file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const { data } = await apiClient.post(`/questions/${questionId}/media`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
 };

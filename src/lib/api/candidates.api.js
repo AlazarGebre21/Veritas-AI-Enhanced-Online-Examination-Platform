@@ -88,4 +88,24 @@ export const candidateApi = {
     const { data } = await apiClient.patch(`/candidates/${id}/deactivate`);
     return data;
   },
+
+  /**
+   * Reactivate a previously deactivated candidate.
+   * @param {string} id
+   * @returns {Promise<{ message: string }>}
+   */
+  activate: async (id) => {
+    const { data } = await apiClient.patch(`/candidates/${id}/activate`);
+    return data;
+  },
+
+  /**
+   * Permanently delete a candidate.
+   * @param {string} id
+   * @returns {Promise<{ message: string }>}
+   */
+  delete: async (id) => {
+    const { data } = await apiClient.delete(`/candidates/${id}`);
+    return data;
+  },
 };

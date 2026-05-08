@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useUiStore } from "@/stores/uiStore.js";
+import { useMyEnterprise } from "@/roles/enterprise-admin/hooks/useMyEnterprise.js";
 import { USER_ROLES } from "@/config/constants.js";
 import { ROUTES } from "@/config/routes.js";
 import { cn } from "@/lib/utils/cn.js";
@@ -50,6 +51,16 @@ export default function Sidebar() {
   const { sidebarOpen, toggleSidebar } = useUiStore();
   const navigate = useNavigate();
 
+  const isEnterpriseRole =
+    user?.role === USER_ROLES.ENTERPRISE_ADMIN ||
+    user?.role === USER_ROLES.ENTERPRISE_STAFF;
+
+  const { data: enterprise } = useMyEnterprise({ enabled: isEnterpriseRole });
+
+  const logoUrl = isEnterpriseRole ? enterprise?.logoUrl : null;
+  // console.log(enterprise)
+  const brandName = (isEnterpriseRole && enterprise?.displayName) || "Veritas";
+
   const navItems = NAV_ITEMS[user?.role] ?? [];
 
   function handleLogout() {
@@ -67,11 +78,19 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 h-14 px-4 border-b border-whisper shrink-0">
-        <div className="w-7 h-7 rounded bg-brand-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
-          V
-        </div>
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt={brandName}
+            className="w-7 h-7 rounded object-cover shrink-0"
+          />
+        ) : (
+          <div className="w-7 h-7 rounded bg-brand-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
+            {brandName.charAt(0).toUpperCase()}
+          </div>
+        )}
         {sidebarOpen && (
-          <span className="font-semibold text-notion-black text-[15px] truncate">Veritas</span>
+          <span className="font-semibold text-notion-black text-[15px] truncate">{brandName}</span>
         )}
       </div>
 

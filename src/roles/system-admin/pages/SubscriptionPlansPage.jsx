@@ -76,7 +76,7 @@ export default function SubscriptionPlansPage() {
       slug: plan.slug || "",
       description: plan.description || "",
       price: plan.price?.toString() || "",
-      currency: plan.currency || "ETB",
+      currency: plan.currency || "USD",
       billing_cycle: plan.billing_cycle || "monthly",
       is_active: plan.is_active ?? true,
     });

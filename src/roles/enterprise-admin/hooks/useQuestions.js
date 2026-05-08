@@ -58,3 +58,17 @@ export function useDeleteQuestion() {
     },
   });
 }
+
+/**
+ * Upload media (image, video, PDF) for a question.
+ * Accepts { questionId, file } and invalidates the question detail on success.
+ */
+export function useUploadQuestionMedia() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ questionId, file }) => questionApi.uploadMedia(questionId, file),
+    onSuccess: (_, { questionId }) => {
+      qc.invalidateQueries({ queryKey: queryKeys.questions.detail(questionId) });
+    },
+  });
+}

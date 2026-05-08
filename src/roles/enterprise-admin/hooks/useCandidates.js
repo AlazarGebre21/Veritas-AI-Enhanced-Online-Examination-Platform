@@ -59,6 +59,36 @@ export function useDeactivateCandidate() {
   });
 }
 
+
+export function useActivateCandidate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => candidateApi.activate(id),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: queryKeys.candidates.all
+      });
+    },
+    onError: (err) => {
+      alert(`Activation failed: ${err?.response?.data?.message}`);
+    }
+  })
+}
+
+
+export function useDeleteCandidate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => candidateApi.delete(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.candidates.all });
+    },
+    onError: (err) => {
+      alert(`Deletion failed: ${err?.response?.data?.message}`);
+    }
+  })
+}
+
 /** Bulk upload candidates from a CSV file. */
 export function useBulkUploadCandidates() {
   const qc = useQueryClient();

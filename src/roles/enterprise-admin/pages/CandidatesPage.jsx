@@ -7,6 +7,8 @@ import {
   Upload,
   MoreHorizontal,
   UserX,
+  UserCheck,
+  Trash2,
   FileSpreadsheet,
   AlertCircle,
   CheckCircle2,
@@ -17,6 +19,8 @@ import {
   useCreateCandidate,
   useUpdateCandidate,
   useDeactivateCandidate,
+  useActivateCandidate,
+  useDeleteCandidate,
   useBulkUploadCandidates,
 } from "../hooks/useCandidates.js";
 import { DataTable } from "@/components/shared/DataTable.jsx";
@@ -103,14 +107,27 @@ function CandidateActionMenu({ candidate, onAction }) {
             >
               <Pencil size={14} /> Edit
             </button>
-            {candidate.isActive && (
+            {candidate.isActive ? (
               <button
                 onClick={() => { onAction("deactivate", candidate); setOpen(false); }}
                 className="flex items-center gap-2 w-full px-3 py-2 text-[13px] text-warm-gray-500 hover:bg-warm-white hover:text-notion-black transition-colors"
               >
                 <UserX size={14} /> Deactivate
               </button>
+            ) : (
+              <button
+                onClick={() => { onAction("activate", candidate); setOpen(false); }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-[13px] text-warm-gray-500 hover:bg-warm-white hover:text-notion-black transition-colors"
+              >
+                <UserCheck size={14} /> Activate
+              </button>
             )}
+            <button
+              onClick={() => { onAction("delete", candidate); setOpen(false); }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-[13px] text-destructive hover:bg-destructive/5 transition-colors"
+            >
+              <Trash2 size={14} /> Delete
+            </button>
           </div>
         </>
       )}
@@ -135,6 +152,8 @@ export default function CandidatesPage() {
   const createCandidate = useCreateCandidate();
   const updateCandidate = useUpdateCandidate();
   const deactivateCandidate = useDeactivateCandidate();
+  const activateCandidate = useActivateCandidate();
+  const deleteCandidate = useDeleteCandidate();
   const bulkUpload = useBulkUploadCandidates();
 
   // ── Action handler
@@ -145,6 +164,16 @@ export default function CandidatesPage() {
     if (action === "deactivate") {
       if (window.confirm(`Deactivate ${candidate.firstName} ${candidate.lastName}?`)) {
         deactivateCandidate.mutate(candidate.id);
+      }
+    }
+    if (action === "activate") {
+      if (window.confirm(`Reactivate ${candidate.firstName} ${candidate.lastName}?`)) {
+        activateCandidate.mutate(candidate.id);
+      }
+    }
+    if (action === "delete") {
+      if (window.confirm(`Permanently delete ${candidate.firstName} ${candidate.lastName}? This cannot be undone.`)) {
+        deleteCandidate.mutate(candidate.id);
       }
     }
   }
@@ -410,7 +439,7 @@ function BulkUploadModal({ isOpen, onClose, mutation }) {
     <Modal isOpen={isOpen} onClose={handleClose} title="Bulk Upload Candidates">
       <div className="space-y-4">
         <p className="text-[14px] text-warm-gray-500">
-          Upload a CSV file with columns: <code className="text-[13px] bg-warm-white px-1.5 py-0.5 rounded-micro font-mono leading-loose">external_id(required), first_name(required), last_name(required), email(optional), face_reference_url(optional)</code>
+          Upload a CSV file with columns: <code className="text-[13px] bg-warm-white px-1.5 py-0.5 rounded-micro font-mono leading-loose">external_id(required), first_name(required), last_name(required), email(optional)</code>
         </p>
 
         {/* Drop zone */}

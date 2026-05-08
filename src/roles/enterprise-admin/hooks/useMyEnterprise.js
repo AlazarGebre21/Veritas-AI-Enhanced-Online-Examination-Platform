@@ -6,10 +6,11 @@ import { queryKeys } from "@/lib/api/queryKeys.js";
  * Fetches the enterprise for the currently authenticated user.
  * Uses GET /enterprises/me (identity derived from JWT).
  */
-export function useMyEnterprise() {
+export function useMyEnterprise(options = {}) {
   return useQuery({
     queryKey: ["enterprises", "me"],
     queryFn: enterpriseApi.getMe,
     staleTime: 5 * 60 * 1000, // Enterprise profile rarely changes
+    ...options,
   });
 }

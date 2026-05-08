@@ -51,6 +51,20 @@ export function useActivateUser(enterpriseId) {
   });
 }
 
+/** Soft delete a Enterprise user*/
+export function useDeleteEnterpriseUser(enterpriseId){
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (userId) => enterpriseApi.deleteEnterpriseUser(enterpriseId, userId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.enterprises.usersAll(enterpriseId) });
+    },
+    onError: (err) => {
+      alert(err?.response?.data?.error || "Failed to delete user.")
+    }
+  });
+}
+
 /** Reset a user's password → returns { temporary_password }. */
 export function useResetUserPassword(enterpriseId) {
   const qc = useQueryClient();

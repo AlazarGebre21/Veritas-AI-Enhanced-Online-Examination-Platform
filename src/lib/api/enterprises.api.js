@@ -271,6 +271,17 @@ export const enterpriseApi = {
   },
 
   /**
+   * Delete a user within an enterprise.
+   * @param {string} enterpriseId
+   * @param {string} userId
+   * @returns {Promise<void>}
+   */
+  deleteEnterpriseUser: async (enterpriseId, userId) => {
+    const { data } = await apiClient.delete(`/enterprises/${enterpriseId}/users/${userId}`);
+    return data;
+  },
+
+  /**
    * Reset a user password → returns temporary password.
    * @param {string} enterpriseId
    * @param {string} userId
