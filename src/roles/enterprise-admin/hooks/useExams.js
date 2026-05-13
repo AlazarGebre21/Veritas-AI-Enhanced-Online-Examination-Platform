@@ -139,8 +139,24 @@ export function useEnrollCandidates(examId) {
   });
 }
 
-export function useRegenerateToken() {
-  return useMutation({ mutationFn: (id) => enrollmentApi.regenerateToken(id) });
+export function useNotifyEnrollment(examId) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => enrollmentApi.notify(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["exams", examId, "enrollments"], exact: false }),
+  });
+}
+
+export function useNotifyAllEnrollments(examId) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => enrollmentApi.notifyAll(examId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["exams", examId, "enrollments"], exact: false }),
+  });
+}
+
+export function useEnrollmentLink() {
+  return useMutation({ mutationFn: (id) => enrollmentApi.getLink(id) });
 }
 
 export function useResetAttempts() {

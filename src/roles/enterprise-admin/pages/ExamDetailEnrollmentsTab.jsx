@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
-import { Copy, Check, RefreshCw, RotateCcw, Ban, Search, Loader2 } from "lucide-react";
+import { Copy, Check, RotateCcw, Ban, Search, Loader2, Mail, Link2, Send } from "lucide-react";
 import {
   useExamEnrollments, useEnrollCandidates,
-  useRegenerateToken, useResetAttempts, useRevokeEnrollment,
+  useNotifyEnrollment, useNotifyAllEnrollments, useEnrollmentLink,
+  useResetAttempts, useRevokeEnrollment,
 } from "../hooks/useExams.js";
 import { useCandidates } from "../hooks/useCandidates.js";
 import { Badge, Button, Skeleton } from "@/components/ui/index.js";
@@ -13,7 +14,7 @@ export function ExamEnrollmentsTab({ examId }) {
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
-  const [tokenDisplay, setTokenDisplay] = useState(null);
+  const [linkDisplay, setLinkDisplay] = useState(null);
   const [copied, setCopied] = useState(false);
 
   // Enrolled list
@@ -37,7 +38,9 @@ export function ExamEnrollmentsTab({ examId }) {
   }, [allCandidates, search]);
 
   const enroll = useEnrollCandidates(examId);
-  const regenerate = useRegenerateToken();
+  const notify = useNotifyEnrollment(examId);
+  const notifyAll = useNotifyAllEnrollments(examId);
+  const getLink = useEnrollmentLink();
   const resetAttempts = useResetAttempts();
   const revoke = useRevokeEnrollment(examId);
 
@@ -57,14 +60,14 @@ export function ExamEnrollmentsTab({ examId }) {
     );
   }
 
-  function handleRegenerate(id) {
-    regenerate.mutate(id, {
-      onSuccess: (res) => setTokenDisplay({ enrollmentId: id, token: res.rawToken }),
+  function handleGetLink(id) {
+    getLink.mutate(id, {
+      onSuccess: (res) => setLinkDisplay({ enrollmentId: id, link: res?.data?.link || "" }),
     });
   }
 
   function handleCopy() {
-    navigator.clipboard.writeText(tokenDisplay?.token || "");
+    navigator.clipboard.writeText(linkDisplay?.link || "");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -76,9 +79,21 @@ export function ExamEnrollmentsTab({ examId }) {
         <p className="text-[14px] text-warm-gray-500">
           {enrollments.length} enrolled candidate{enrollments.length !== 1 ? "s" : ""}
         </p>
-        <Button onClick={() => setEnrollOpen(true)}>
-          + Enroll Candidates
-        </Button>
+        <div className="flex items-center gap-2">
+          {enrollments.length > 0 && (
+            <Button
+              variant="secondary"
+              onClick={() => notifyAll.mutate()}
+              disabled={notifyAll.isPending}
+            >
+              <Send size={14} className="mr-1.5" />
+              {notifyAll.isPending ? "Sending..." : "Notify All"}
+            </Button>
+          )}
+          <Button onClick={() => setEnrollOpen(true)}>
+            + Enroll Candidates
+          </Button>
+        </div>
       </div>
 
       {/* Enrolled list */}
@@ -111,11 +126,19 @@ export function ExamEnrollmentsTab({ examId }) {
 
                 <div className="flex items-center gap-1.5 shrink-0 ml-4">
                   <button
-                    onClick={() => handleRegenerate(e.id)}
-                    title="Regenerate access token"
+                    onClick={() => notify.mutate(e.id)}
+                    title="Send invitation notification"
+                    disabled={notify.isPending}
                     className="p-2 rounded-micro text-warm-gray-400 hover:text-notion-blue hover:bg-notion-blue/5 transition-colors"
                   >
-                    <RefreshCw size={17} />
+                    <Mail size={17} />
+                  </button>
+                  <button
+                    onClick={() => handleGetLink(e.id)}
+                    title="Get invitation link"
+                    className="p-2 rounded-micro text-warm-gray-400 hover:text-notion-blue hover:bg-notion-blue/5 transition-colors"
+                  >
+                    <Link2 size={17} />
                   </button>
                   <button
                     onClick={() => resetAttempts.mutate(e.id)}
@@ -214,15 +237,15 @@ export function ExamEnrollmentsTab({ examId }) {
         </div>
       </Modal>
 
-      {/* ── Token Modal ───────────────────────────────────────────────── */}
-      <Modal isOpen={!!tokenDisplay} onClose={() => setTokenDisplay(null)} title="New Access Token">
+      {/* ── Invitation Link Modal ──────────────────────────────────────── */}
+      <Modal isOpen={!!linkDisplay} onClose={() => setLinkDisplay(null)} title="Invitation Link">
         <div className="space-y-4">
           <p className="text-[14px] text-warm-gray-500">
-            Share this token securely with the candidate. It will <strong>not</strong> be shown again.
+            Share this link with the candidate to access their exam.
           </p>
           <div className="flex items-center gap-2 bg-warm-white border border-whisper rounded-micro px-4 py-3">
             <code className="flex-1 text-[13px] font-mono text-notion-black select-all break-all">
-              {tokenDisplay?.token}
+              {linkDisplay?.link}
             </code>
             <button
               onClick={handleCopy}
@@ -232,7 +255,7 @@ export function ExamEnrollmentsTab({ examId }) {
             </button>
           </div>
           <div className="flex justify-end">
-            <Button onClick={() => setTokenDisplay(null)}>Done</Button>
+            <Button onClick={() => setLinkDisplay(null)}>Done</Button>
           </div>
         </div>
       </Modal>

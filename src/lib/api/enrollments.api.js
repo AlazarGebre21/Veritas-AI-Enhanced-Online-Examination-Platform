@@ -31,12 +31,22 @@ export const enrollmentApi = {
   },
 
   /**
-   * Regenerate and return a new raw access token for an enrollment.
+   * Send notification to a single enrollment (invitation email).
    * @param {string} id
-   * @returns {Promise<{ message: string, rawToken: string }>}
+   * @returns {Promise<{ message: string }>}
    */
-  regenerateToken: async (id) => {
-    const { data } = await apiClient.post(`/enrollments/${id}/regenerate-token`);
+  notify: async (id) => {
+    const { data } = await apiClient.post(`/enrollments/${id}/notify`);
+    return data;
+  },
+
+  /**
+   * Get the invitation link for an enrollment.
+   * @param {string} id
+   * @returns {Promise<{ data: { link: string } }>}
+   */
+  getLink: async (id) => {
+    const { data } = await apiClient.get(`/enrollments/${id}/link`);
     return data;
   },
 
@@ -72,13 +82,23 @@ export const enrollmentApi = {
   },
 
   /**
-   * Enroll candidates in an exam and return raw access tokens.
+   * Enroll candidates in an exam (opaque codes issued server-side).
    * @param {string} examId
    * @param {EnrollCandidatesPayload} payload
-   * @returns {Promise<{ message: string, rawTokens: string[] }>}
+   * @returns {Promise<{ message: string, count: number }>}
    */
   enrollCandidates: async (examId, payload) => {
     const { data } = await apiClient.post(`/exams/${examId}/enrollments`, payload);
+    return data;
+  },
+
+  /**
+   * Send notifications to all enrolled candidates for an exam.
+   * @param {string} examId
+   * @returns {Promise<{ message: string }>}
+   */
+  notifyAll: async (examId) => {
+    const { data } = await apiClient.post(`/exams/${examId}/enrollments/notify`);
     return data;
   },
 };

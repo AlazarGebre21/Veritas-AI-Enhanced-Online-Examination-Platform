@@ -5,7 +5,7 @@ import { persist } from "zustand/middleware";
  * Exam session store for the candidate flow.
  * Persisted to sessionStorage (cleared when the tab closes).
  *
- * Holds the raw enrollment token and active session identity.
+ * Holds the session token (from POST /access/redeem) and active session identity.
  * The candidateClient Axios instance reads rawToken from here.
  *
  * Server data (session details, questions, answers) stays in React Query.
@@ -13,7 +13,7 @@ import { persist } from "zustand/middleware";
 export const useExamSessionStore = create()(
   persist(
     (set) => ({
-      /** @type {string|null} Raw enrollment token from the access page */
+      /** @type {string|null} Session token received from POST /access/redeem */
       rawToken: null,
 
       /** @type {string|null} */
@@ -35,7 +35,7 @@ export const useExamSessionStore = create()(
       currentQuestionIndex: 0,
 
       /**
-       * Called after POST /access/validate succeeds.
+       * Called after POST /access/redeem succeeds.
        * @param {{ rawToken: string, enrollmentId: string, enterpriseId: string, examId: string, candidateId: string }} payload
        */
       startAccess: (payload) => set({ ...payload }),
