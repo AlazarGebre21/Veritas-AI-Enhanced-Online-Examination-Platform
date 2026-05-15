@@ -291,4 +291,15 @@ export const enterpriseApi = {
     const { data } = await apiClient.post(`/enterprises/${enterpriseId}/users/${userId}/reset-password`);
     return data;
   },
+
+  /**
+   * Self-service password change for an authenticated user.
+   * @param {string} enterpriseId
+   * @param {string} userId
+   * @param {{ current_password: string, new_password: string }} payload
+   * @returns {Promise<void>}
+   */
+  changePassword: async (enterpriseId, userId, payload) => {
+    await apiClient.post(`/enterprises/${enterpriseId}/users/${userId}/change-password`, payload);
+  },
 };

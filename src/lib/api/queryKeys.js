@@ -68,4 +68,9 @@ export const queryKeys = {
     invoices: (params) => ["invoices", "list", params],
     billingSummary: ["billing", "summary"],
   },
+
+  proctoring: {
+    events: (sessionId) => ["proctoring", sessionId, "events"],
+    score: (sessionId) => ["proctoring", sessionId, "score"],
+  },
 };

@@ -18,6 +18,7 @@ export function ExamOverviewTab({ exam, examId }) {
   const [cloneTitle, setCloneTitle] = useState(`${exam.title} (Copy)`);
   const [startTime, setStartTime] = useState(exam.scheduledStart?.slice(0, 16) || "");
   const [endTime, setEndTime] = useState(exam.scheduledEnd?.slice(0, 16) || "");
+  const [scheduleError, setScheduleError] = useState("");
 
   const publishExam = usePublishExam();
   const closeExam = useCloseExam();
@@ -44,9 +45,26 @@ export function ExamOverviewTab({ exam, examId }) {
   }
 
   function handleScheduleSave() {
+    setScheduleError("");
+    if (!startTime || !endTime) {
+      setScheduleError("Both start and end times are required.");
+      return;
+    }
+    const now = new Date();
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    if (start <= now) {
+      setScheduleError("Start time must be in the future.");
+      return;
+    }
+    if (end <= start) {
+      setScheduleError("End time must be after the start time.");
+      return;
+    }
+    const fmt = (v) => new Date(v).toISOString().replace(/\.\d{3}Z$/, "Z");
     scheduleExam.mutate(
-      { id: examId, startTime: new Date(startTime).toISOString(), endTime: new Date(endTime).toISOString() },
-      { onSuccess: () => setScheduleOpen(false) }
+      { id: examId, startTime: fmt(startTime), endTime: fmt(endTime) },
+      { onSuccess: () => { setScheduleOpen(false); setScheduleError(""); } }
     );
   }
 
@@ -146,20 +164,27 @@ export function ExamOverviewTab({ exam, examId }) {
       </Card>
 
       {/* Schedule Modal */}
-      <Modal isOpen={scheduleOpen} onClose={() => setScheduleOpen(false)} title="Set Schedule">
+      <Modal isOpen={scheduleOpen} onClose={() => { setScheduleOpen(false); setScheduleError(""); }} title="Set Schedule">
         <div className="space-y-4">
+          {scheduleError && (
+            <p className="text-[13px] text-destructive bg-destructive/5 border border-destructive/20 rounded-micro px-3 py-2">
+              {scheduleError}
+            </p>
+          )}
           <div>
             <label className="block text-[14px] font-medium text-notion-black mb-1.5">Start Time</label>
-            <input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)}
+            <input type="datetime-local" value={startTime} onChange={(e) => { setStartTime(e.target.value); setScheduleError(""); }}
+              min={new Date().toISOString().slice(0, 16)}
               className="w-full border border-[#ddd] rounded-micro px-3 py-2 text-[14px] focus:outline-none focus:border-notion-blue focus:ring-2 focus:ring-notion-blue/20" />
           </div>
           <div>
             <label className="block text-[14px] font-medium text-notion-black mb-1.5">End Time</label>
-            <input type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)}
+            <input type="datetime-local" value={endTime} onChange={(e) => { setEndTime(e.target.value); setScheduleError(""); }}
+              min={startTime || new Date().toISOString().slice(0, 16)}
               className="w-full border border-[#ddd] rounded-micro px-3 py-2 text-[14px] focus:outline-none focus:border-notion-blue focus:ring-2 focus:ring-notion-blue/20" />
           </div>
           <div className="flex justify-end gap-3 pt-2">
-            <Button variant="secondary" onClick={() => setScheduleOpen(false)}>Cancel</Button>
+            <Button variant="secondary" onClick={() => { setScheduleOpen(false); setScheduleError(""); }}>Cancel</Button>
             <Button onClick={handleScheduleSave} disabled={scheduleExam.isPending}>
               {scheduleExam.isPending ? "Saving..." : "Save Schedule"}
             </Button>

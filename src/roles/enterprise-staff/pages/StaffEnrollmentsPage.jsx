@@ -1,31 +1,101 @@
 import { useState, useMemo } from "react";
-import { Copy, Check, RotateCcw, Ban, Search, Loader2, Mail, Link2, Send } from "lucide-react";
 import {
-  useExamEnrollments, useEnrollCandidates,
-  useNotifyEnrollment, useNotifyAllEnrollments, useEnrollmentLink,
-  useResetAttempts, useRevokeEnrollment,
-} from "../hooks/useExams.js";
-import { useCandidates } from "../hooks/useCandidates.js";
-import { Badge, Button, Skeleton } from "@/components/ui/index.js";
+  Search,
+  Copy,
+  Check,
+  Mail,
+  Link2,
+  Send,
+  Loader2,
+  ClipboardList,
+  ArrowRight,
+} from "lucide-react";
+import {
+  useCandidates,
+  useExamEnrollments,
+  useEnrollCandidates,
+  useNotifyEnrollment,
+  useNotifyAllEnrollments,
+  useEnrollmentLink,
+} from "../hooks/useStaffData.js";
+import { Badge, Button, Skeleton, Input } from "@/components/ui/index.js";
 import { Modal } from "@/components/ui/index.js";
 import { formatDate } from "@/lib/utils/date.js";
 
-export function ExamEnrollmentsTab({ examId }) {
+export default function StaffEnrollmentsPage() {
+  // ── Exam ID lookup ──────────────────────────────────────────────────────
+  const [examIdInput, setExamIdInput] = useState("");
+  const [activeExamId, setActiveExamId] = useState(null);
+
+  function handleLoadExam(e) {
+    e.preventDefault();
+    const trimmed = examIdInput.trim();
+    if (trimmed) setActiveExamId(trimmed);
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="border-b border-whisper pb-6">
+        <h1 className="text-2xl font-bold text-notion-black">Enrollments</h1>
+        <p className="text-warm-gray-500 text-[15px] mt-1">
+          Manage exam enrollments — enroll candidates and send invitations.
+        </p>
+      </div>
+
+      {/* Exam ID Input */}
+      <form onSubmit={handleLoadExam} className="flex items-end gap-3">
+        <div className="flex-1 max-w-lg">
+          <Input
+            label="Exam ID"
+            id="staff-exam-id"
+            placeholder="Paste the exam ID provided by your administrator..."
+            value={examIdInput}
+            onChange={(e) => setExamIdInput(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={!examIdInput.trim()}>
+          <ArrowRight size={16} className="mr-1.5" />
+          Load Enrollments
+        </Button>
+      </form>
+
+      {/* Enrollment content */}
+      {activeExamId ? (
+        <EnrollmentPanel examId={activeExamId} />
+      ) : (
+        <div className="text-center py-16 border border-dashed border-whisper rounded-comfortable">
+          <ClipboardList size={32} className="mx-auto text-warm-gray-300 mb-3" />
+          <p className="text-[14px] text-warm-gray-500">
+            Enter an exam ID above to view and manage its enrollments.
+          </p>
+          <p className="text-[12px] text-warm-gray-300 mt-1">
+            Your administrator can provide the exam ID from the exam management page.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Enrollment Panel (loaded after exam ID is entered) ────────────────────
+
+function EnrollmentPanel({ examId }) {
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
   const [linkDisplay, setLinkDisplay] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  // Enrolled list
-  const { data, isLoading } = useExamEnrollments(examId);
+  // Enrollment list
+  const { data, isLoading, isError } = useExamEnrollments(examId);
   const enrollments = data?.data || [];
 
-  // Fetch ALL candidates once — client-side search filtering (no server-side search param)
+  // Fetch all candidates for enrollment modal + name resolution
   const { data: candData, isLoading: candLoading } = useCandidates({ limit: 1000 });
   const allCandidates = candData?.data || [];
 
-  // Client-side filter
+  // Client-side candidate search
   const filteredCandidates = useMemo(() => {
     if (!search.trim()) return allCandidates;
     const q = search.toLowerCase();
@@ -41,8 +111,6 @@ export function ExamEnrollmentsTab({ examId }) {
   const notify = useNotifyEnrollment(examId);
   const notifyAll = useNotifyAllEnrollments(examId);
   const getLink = useEnrollmentLink();
-  const resetAttempts = useResetAttempts();
-  const revoke = useRevokeEnrollment(examId);
 
   function handleEnroll() {
     enroll.mutate(
@@ -62,7 +130,10 @@ export function ExamEnrollmentsTab({ examId }) {
 
   function handleGetLink(id) {
     getLink.mutate(id, {
-      onSuccess: (res) => setLinkDisplay({ enrollmentId: id, link: res?.invitationUrl || res?.data?.link || "" }),
+      onSuccess: (res) => setLinkDisplay({
+        enrollmentId: id,
+        link: res?.invitationUrl || res?.data?.link || "",
+      }),
     });
   }
 
@@ -72,12 +143,25 @@ export function ExamEnrollmentsTab({ examId }) {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  if (isError) {
+    return (
+      <div className="text-center py-12 border border-dashed border-destructive/30 rounded-comfortable bg-destructive/5">
+        <p className="text-[14px] text-destructive font-medium">
+          Failed to load enrollments for this exam.
+        </p>
+        <p className="text-[12px] text-warm-gray-500 mt-1">
+          Please verify the exam ID is correct and that you have access.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Header row */}
       <div className="flex items-center justify-between">
         <p className="text-[14px] text-warm-gray-500">
-          {enrollments.length} enrolled candidate{enrollments.length !== 1 ? "s" : ""}
+          {isLoading ? "Loading..." : `${enrollments.length} enrolled candidate${enrollments.length !== 1 ? "s" : ""}`}
         </p>
         <div className="flex items-center gap-2">
           {enrollments.length > 0 && (
@@ -101,7 +185,7 @@ export function ExamEnrollmentsTab({ examId }) {
         <div className="space-y-2">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
       ) : enrollments.length === 0 ? (
         <p className="text-center text-[13px] text-warm-gray-500 py-10 border border-dashed border-whisper rounded-comfortable">
-          No candidates enrolled. Click &quot;Enroll Candidates&quot; to get started.
+          No candidates enrolled yet. Click &quot;Enroll Candidates&quot; to get started.
         </p>
       ) : (
         <div className="border border-whisper rounded-comfortable overflow-hidden divide-y divide-whisper">
@@ -140,22 +224,6 @@ export function ExamEnrollmentsTab({ examId }) {
                   >
                     <Link2 size={17} />
                   </button>
-                  <button
-                    onClick={() => resetAttempts.mutate(e.id)}
-                    title="Reset attempts to zero"
-                    className="p-2 rounded-micro text-warm-gray-400 hover:text-notion-blue hover:bg-notion-blue/5 transition-colors"
-                  >
-                    <RotateCcw size={17} />
-                  </button>
-                  {!e.isRevoked && (
-                    <button
-                      onClick={() => revoke.mutate(e.id)}
-                      title="Revoke access"
-                      className="p-2 rounded-micro text-warm-gray-400 hover:text-destructive hover:bg-destructive/5 transition-colors"
-                    >
-                      <Ban size={17} />
-                    </button>
-                  )}
                 </div>
               </div>
             );
@@ -166,7 +234,7 @@ export function ExamEnrollmentsTab({ examId }) {
       {/* ── Enroll Modal ──────────────────────────────────────────────── */}
       <Modal isOpen={enrollOpen} onClose={() => { setEnrollOpen(false); setSelected([]); setSearch(""); }} title="Enroll Candidates">
         <div className="space-y-3">
-          {/* Search — client-side */}
+          {/* Search */}
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray-300" />
             <input

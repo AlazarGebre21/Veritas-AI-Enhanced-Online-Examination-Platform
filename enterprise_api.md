@@ -1867,3 +1867,62 @@ This endpoint has **no parameters**.
   "additionalProp3": "string"
 }
 ```
+
+# POST `/enterprises/{enterpriseId}/users/{userId}/change-password` PUBLIC
+
+## Change User Password
+
+Self-service password change for authenticated users.
+
+---
+
+## Request
+
+### Endpoint
+
+```http
+POST /enterprises/{enterpriseId}/users/{userId}/change-password
+```
+
+---
+
+## Path Parameters
+
+| Name           | Type          | Required | Description   |
+| -------------- | ------------- | -------- | ------------- |
+| `enterpriseId` | string (UUID) | Yes      | Enterprise ID |
+| `userId`       | string (UUID) | Yes      | User ID       |
+
+---
+
+## Headers
+
+| Name        | Type          | Required | Description   |
+| ----------- | ------------- | -------- | ------------- |
+| `X-User-ID` | string (UUID) | Yes      | Actor user ID |
+
+---
+
+## Request Body
+
+**Content-Type:** `application/json`
+
+Change password payload.
+
+### Example
+
+```json
+{
+  "current_password": "string",
+  "new_password": "stringst"
+}
+```
+
+---
+
+## Request Body Schema
+
+| Field              | Type   | Description           |
+| ------------------ | ------ | --------------------- |
+| `current_password` | string | Current user password |
+| `new_password`     | string | New password          |

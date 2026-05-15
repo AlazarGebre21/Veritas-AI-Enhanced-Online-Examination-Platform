@@ -37,9 +37,10 @@ export const ROUTES = {
 
   // EnterpriseStaff
   STAFF_PORTAL: "/staff-portal",
-  STAFF_EXAMS: "/staff-portal/exams",
-  STAFF_EXAM_DETAIL: "/staff-portal/exams/:id",
+  STAFF_ENROLLMENTS: "/staff-portal/enrollments",
   STAFF_QUESTIONS: "/staff-portal/questions",
-  STAFF_MONITOR: "/staff-portal/monitor",
-  STAFF_RESULTS: "/staff-portal/results",
+  STAFF_QUESTIONS_SUBJECT: "/staff-portal/questions/subject/:subjectName",
+  STAFF_QUESTION_DETAIL: "/staff-portal/questions/:id",
+  STAFF_CANDIDATES: "/staff-portal/candidates",
+  STAFF_SETTINGS: "/staff-portal/settings",
 };

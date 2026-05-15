@@ -43,7 +43,7 @@ export const enrollmentApi = {
   /**
    * Get the invitation link for an enrollment.
    * @param {string} id
-   * @returns {Promise<{ data: { link: string } }>}
+   * @returns {Promise<{ enrollmentId: string, invitationUrl: string, status: string, tokenExpiresAt: string }>}
    */
   getLink: async (id) => {
     const { data } = await apiClient.get(`/enrollments/${id}/link`);

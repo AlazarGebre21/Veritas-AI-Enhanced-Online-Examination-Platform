@@ -1685,3 +1685,250 @@ Get submission detail by submission ID.
   }
 }
 ```
+
+# POST `/exams/{examId}/enrollments/notify` ENTERPRISE ADMIN AND ENTERPRISE STAFF ENDPOINT
+
+## Bulk Notify Candidates
+
+Send invitation emails to enrolled candidates.
+
+Admin-triggered; no emails are sent automatically on enroll.
+
+---
+
+## Request
+
+### Endpoint
+
+```http
+POST /exams/{examId}/enrollments/notify
+```
+
+---
+
+## Headers
+
+| Name              | Type   | Required | Description   |
+| ----------------- | ------ | -------- | ------------- |
+| `X-Enterprise-Id` | string | No       | Enterprise ID |
+
+---
+
+## Path Parameters
+
+| Name     | Type          | Required | Description |
+| -------- | ------------- | -------- | ----------- |
+| `examId` | string (UUID) | Yes      | Exam ID     |
+
+---
+
+## Request Body
+
+**Content-Type:** `application/json`
+
+Optional list of enrollment IDs to notify.
+
+### Example
+
+```json
+{
+  "enrollmentIds": ["string"]
+}
+```
+
+---
+
+## Request Body Schema
+
+| Field           | Type          | Description                      |
+| --------------- | ------------- | -------------------------------- |
+| `enrollmentIds` | array<string> | List of enrollment IDs to notify |
+
+---
+
+## Responses
+
+### `200 OK`
+
+Successful Response
+
+**Content-Type:** `application/json`
+
+### Example
+
+```json
+{
+  "message": "string",
+  "results": [
+    {
+      "candidateId": "string",
+      "enrollmentId": "string",
+      "notifyStatus": "string"
+    }
+  ]
+}
+```
+
+---
+
+## Response Fields
+
+### Root Object
+
+| Field     | Type          | Description                             |
+| --------- | ------------- | --------------------------------------- |
+| `message` | string        | General response message                |
+| `results` | array<object> | Notification results for each candidate |
+
+---
+
+### Result Object
+
+| Field          | Type   | Description                  |
+| -------------- | ------ | ---------------------------- |
+| `candidateId`  | string | Candidate identifier         |
+| `enrollmentId` | string | Enrollment identifier        |
+| `notifyStatus` | string | Notification delivery status |
+
+# POST `/enrollments/{enrollmentId}/notify` ENTERPRISE ADMIN AND ENTERPRISE STAFF ENDPOINT
+
+## Notify Single Candidate
+
+Send or resend an invitation email to one candidate enrollment.
+
+---
+
+## Request
+
+### Endpoint
+
+```http
+POST /enrollments/{enrollmentId}/notify
+```
+
+---
+
+## Headers
+
+| Name              | Type   | Required | Description   |
+| ----------------- | ------ | -------- | ------------- |
+| `X-Enterprise-Id` | string | No       | Enterprise ID |
+
+---
+
+## Path Parameters
+
+| Name           | Type          | Required | Description   |
+| -------------- | ------------- | -------- | ------------- |
+| `enrollmentId` | string (UUID) | Yes      | Enrollment ID |
+
+---
+
+## Responses
+
+### `200 OK`
+
+Successful Response
+
+**Content-Type:** `application/json`
+
+### Example
+
+```json
+{
+  "message": "string",
+  "results": [
+    {
+      "candidateId": "string",
+      "enrollmentId": "string",
+      "notifyStatus": "string"
+    }
+  ]
+}
+```
+
+---
+
+## Response Fields
+
+### Root Object
+
+| Field     | Type          | Description                 |
+| --------- | ------------- | --------------------------- |
+| `message` | string        | General response message    |
+| `results` | array<object> | Notification result details |
+
+---
+
+### Result Object
+
+| Field          | Type   | Description                  |
+| -------------- | ------ | ---------------------------- |
+| `candidateId`  | string | Candidate identifier         |
+| `enrollmentId` | string | Enrollment identifier        |
+| `notifyStatus` | string | Notification delivery status |
+
+# GET `/enrollments/{enrollmentId}/link` ENTERPRISE ADMIN AND ENTERPRISE STAFF ENDPOINT
+
+## Get Invitation Link
+
+Generate a fresh invitation URL (opaque code) for manual distribution.  
+Old URL is invalidated.
+
+---
+
+## Request
+
+### Endpoint
+
+```http
+GET /enrollments/{enrollmentId}/link
+```
+
+---
+
+## Headers
+
+| Name              | Type   | Required | Description   |
+| ----------------- | ------ | -------- | ------------- |
+| `X-Enterprise-Id` | string | No       | Enterprise ID |
+
+---
+
+## Path Parameters
+
+| Name           | Type          | Required | Description   |
+| -------------- | ------------- | -------- | ------------- |
+| `enrollmentId` | string (UUID) | Yes      | Enrollment ID |
+
+---
+
+## Responses
+
+### `200 OK`
+
+Successful Response
+
+**Content-Type:** `application/json`
+
+### Example
+
+```json
+{
+  "enrollmentId": "string",
+  "invitationUrl": "string",
+  "status": "string",
+  "tokenExpiresAt": "string"
+}
+```
+
+---
+
+## Response Fields
+
+| Field            | Type               | Description                             |
+| ---------------- | ------------------ | --------------------------------------- |
+| `enrollmentId`   | string             | Enrollment identifier                   |
+| `invitationUrl`  | string             | Newly generated invitation URL          |
+| `status`         | string             | Invitation status                       |
+| `tokenExpiresAt` | string (date-time) | Expiration time of the invitation token |

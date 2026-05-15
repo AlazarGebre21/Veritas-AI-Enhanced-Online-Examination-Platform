@@ -39,10 +39,10 @@ const NAV_ITEMS = {
   ],
   [USER_ROLES.ENTERPRISE_STAFF]: [
     { label: "Dashboard", icon: LayoutDashboard, to: ROUTES.STAFF_PORTAL },
-    { label: "Exams", icon: ClipboardList, to: ROUTES.STAFF_EXAMS },
+    { label: "Enrollments", icon: ClipboardList, to: ROUTES.STAFF_ENROLLMENTS },
     { label: "Questions", icon: FileText, to: ROUTES.STAFF_QUESTIONS },
-    { label: "Monitoring", icon: BarChart2, to: ROUTES.STAFF_MONITOR },
-    { label: "Results", icon: BarChart2, to: ROUTES.STAFF_RESULTS },
+    { label: "Candidates", icon: Users, to: ROUTES.STAFF_CANDIDATES },
+    { label: "Settings", icon: Settings, to: ROUTES.STAFF_SETTINGS },
   ],
 };
 
@@ -51,15 +51,13 @@ export default function Sidebar() {
   const { sidebarOpen, toggleSidebar } = useUiStore();
   const navigate = useNavigate();
 
-  const isEnterpriseRole =
-    user?.role === USER_ROLES.ENTERPRISE_ADMIN ||
-    user?.role === USER_ROLES.ENTERPRISE_STAFF;
+  // Only admins can call GET /enterprises/me — staff gets 403
+  const isAdmin = user?.role === USER_ROLES.ENTERPRISE_ADMIN;
 
-  const { data: enterprise } = useMyEnterprise({ enabled: isEnterpriseRole });
+  const { data: enterprise } = useMyEnterprise({ enabled: isAdmin });
 
-  const logoUrl = isEnterpriseRole ? enterprise?.logoUrl : null;
-  // console.log(enterprise)
-  const brandName = (isEnterpriseRole && enterprise?.displayName) || "Veritas";
+  const logoUrl = isAdmin ? enterprise?.logoUrl : null;
+  const brandName = (isAdmin && enterprise?.displayName) || "Veritas";
 
   const navItems = NAV_ITEMS[user?.role] ?? [];
 

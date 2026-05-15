@@ -1,3 +1,140 @@
+import { useParams, useNavigate } from "react-router-dom";
+import { useCandidateResult } from "../hooks/useCandidateResult.js";
+import { useExamSessionStore } from "@/stores/examSessionStore.js";
+import { Skeleton } from "@/components/ui/index.js";
+import { CheckCircle2, Clock, LogOut } from "lucide-react";
+
+/**
+ * Candidate results page — shows exam submission status.
+ * Reads session details via useCandidateResult (session.submission).
+ */
 export default function CandidateResultsPage() {
-  return <div className="p-6"><h1 className="text-2xl font-bold text-notion-black">Your Results</h1></div>;
+  const { sessionId } = useParams();
+  const navigate = useNavigate();
+  const clearSession = useExamSessionStore((s) => s.clearSession);
+
+  const { data, isLoading, isError } = useCandidateResult(sessionId);
+  const session = data?.data;
+  const submission = session?.submission;
+
+  function handleExit() {
+    clearSession();
+    navigate("/exam", { replace: true });
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-warm-white">
+        <div className="bg-white rounded-comfortable shadow-card p-8 w-full max-w-md border border-whisper space-y-4">
+          <Skeleton className="h-8 w-48 mx-auto" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-warm-white px-4">
+        <div className="bg-white rounded-comfortable shadow-card p-8 w-full max-w-md border border-whisper text-center">
+          <p className="text-[15px] text-warm-gray-500 mb-4">
+            Unable to load exam results. The session may have expired.
+          </p>
+          <button
+            type="button"
+            onClick={handleExit}
+            className="px-5 py-2 text-[14px] font-medium text-white bg-notion-blue rounded-subtle hover:bg-active-blue transition-colors"
+          >
+            Return to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const isSubmitted = session.status === "Submitted";
+  const isTerminated = session.status === "Terminated";
+  const isExpired = session.status === "Expired";
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-warm-white px-4">
+      <div className="bg-white rounded-comfortable shadow-card p-8 w-full max-w-md border border-whisper">
+        {/* Status icon */}
+        <div className="text-center mb-6">
+          {isSubmitted ? (
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/10 mb-4">
+              <CheckCircle2 size={36} className="text-success" />
+            </div>
+          ) : (
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-warning/10 mb-4">
+              <Clock size={36} className="text-warning" />
+            </div>
+          )}
+
+          <h1 className="text-[22px] font-bold text-notion-black">
+            {isSubmitted && "Exam Submitted"}
+            {isTerminated && "Exam Terminated"}
+            {isExpired && "Exam Expired"}
+            {!isSubmitted && !isTerminated && !isExpired && "Exam Complete"}
+          </h1>
+
+          {isTerminated && session.terminationReason && (
+            <p className="text-[13px] text-destructive mt-1">
+              Reason: {session.terminationReason}
+            </p>
+          )}
+        </div>
+
+        {/* Details */}
+        <div className="space-y-3 mb-6">
+          <DetailRow label="Status" value={session.status} />
+          {submission?.submittedAt && (
+            <DetailRow
+              label="Submitted At"
+              value={new Date(submission.submittedAt).toLocaleString()}
+            />
+          )}
+          {submission?.autoSubmitted && (
+            <DetailRow label="Auto-Submitted" value="Yes (time expired)" />
+          )}
+          {session.startedAt && (
+            <DetailRow
+              label="Started At"
+              value={new Date(session.startedAt).toLocaleString()}
+            />
+          )}
+        </div>
+
+        {/* Grading message */}
+        <div className="bg-warm-white border border-whisper rounded-subtle p-4 mb-6">
+          <p className="text-[13px] text-warm-gray-500 leading-relaxed">
+            Your exam has been recorded. Results will be available once grading
+            is complete. Please contact your exam administrator for further
+            information.
+          </p>
+        </div>
+
+        {/* Exit */}
+        <button
+          type="button"
+          onClick={handleExit}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 text-[14px] font-medium text-notion-black border border-whisper rounded-subtle hover:bg-warm-white transition-colors"
+        >
+          <LogOut size={15} />
+          Exit
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }) {
+  return (
+    <div className="flex items-center justify-between py-2 border-b border-whisper last:border-0">
+      <span className="text-[13px] text-warm-gray-500">{label}</span>
+      <span className="text-[13px] font-medium text-notion-black">{value}</span>
+    </div>
+  );
 }

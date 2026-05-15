@@ -81,20 +81,23 @@ const EnterpriseSettingsPage = lazy(() =>
 const StaffDashboardPage = lazy(() =>
   import("@/roles/enterprise-staff/pages/StaffDashboardPage.jsx")
 );
-const StaffExamsPage = lazy(() =>
-  import("@/roles/enterprise-staff/pages/StaffExamsPage.jsx")
-);
-const StaffExamDetailPage = lazy(() =>
-  import("@/roles/enterprise-staff/pages/StaffExamDetailPage.jsx")
+const StaffEnrollmentsPage = lazy(() =>
+  import("@/roles/enterprise-staff/pages/StaffEnrollmentsPage.jsx")
 );
 const StaffQuestionsPage = lazy(() =>
   import("@/roles/enterprise-staff/pages/StaffQuestionsPage.jsx")
 );
-const StaffMonitoringPage = lazy(() =>
-  import("@/roles/enterprise-staff/pages/StaffMonitoringPage.jsx")
+const StaffSubjectQuestionsPage = lazy(() =>
+  import("@/roles/enterprise-staff/pages/StaffSubjectQuestionsPage.jsx")
 );
-const StaffResultsPage = lazy(() =>
-  import("@/roles/enterprise-staff/pages/StaffResultsPage.jsx")
+const StaffQuestionDetailPage = lazy(() =>
+  import("@/roles/enterprise-staff/pages/StaffQuestionDetailPage.jsx")
+);
+const StaffCandidatesPage = lazy(() =>
+  import("@/roles/enterprise-staff/pages/StaffCandidatesPage.jsx")
+);
+const StaffSettingsPage = lazy(() =>
+  import("@/roles/enterprise-staff/pages/StaffSettingsPage.jsx")
 );
 
 // Candidate
@@ -179,11 +182,12 @@ export const router = createBrowserRouter([
         element: <RoleGuard roles={[USER_ROLES.ENTERPRISE_STAFF]} />,
         children: [
           { path: ROUTES.STAFF_PORTAL, element: <Page><StaffDashboardPage /></Page> },
-          { path: ROUTES.STAFF_EXAMS, element: <Page><StaffExamsPage /></Page> },
-          { path: ROUTES.STAFF_EXAM_DETAIL, element: <Page><StaffExamDetailPage /></Page> },
+          { path: ROUTES.STAFF_ENROLLMENTS, element: <Page><StaffEnrollmentsPage /></Page> },
           { path: ROUTES.STAFF_QUESTIONS, element: <Page><StaffQuestionsPage /></Page> },
-          { path: ROUTES.STAFF_MONITOR, element: <Page><StaffMonitoringPage /></Page> },
-          { path: ROUTES.STAFF_RESULTS, element: <Page><StaffResultsPage /></Page> },
+          { path: ROUTES.STAFF_QUESTIONS_SUBJECT, element: <Page><StaffSubjectQuestionsPage /></Page> },
+          { path: ROUTES.STAFF_QUESTION_DETAIL, element: <Page><StaffQuestionDetailPage /></Page> },
+          { path: ROUTES.STAFF_CANDIDATES, element: <Page><StaffCandidatesPage /></Page> },
+          { path: ROUTES.STAFF_SETTINGS, element: <Page><StaffSettingsPage /></Page> },
         ],
       },
 

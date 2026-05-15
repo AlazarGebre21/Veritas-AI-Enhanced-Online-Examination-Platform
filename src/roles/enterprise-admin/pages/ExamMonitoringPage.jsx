@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, OctagonX, Activity, Clock, Users, AlertTriangle } from "lucide-react";
+import { ArrowLeft, OctagonX, Activity, Clock, Users, AlertTriangle, X } from "lucide-react";
 import { useExam, useExamSessions, useTerminateSession } from "../hooks/useExams.js";
+import { useCheatingScore } from "../hooks/useCheatingScore.js";
+import ProctoringEventLog from "../components/ProctoringEventLog.jsx";
 import { Badge, Button, Skeleton } from "@/components/ui/index.js";
+import { Modal } from "@/components/ui/index.js";
 import { ROUTES } from "@/config/routes.js";
 import { formatDate } from "@/lib/utils/date.js";
 
@@ -17,6 +21,7 @@ function useCountdown(startedAt, durationMinutes) {
 export default function ExamMonitoringPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [selectedSession, setSelectedSession] = useState(null);
 
   const { data: exam } = useExam(id);
 
@@ -57,8 +62,8 @@ export default function ExamMonitoringPage() {
         <SummaryCard icon={Users} label="Active Sessions" value={isLoading ? "..." : sessions.length} color="notion-blue" />
         <SummaryCard icon={Clock} label="Duration" value={exam ? `${exam.durationMinutes}m` : "..."} color="[#d9730d]" />
         <SummaryCard icon={AlertTriangle} label="High Risk"
-          value={sessions.filter((s) => (s.monitoringScore ?? 100) < 60).length}
-          color="destructive" />
+          value={isLoading ? "..." : "—"}
+          color="destructive" note="Click a session to view" />
       </div>
 
       {/* Session cards */}
@@ -75,21 +80,48 @@ export default function ExamMonitoringPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {sessions.map((s) => (
-            <SessionCard key={s.id} session={s} durationMinutes={exam?.durationMinutes} onTerminate={handleTerminate} />
+            <SessionCard
+              key={s.id}
+              session={s}
+              durationMinutes={exam?.durationMinutes}
+              onTerminate={handleTerminate}
+              onViewProctoring={() => setSelectedSession(s)}
+            />
           ))}
         </div>
       )}
+
+      {/* Proctoring detail modal */}
+      <Modal
+        isOpen={!!selectedSession}
+        onClose={() => setSelectedSession(null)}
+        title={`Proctoring — ${selectedSession?.candidate?.firstName || ""} ${selectedSession?.candidate?.lastName || ""}`}
+      >
+        {selectedSession && (
+          <div className="max-h-[60vh] overflow-y-auto">
+            <ProctoringEventLog sessionId={selectedSession.id} />
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
 
-function SessionCard({ session, durationMinutes, onTerminate }) {
-  const score = session.monitoringScore;
-  const isHighRisk = score != null && score < 60;
+function SessionCard({ session, durationMinutes, onTerminate, onViewProctoring }) {
+  const { data: scoreData } = useCheatingScore(session.id);
+  const score = scoreData?.cheating_score;
+  const isHighRisk = score != null && score >= 60;
   const countdown = useCountdown(session.startedAt, durationMinutes);
 
   return (
-    <div className={`border rounded-comfortable p-4 space-y-3 transition-colors ${isHighRisk ? "border-destructive/40 bg-destructive/5" : "border-whisper bg-white hover:shadow-card"}`}>
+    <div
+      className={`border rounded-comfortable p-4 space-y-3 transition-colors cursor-pointer ${
+        isHighRisk
+          ? "border-destructive/40 bg-destructive/5"
+          : "border-whisper bg-white hover:shadow-card"
+      }`}
+      onClick={onViewProctoring}
+    >
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
@@ -106,14 +138,18 @@ function SessionCard({ session, durationMinutes, onTerminate }) {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-2">
         <Stat label="Time Left" value={countdown || "—"} highlight={countdown === "Time up"} />
-        <Stat label="Monitor Score"
-          value={score != null ? `${score}%` : "—"}
-          highlight={isHighRisk} />
+        <Stat
+          label="Cheating Score"
+          value={score != null ? Math.round(score) : "—"}
+          highlight={isHighRisk}
+        />
       </div>
 
       {/* Terminate */}
-      <button onClick={() => onTerminate(session)}
-        className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[12px] font-medium text-destructive border border-destructive/30 rounded-micro hover:bg-destructive/5 transition-colors">
+      <button
+        onClick={(e) => { e.stopPropagation(); onTerminate(session); }}
+        className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[12px] font-medium text-destructive border border-destructive/30 rounded-micro hover:bg-destructive/5 transition-colors"
+      >
         <OctagonX size={13} /> Terminate
       </button>
     </div>
@@ -129,7 +165,7 @@ function Stat({ label, value, highlight }) {
   );
 }
 
-function SummaryCard({ icon: Icon, label, value, color }) {
+function SummaryCard({ icon: Icon, label, value, color, note }) {
   return (
     <div className="flex items-center gap-3 p-4 border border-whisper rounded-comfortable bg-white">
       <div className={`w-9 h-9 rounded-lg bg-${color}/10 flex items-center justify-center text-${color} shrink-0`}>
@@ -138,6 +174,7 @@ function SummaryCard({ icon: Icon, label, value, color }) {
       <div>
         <p className="text-[11px] text-warm-gray-500 uppercase tracking-wide">{label}</p>
         <p className="text-[18px] font-bold text-notion-black">{value}</p>
+        {note && <p className="text-[10px] text-warm-gray-300">{note}</p>}
       </div>
     </div>
   );
