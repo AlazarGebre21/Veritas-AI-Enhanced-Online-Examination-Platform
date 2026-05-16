@@ -66,9 +66,10 @@ import { candidateClient } from "./candidateClient.js";
  */
 export const candidateSessionApi = {
   /**
-   * Redeem an opaque invitation code to get a session token.
+   * Redeem an opaque invitation code to get a session JWT.
+   * The response contains only { token: "..." }.
    * @param {string} code - Opaque invitation code
-   * @returns {Promise<RedeemResponse>}
+   * @returns {Promise<{ token: string }>}
    */
   redeemCode: async (code) => {
     const { data } = await candidateClient.post("/access/redeem", { code });

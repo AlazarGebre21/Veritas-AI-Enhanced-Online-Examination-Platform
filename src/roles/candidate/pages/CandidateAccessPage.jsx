@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useExamSessionStore } from "@/stores/examSessionStore.js";
 import { useRedeemCode } from "../hooks/useRedeemCode.js";
 import { useStartSession } from "../hooks/useStartSession.js";
@@ -10,28 +10,55 @@ import FaceVerificationStep from "../components/FaceVerificationStep.jsx";
 /**
  * Candidate access page — entry point for the exam flow.
  *
+ * Supports two entry methods:
+ * A) Email link: /exam?code=XXXXX → auto-redeems the code
+ * B) Manual paste: candidate types the code into TokenEntryForm
+ *
  * Flow:
- * 1. Paste opaque code → TokenEntryForm
- * 2. Redeem code → useRedeemCode mutation
- * 3. Check for active session → useResumeSession
+ * 1. Read ?code= from URL (or paste manually) → useRedeemCode mutation
+ * 2. Check for active session → useResumeSession
  *    - Active → navigate to /exam/session/:id (resume)
  *    - None → show FaceVerificationStep
- * 4. Capture face → useStartSession mutation (multipart/form-data)
- * 5. Navigate to /exam/session/:id
+ * 3. Capture face → useStartSession mutation (multipart/form-data)
+ * 4. Navigate to /exam/session/:id
  */
 export default function CandidateAccessPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const rawToken = useExamSessionStore((s) => s.rawToken);
   const sessionId = useExamSessionStore((s) => s.sessionId);
   const setSessionId = useExamSessionStore((s) => s.setSessionId);
+  const clearSession = useExamSessionStore((s) => s.clearSession);
 
   // Steps: "token" → "face" → navigating
-  const [step, setStep] = useState(rawToken ? "face" : "token");
+  const codeFromUrl = searchParams.get("code");
+  const [step, setStep] = useState(
+    rawToken && !codeFromUrl ? "face" : "token"
+  );
   const [tokenError, setTokenError] = useState(null);
+  const [autoRedeemed, setAutoRedeemed] = useState(false);
 
   const redeem = useRedeemCode();
   const startSession = useStartSession();
   const { data: activeSession, isSuccess: resumeChecked } = useResumeSession();
+
+  // Auto-redeem code from URL query param (?code=XXXXX)
+  // Clear any stale session first so the new code can be redeemed
+  useEffect(() => {
+    if (codeFromUrl && !autoRedeemed) {
+      setAutoRedeemed(true);
+      // Clear stale session data before redeeming new code
+      clearSession();
+      redeem.mutate(codeFromUrl, {
+        onError: (err) => {
+          setTokenError(
+            err.response?.data?.error || "Invalid or expired invitation code."
+          );
+        },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [codeFromUrl]);
 
   // If we already have a sessionId, go straight to the exam
   useEffect(() => {

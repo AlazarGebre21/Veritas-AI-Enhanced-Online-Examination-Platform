@@ -1,17 +1,16 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus,
+  Search,
   ClipboardList,
   ChevronDown,
   ChevronRight,
   Clock,
   Users,
   CalendarDays,
-  Search,
 } from "lucide-react";
-import { useExams } from "../hooks/useExams.js";
-import { Button, Badge, Skeleton } from "@/components/ui/index.js";
+import { useExams } from "../hooks/useStaffData.js";
+import { Badge, Skeleton } from "@/components/ui/index.js";
 import { ROUTES } from "@/config/routes.js";
 import { formatDate } from "@/lib/utils/date.js";
 import { useDebounce } from "@/lib/hooks/useDebounce.js";
@@ -35,7 +34,7 @@ const STATUS_DOT = {
   Archived: "bg-warm-gray-300",
 };
 
-export default function ExamsPage() {
+export default function StaffExamsPage() {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchInput, setSearchInput] = useState("");
@@ -53,13 +52,13 @@ export default function ExamsPage() {
   const { data, isLoading } = useExams(params);
   const allExams = data?.data || [];
 
-  // Filter by status
-  const filtered = useMemo(   
+  // Filter by status (client-side)
+  const filtered = useMemo(
     () => statusFilter === "All" ? allExams : allExams.filter((e) => e.status === statusFilter),
     [allExams, statusFilter]
   );
 
-  // Group by topic (fallback to "General" if no topic)
+  // Group by topic
   const grouped = useMemo(() => {
     const map = {};
     filtered.forEach((exam) => {
@@ -74,11 +73,6 @@ export default function ExamsPage() {
     setExpandedTopics((prev) => ({ ...prev, [topic]: !prev[topic] }));
   }
 
-  function goCreate(topic = null) {
-    const path = ROUTES.EXAM_NEW + (topic ? `?topic=${encodeURIComponent(topic)}` : "");
-    navigate(path);
-  }
-
   return (
     <div className="space-y-6">
       {/* ── Header ──────────────────────────────────────────────────────── */}
@@ -86,13 +80,9 @@ export default function ExamsPage() {
         <div>
           <h1 className="text-2xl font-bold text-notion-black">Exams</h1>
           <p className="text-warm-gray-500 text-[15px] mt-1">
-            Manage exams grouped by subject. Click a subject card to view its exams.
+            Browse exams and view details. Exam management is handled by your administrator.
           </p>
         </div>
-        <Button onClick={() => goCreate()}>
-          <Plus size={16} className="mr-2" />
-          Create Exam
-        </Button>
       </div>
 
       {/* ── Search ───────────────────────────────────────────────────────── */}
@@ -131,7 +121,15 @@ export default function ExamsPage() {
           ))}
         </div>
       ) : grouped.length === 0 ? (
-        <EmptyState onCreateClick={() => goCreate()} />
+        <div className="text-center py-16 border border-dashed border-whisper rounded-comfortable bg-warm-white/30">
+          <div className="w-14 h-14 rounded-full bg-notion-blue/10 flex items-center justify-center text-notion-blue mx-auto mb-4">
+            <ClipboardList size={24} />
+          </div>
+          <h3 className="text-[16px] font-semibold text-notion-black">No exams found</h3>
+          <p className="text-warm-gray-500 text-[14px] mt-1">
+            {debouncedSearch ? "No exams match your search." : "No exams available yet."}
+          </p>
+        </div>
       ) : (
         <div className="space-y-4">
           {grouped.map(([topic, exams]) => (
@@ -139,10 +137,9 @@ export default function ExamsPage() {
               key={topic}
               topic={topic}
               exams={exams}
-              isExpanded={expandedTopics[topic] !== false} // default open
+              isExpanded={expandedTopics[topic] !== false}
               onToggle={() => toggleTopic(topic)}
-              onCreateInTopic={() => goCreate(topic)}
-              onExamClick={(exam) => navigate(ROUTES.EXAM_DETAIL.replace(":id", exam.id))}
+              onExamClick={(exam) => navigate(ROUTES.STAFF_EXAM_DETAIL.replace(":id", exam.id))}
             />
           ))}
         </div>
@@ -152,12 +149,11 @@ export default function ExamsPage() {
 }
 
 // ── SubjectCard ──────────────────────────────────────────────────────────
-function SubjectCard({ topic, exams, isExpanded, onToggle, onCreateInTopic, onExamClick }) {
+function SubjectCard({ topic, exams, isExpanded, onToggle, onExamClick }) {
   const activeCount = exams.filter((e) => e.status === "Active").length;
 
   return (
     <div className="border border-whisper rounded-comfortable bg-white overflow-hidden shadow-sm hover:shadow-card transition-shadow">
-      {/* Card Header */}
       <div
         className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-warm-white/50 transition-colors"
         onClick={onToggle}
@@ -177,14 +173,7 @@ function SubjectCard({ topic, exams, isExpanded, onToggle, onCreateInTopic, onEx
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Add exam to this subject */}
-          <button
-            onClick={(e) => { e.stopPropagation(); onCreateInTopic(); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-notion-blue border border-notion-blue/30 rounded-micro hover:bg-notion-blue/5 transition-colors"
-          >
-            <Plus size={12} /> Add Exam
-          </button>
+        <div className="shrink-0">
           {isExpanded ? (
             <ChevronDown size={18} className="text-warm-gray-300" />
           ) : (
@@ -193,7 +182,6 @@ function SubjectCard({ topic, exams, isExpanded, onToggle, onCreateInTopic, onEx
         </div>
       </div>
 
-      {/* Exam List */}
       {isExpanded && (
         <div className="border-t border-whisper divide-y divide-whisper">
           {exams.map((exam) => (
@@ -242,24 +230,6 @@ function ExamRow({ exam, onClick }) {
         <Badge variant={STATUS_VARIANT[exam.status] || "neutral"}>{exam.status}</Badge>
         <span className="text-[11px] text-warm-gray-300">{formatDate(exam.createdAt)}</span>
       </div>
-    </div>
-  );
-}
-
-// ── EmptyState ────────────────────────────────────────────────────────────
-function EmptyState({ onCreateClick }) {
-  return (
-    <div className="text-center py-16 border border-dashed border-whisper rounded-comfortable bg-warm-white/30">
-      <div className="w-14 h-14 rounded-full bg-notion-blue/10 flex items-center justify-center text-notion-blue mx-auto mb-4">
-        <ClipboardList size={24} />
-      </div>
-      <h3 className="text-[16px] font-semibold text-notion-black">No exams yet</h3>
-      <p className="text-warm-gray-500 text-[14px] mt-1 mb-5">
-        Create your first exam to get started.
-      </p>
-      <Button onClick={onCreateClick}>
-        <Plus size={16} className="mr-2" /> Create Exam
-      </Button>
     </div>
   );
 }

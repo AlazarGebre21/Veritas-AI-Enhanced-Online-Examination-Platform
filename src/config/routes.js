@@ -10,6 +10,7 @@ export const ROUTES = {
 
   // Candidate exam (token auth, no JWT)
   EXAM_ACCESS: "/exam",
+  EXAM_START: "/exam/start",
   EXAM_SESSION: "/exam/session/:id",
   EXAM_RESULT: "/exam/result/:sessionId",
 
@@ -37,7 +38,8 @@ export const ROUTES = {
 
   // EnterpriseStaff
   STAFF_PORTAL: "/staff-portal",
-  STAFF_ENROLLMENTS: "/staff-portal/enrollments",
+  STAFF_EXAMS: "/staff-portal/exams",
+  STAFF_EXAM_DETAIL: "/staff-portal/exams/:id",
   STAFF_QUESTIONS: "/staff-portal/questions",
   STAFF_QUESTIONS_SUBJECT: "/staff-portal/questions/subject/:subjectName",
   STAFF_QUESTION_DETAIL: "/staff-portal/questions/:id",

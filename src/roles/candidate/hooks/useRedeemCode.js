@@ -4,23 +4,18 @@ import { candidateSessionApi } from "@/lib/api/candidateSession.api.js";
 import { useExamSessionStore } from "@/stores/examSessionStore.js";
 
 /**
- * Redeem an opaque invitation code to get a session token.
- * On success, stores the token and session context in examSessionStore.
+ * Redeem an opaque invitation code to get a session JWT.
+ * On success, stores the JWT in examSessionStore so candidateClient
+ * can use it as the Bearer token for subsequent requests.
  */
 export function useRedeemCode() {
   const startAccess = useExamSessionStore((s) => s.startAccess);
 
   return useMutation({
     mutationFn: (code) => candidateSessionApi.redeemCode(code),
-    onSuccess: (res, code) => {
-      const { candidateId, enrollmentId, enterpriseId, examId } = res.data;
-      // The raw token is whatever the server returns — store it for candidateClient
+    onSuccess: (res) => {
       startAccess({
-        rawToken: code,
-        candidateId,
-        enrollmentId,
-        enterpriseId,
-        examId,
+        rawToken: res.token,
       });
     },
     onError: (error) => {

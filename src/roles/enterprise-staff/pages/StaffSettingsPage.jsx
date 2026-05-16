@@ -7,9 +7,10 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
+  Loader2,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore.js";
-import { useUpdateMyProfile, useChangeMyPassword } from "../hooks/useStaffSettings.js";
+import { useMyProfile, useUpdateMyProfile, useChangeMyPassword } from "../hooks/useStaffSettings.js";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card.jsx";
 import { Button } from "@/components/ui/Button.jsx";
 import { Input } from "@/components/ui/Input.jsx";
@@ -74,6 +75,9 @@ function ProfileTab({ user }) {
   const enterpriseId = user?.enterpriseId;
   const userId = user?.id;
   const updateProfile = useUpdateMyProfile(enterpriseId);
+  const { data: profileResponse, isLoading } = useMyProfile(enterpriseId, userId);
+  const profile = profileResponse?.data || user;
+
   const [toast, setToast] = useState(null);
 
   const [form, setForm] = useState({
@@ -83,23 +87,23 @@ function ProfileTab({ user }) {
     phone: "",
   });
 
-  // Populate form from JWT-decoded user (limited fields available)
+  // Populate form from fetched profile (or JWT user fallback)
   useEffect(() => {
-    if (user) {
+    if (profile) {
       setForm({
-        first_name: user.firstName || "",
-        last_name: user.lastName || "",
-        honorific: user.honorific || "",
-        phone: user.phone || "",
+        first_name: profile.firstName || "",
+        last_name: profile.lastName || "",
+        honorific: profile.honorific || "",
+        phone: profile.phone || "",
       });
     }
-  }, [user]);
+  }, [profile]);
 
   const hasChanges =
-    form.first_name !== (user?.firstName || "") ||
-    form.last_name !== (user?.lastName || "") ||
-    form.honorific !== (user?.honorific || "") ||
-    form.phone !== (user?.phone || "");
+    form.first_name !== (profile?.firstName || "") ||
+    form.last_name !== (profile?.lastName || "") ||
+    form.honorific !== (profile?.honorific || "") ||
+    form.phone !== (profile?.phone || "");
 
   function handleSave() {
     updateProfile.mutate(
@@ -122,6 +126,14 @@ function ProfileTab({ user }) {
 
   const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-warm-gray-400" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Toast toast={toast} />
@@ -138,7 +150,7 @@ function ProfileTab({ user }) {
             <div>
               <label className="block text-[14px] font-medium text-notion-black mb-1.5">Email</label>
               <div className="px-3.5 py-2 rounded-micro bg-warm-white border border-[#ddd] text-[14px] text-warm-gray-500 select-all">
-                {user?.email || "—"}
+                {profile?.email || user?.email || "—"}
               </div>
             </div>
             <div>

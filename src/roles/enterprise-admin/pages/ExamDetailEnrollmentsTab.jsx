@@ -10,7 +10,7 @@ import { Badge, Button, Skeleton } from "@/components/ui/index.js";
 import { Modal } from "@/components/ui/index.js";
 import { formatDate } from "@/lib/utils/date.js";
 
-export function ExamEnrollmentsTab({ examId }) {
+export function ExamEnrollmentsTab({ examId, exam }) {
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
@@ -49,7 +49,9 @@ export function ExamEnrollmentsTab({ examId }) {
       {
         candidateIds: selected,
         maxAttempts: 1,
-        tokenExpiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        tokenExpiresAt: exam?.scheduledEnd
+          ? new Date(new Date(exam.scheduledEnd).getTime() - 2 * 60 * 1000).toISOString()
+          : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
       },
       {
         onSuccess: () => {

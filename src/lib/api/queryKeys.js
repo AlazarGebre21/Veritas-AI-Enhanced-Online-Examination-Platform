@@ -21,6 +21,7 @@ export const queryKeys = {
     auditLogs: (id, params) => ["enterprises", id, "audit-logs", params],
     usersAll: (id) => ["enterprises", id, "users"],
     users: (id, params) => ["enterprises", id, "users", params],
+    user: (id, userId) => ["enterprises", id, "users", userId],
   },
 
   exams: {

@@ -89,7 +89,7 @@ export default function ExamDetailPage() {
       <div className="pt-6">
         {activeTab === "Overview" && <ExamOverviewTab exam={exam} examId={id} />}
         {activeTab === "Questions" && <ExamQuestionsTab examId={id} exam={exam} />}
-        {activeTab === "Enrollments" && <ExamEnrollmentsTab examId={id} />}
+        {activeTab === "Enrollments" && <ExamEnrollmentsTab examId={id} exam={exam} />}
         {activeTab === "Sessions" && <ExamSessionsTab examId={id} />}
         {activeTab === "Submissions" && <ExamSubmissionsTab examId={id} />}
       </div>

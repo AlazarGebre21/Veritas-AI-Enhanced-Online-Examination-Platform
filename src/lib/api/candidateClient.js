@@ -28,6 +28,11 @@ export const candidateClient = axios.create({
 });
 
 candidateClient.interceptors.request.use((config) => {
+  // /access/redeem is a PUBLIC endpoint — must NOT have Authorization header
+  if (config.url?.includes("/access/redeem")) {
+    delete config.headers.Authorization;
+    return config;
+  }
   const rawToken = getSessionStore?.()?.rawToken;
   if (rawToken) {
     config.headers.Authorization = `Bearer ${rawToken}`;

@@ -1,86 +1,203 @@
 import { useState, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Clock, Percent, Users, CalendarDays, Search, Mail, Link2, Copy, Check, Send, Loader2 } from "lucide-react";
 import {
-  Search,
-  Copy,
-  Check,
-  Mail,
-  Link2,
-  Send,
-  Loader2,
-  ClipboardList,
-  ArrowRight,
-} from "lucide-react";
-import {
-  useCandidates,
+  useExam,
+  useExamQuestions,
   useExamEnrollments,
+  useCandidates,
   useEnrollCandidates,
   useNotifyEnrollment,
   useNotifyAllEnrollments,
   useEnrollmentLink,
 } from "../hooks/useStaffData.js";
-import { Badge, Button, Skeleton, Input } from "@/components/ui/index.js";
-import { Modal } from "@/components/ui/index.js";
+import { Badge, Skeleton, Card, CardContent, Button, Modal } from "@/components/ui/index.js";
+import { ROUTES } from "@/config/routes.js";
 import { formatDate } from "@/lib/utils/date.js";
 
-export default function StaffEnrollmentsPage() {
-  // ── Exam ID lookup ──────────────────────────────────────────────────────
-  const [examIdInput, setExamIdInput] = useState("");
-  const [activeExamId, setActiveExamId] = useState(null);
+const TABS = ["Overview", "Questions", "Enrollments"];
 
-  function handleLoadExam(e) {
-    e.preventDefault();
-    const trimmed = examIdInput.trim();
-    if (trimmed) setActiveExamId(trimmed);
+const STATUS_VARIANT = {
+  Draft: "neutral", Scheduled: "info", Active: "success",
+  Closed: "neutral", Archived: "neutral",
+};
+
+export default function StaffExamDetailPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("Overview");
+
+  const { data: exam, isLoading } = useExam(id);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-72" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (!exam) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-warm-gray-500">Exam not found or you do not have access.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-0">
+      {/* Back */}
+      <button
+        onClick={() => navigate(ROUTES.STAFF_EXAMS)}
+        className="flex items-center gap-1.5 text-[14px] text-warm-gray-500 hover:text-notion-black transition-colors mb-4"
+      >
+        <ArrowLeft size={16} /> Back to Exams
+      </button>
+
       {/* Header */}
-      <div className="border-b border-whisper pb-6">
-        <h1 className="text-2xl font-bold text-notion-black">Enrollments</h1>
-        <p className="text-warm-gray-500 text-[15px] mt-1">
-          Manage exam enrollments — enroll candidates and send invitations.
-        </p>
+      <div className="border-b border-whisper pb-5 mb-0">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-notion-black truncate">{exam.title}</h1>
+            <div className="flex items-center gap-3 mt-1.5">
+              <Badge variant={STATUS_VARIANT[exam.status]}>{exam.status}</Badge>
+              <span className="text-[13px] text-warm-gray-500">{exam.durationMinutes}m</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex items-center gap-1 mt-5 overflow-x-auto">
+          {TABS.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2.5 text-[13px] font-medium whitespace-nowrap border-b-2 transition-colors ${
+                activeTab === tab
+                  ? "border-notion-blue text-notion-blue"
+                  : "border-transparent text-warm-gray-500 hover:text-notion-black"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Exam ID Input */}
-      <form onSubmit={handleLoadExam} className="flex items-end gap-3">
-        <div className="flex-1 max-w-lg">
-          <Input
-            label="Exam ID"
-            id="staff-exam-id"
-            placeholder="Paste the exam ID provided by your administrator..."
-            value={examIdInput}
-            onChange={(e) => setExamIdInput(e.target.value)}
-          />
-        </div>
-        <Button type="submit" disabled={!examIdInput.trim()}>
-          <ArrowRight size={16} className="mr-1.5" />
-          Load Enrollments
-        </Button>
-      </form>
-
-      {/* Enrollment content */}
-      {activeExamId ? (
-        <EnrollmentPanel examId={activeExamId} />
-      ) : (
-        <div className="text-center py-16 border border-dashed border-whisper rounded-comfortable">
-          <ClipboardList size={32} className="mx-auto text-warm-gray-300 mb-3" />
-          <p className="text-[14px] text-warm-gray-500">
-            Enter an exam ID above to view and manage its enrollments.
-          </p>
-          <p className="text-[12px] text-warm-gray-300 mt-1">
-            Your administrator can provide the exam ID from the exam management page.
-          </p>
-        </div>
-      )}
+      {/* Tab Content */}
+      <div className="pt-6">
+        {activeTab === "Overview" && <OverviewTab exam={exam} />}
+        {activeTab === "Questions" && <QuestionsTab examId={id} />}
+        {activeTab === "Enrollments" && <EnrollmentsTab exam={exam} />}
+      </div>
     </div>
   );
 }
 
-// ── Enrollment Panel (loaded after exam ID is entered) ────────────────────
+// ── Overview Tab (read-only) ──────────────────────────────────────────────
+function OverviewTab({ exam }) {
+  const settings = exam.settings || {};
 
-function EnrollmentPanel({ examId }) {
+  return (
+    <div className="space-y-6">
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <StatCard icon={Clock} label="Duration" value={`${exam.durationMinutes} min`} />
+        <StatCard icon={Percent} label="Passing Score" value={`${exam.passingScorePercent}%`} />
+        <StatCard icon={Users} label="Max Participants" value={exam.maxParticipants || "Unlimited"} />
+        <StatCard icon={CalendarDays} label="Status" value={exam.status} />
+      </div>
+
+      {/* Details */}
+      <Card>
+        <CardContent className="p-5 space-y-3">
+          <h3 className="text-[15px] font-semibold text-notion-black">Details</h3>
+          {exam.description && <p className="text-[14px] text-warm-gray-500">{exam.description}</p>}
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-[13px]">
+            <Detail label="Status" value={<Badge variant={STATUS_VARIANT[exam.status]}>{exam.status}</Badge>} />
+            <Detail label="Negative Marking" value={exam.negativeMarking ? "Yes" : "No"} />
+            <Detail label="Created" value={formatDate(exam.createdAt)} />
+            {exam.scheduledStart && <Detail label="Scheduled Start" value={formatDate(exam.scheduledStart)} />}
+            {exam.scheduledEnd && <Detail label="Scheduled End" value={formatDate(exam.scheduledEnd)} />}
+          </dl>
+        </CardContent>
+      </Card>
+
+      {/* Settings */}
+      <Card>
+        <CardContent className="p-5 space-y-3">
+          <h3 className="text-[15px] font-semibold text-notion-black">Settings</h3>
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-[13px]">
+            {[
+              ["Randomize Questions", settings.randomizeQuestions],
+              ["Randomize Options", settings.randomizeOptions],
+              ["Show Results Immediately", settings.showResultsImmediately],
+              ["Allow Review", settings.allowReview],
+              ["Max Attempts", settings.maxAttempts],
+              ["Proctoring", settings.proctoring?.enabled ? "Enabled" : "Disabled"],
+            ].map(([k, v]) => (
+              <Detail key={k} label={k} value={
+                typeof v === "boolean"
+                  ? <Badge variant={v ? "success" : "neutral"}>{v ? "On" : "Off"}</Badge>
+                  : String(v ?? "—")
+              } />
+            ))}
+          </dl>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ── Questions Tab (read-only) ─────────────────────────────────────────────
+function QuestionsTab({ examId }) {
+  const { data, isLoading } = useExamQuestions(examId, { limit: 100, with_correct_answer: false });
+  const questions = data?.data || [];
+
+  if (isLoading) {
+    return <div className="space-y-2">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full" />)}</div>;
+  }
+
+  if (questions.length === 0) {
+    return (
+      <p className="text-center text-[13px] text-warm-gray-500 py-10 border border-dashed border-whisper rounded-comfortable">
+        No questions attached to this exam.
+      </p>
+    );
+  }
+
+  return (
+    <div className="border border-whisper rounded-comfortable overflow-hidden divide-y divide-whisper">
+      {questions.map((q, i) => {
+        const question = q.question || q;
+        return (
+          <div key={q.id || i} className="px-5 py-3.5 hover:bg-warm-white/50 transition-colors">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="text-[14px] font-medium text-notion-black">
+                  {q.orderIndex != null ? `${q.orderIndex + 1}. ` : `${i + 1}. `}
+                  {question.title || question.content?.slice(0, 80) || "Untitled"}
+                </p>
+                <div className="flex items-center gap-3 mt-0.5 text-[11px] text-warm-gray-500">
+                  <Badge variant="neutral">{question.type || "—"}</Badge>
+                  <Badge variant="neutral">{question.difficulty || "—"}</Badge>
+                  <span>{q.pointsOverride ?? question.points ?? 0} pts</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Enrollments Tab (Full Enrollment Functionality) ─────────────────────────
+function EnrollmentsTab({ exam }) {
+  const examId = exam.id;
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
@@ -113,11 +230,22 @@ function EnrollmentPanel({ examId }) {
   const getLink = useEnrollmentLink();
 
   function handleEnroll() {
+    let tokenExpiresAt;
+    if (exam.scheduledEnd) {
+      // Set to 2 minutes before exam end time
+      const endTime = new Date(exam.scheduledEnd);
+      endTime.setMinutes(endTime.getMinutes() - 2);
+      tokenExpiresAt = endTime.toISOString();
+    } else {
+      // Default to 90 days if no end time is specified
+      tokenExpiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
+    }
+
     enroll.mutate(
       {
         candidateIds: selected,
         maxAttempts: 1,
-        tokenExpiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        tokenExpiresAt,
       },
       {
         onSuccess: () => {
@@ -148,9 +276,6 @@ function EnrollmentPanel({ examId }) {
       <div className="text-center py-12 border border-dashed border-destructive/30 rounded-comfortable bg-destructive/5">
         <p className="text-[14px] text-destructive font-medium">
           Failed to load enrollments for this exam.
-        </p>
-        <p className="text-[12px] text-warm-gray-500 mt-1">
-          Please verify the exam ID is correct and that you have access.
         </p>
       </div>
     );
@@ -328,5 +453,32 @@ function EnrollmentPanel({ examId }) {
         </div>
       </Modal>
     </div>
+  );
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+function StatCard({ icon: Icon, label, value }) {
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-3 p-4">
+        <div className="w-9 h-9 rounded-lg bg-notion-blue/10 flex items-center justify-center text-notion-blue shrink-0">
+          <Icon size={16} />
+        </div>
+        <div>
+          <p className="text-[11px] font-medium text-warm-gray-500 uppercase tracking-wide">{label}</p>
+          <p className="text-[16px] font-bold text-notion-black mt-0.5">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Detail({ label, value }) {
+  return (
+    <>
+      <dt className="text-warm-gray-500">{label}</dt>
+      <dd className="font-medium text-notion-black">{value}</dd>
+    </>
   );
 }

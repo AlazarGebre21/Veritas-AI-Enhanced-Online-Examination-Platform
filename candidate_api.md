@@ -1932,3 +1932,60 @@ Successful Response
 | `invitationUrl`  | string             | Newly generated invitation URL          |
 | `status`         | string             | Invitation status                       |
 | `tokenExpiresAt` | string (date-time) | Expiration time of the invitation token |
+
+# Redeem Invitation Code PUBLIC ENDPOINT
+
+## Endpoint
+
+```http
+POST /access/redeem
+```
+
+## Description
+
+Exchange the opaque invitation code (from the URL query parameter) for a JWT.
+The JWT is returned in the response body only.
+
+---
+
+## Request Body
+
+### Content Type
+
+```http
+application/json
+```
+
+### Body Parameters
+
+| Name | Type   | Required | Description                                    |
+| ---- | ------ | -------- | ---------------------------------------------- |
+| code | string | Yes      | Opaque invitation code from the invitation URL |
+
+### Example Request
+
+```json
+{
+  "code": "string"
+}
+```
+
+---
+
+## Responses
+
+### 200 OK
+
+#### Content Type
+
+```http
+application/json
+```
+
+#### Example Response
+
+```json
+{
+  "token": "string"
+}
+```

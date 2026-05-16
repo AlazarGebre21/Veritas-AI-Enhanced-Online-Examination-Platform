@@ -4,8 +4,21 @@
  * but scoped to the current user editing their own profile.
  */
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { enterpriseApi } from "@/lib/api/enterprises.api.js";
+import { queryKeys } from "@/lib/api/queryKeys.js";
+
+/**
+ * Fetch current user's profile details.
+ * GET /enterprises/:enterpriseId/users/:userId
+ */
+export function useMyProfile(enterpriseId, userId) {
+  return useQuery({
+    queryKey: queryKeys.enterprises.user(enterpriseId, userId),
+    queryFn: () => enterpriseApi.getUser(enterpriseId, userId),
+    enabled: !!enterpriseId && !!userId,
+  });
+}
 
 /**
  * Update current user's profile fields.

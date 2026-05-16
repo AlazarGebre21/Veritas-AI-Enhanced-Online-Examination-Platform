@@ -81,8 +81,11 @@ const EnterpriseSettingsPage = lazy(() =>
 const StaffDashboardPage = lazy(() =>
   import("@/roles/enterprise-staff/pages/StaffDashboardPage.jsx")
 );
-const StaffEnrollmentsPage = lazy(() =>
-  import("@/roles/enterprise-staff/pages/StaffEnrollmentsPage.jsx")
+const StaffExamsPage = lazy(() =>
+  import("@/roles/enterprise-staff/pages/StaffExamsPage.jsx")
+);
+const StaffExamDetailPage = lazy(() =>
+  import("@/roles/enterprise-staff/pages/StaffExamDetailPage.jsx")
 );
 const StaffQuestionsPage = lazy(() =>
   import("@/roles/enterprise-staff/pages/StaffQuestionsPage.jsx")
@@ -132,6 +135,7 @@ export const router = createBrowserRouter([
     element: <ExamLayout />,
     children: [
       { path: ROUTES.EXAM_ACCESS, element: <Page><CandidateAccessPage /></Page> },
+      { path: ROUTES.EXAM_START, element: <Page><CandidateAccessPage /></Page> },
       { path: ROUTES.EXAM_SESSION, element: <Page><ExamSessionPage /></Page> },
       { path: ROUTES.EXAM_RESULT, element: <Page><CandidateResultsPage /></Page> },
     ],
@@ -182,7 +186,8 @@ export const router = createBrowserRouter([
         element: <RoleGuard roles={[USER_ROLES.ENTERPRISE_STAFF]} />,
         children: [
           { path: ROUTES.STAFF_PORTAL, element: <Page><StaffDashboardPage /></Page> },
-          { path: ROUTES.STAFF_ENROLLMENTS, element: <Page><StaffEnrollmentsPage /></Page> },
+          { path: ROUTES.STAFF_EXAMS, element: <Page><StaffExamsPage /></Page> },
+          { path: ROUTES.STAFF_EXAM_DETAIL, element: <Page><StaffExamDetailPage /></Page> },
           { path: ROUTES.STAFF_QUESTIONS, element: <Page><StaffQuestionsPage /></Page> },
           { path: ROUTES.STAFF_QUESTIONS_SUBJECT, element: <Page><StaffSubjectQuestionsPage /></Page> },
           { path: ROUTES.STAFF_QUESTION_DETAIL, element: <Page><StaffQuestionDetailPage /></Page> },

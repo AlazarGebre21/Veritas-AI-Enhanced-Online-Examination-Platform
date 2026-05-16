@@ -1,11 +1,7 @@
 import axios from "axios";
 import { env } from "@/config/env.js";
 
-// We import the store getter lazily to avoid circular dependency at module init
-let getAuthStore;
-import("@/stores/authStore.js").then((m) => {
-  getAuthStore = m.useAuthStore.getState;
-});
+import { useAuthStore } from "@/stores/authStore.js";
 
 export const apiClient = axios.create({
   baseURL: env.API_BASE_URL,
@@ -17,7 +13,7 @@ export const apiClient = axios.create({
 // CORS allows: Authorization, Content-Type, X-Request-ID
 // DO NOT inject X-Enterprise-ID, X-User-ID — backend resolves from JWT.
 apiClient.interceptors.request.use((config) => {
-  const accessToken = getAuthStore?.()?.accessToken;
+  const accessToken = useAuthStore.getState().accessToken;
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
@@ -61,7 +57,7 @@ apiClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const { refreshToken, setTokens, clearAuth } = getAuthStore?.() ?? {};
+      const { refreshToken, setTokens, clearAuth } = useAuthStore.getState();
       if (!refreshToken) throw new Error("No refresh token");
 
       const { data } = await axios.post(`${env.API_BASE_URL}/auth/refresh`, {
@@ -75,7 +71,7 @@ apiClient.interceptors.response.use(
       return apiClient(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError, null);
-      getAuthStore?.()?.clearAuth?.();
+      useAuthStore.getState().clearAuth?.();
       window.location.href = "/login";
       return Promise.reject(refreshError);
     } finally {

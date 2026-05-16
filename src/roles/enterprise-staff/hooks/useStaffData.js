@@ -9,6 +9,16 @@
 // Candidates (read-only for staff)
 export { useCandidates, useCandidate } from "@/roles/enterprise-admin/hooks/useCandidates.js";
 
+// Users (read-only for staff — GET /enterprises/:id/users/:userId)
+export { useEnterpriseUser } from "@/roles/enterprise-admin/hooks/useEnterpriseUsers.js";
+
+// Exams (read-only for staff — GET /exams, GET /exams/:id, GET /exams/:id/questions)
+export {
+  useExams,
+  useExam,
+  useExamQuestions,
+} from "@/roles/enterprise-admin/hooks/useExams.js";
+
 // Enrollments (staff can list, create, notify, get link)
 export {
   useExamEnrollments,

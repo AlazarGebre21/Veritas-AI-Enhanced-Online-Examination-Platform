@@ -39,7 +39,7 @@ const NAV_ITEMS = {
   ],
   [USER_ROLES.ENTERPRISE_STAFF]: [
     { label: "Dashboard", icon: LayoutDashboard, to: ROUTES.STAFF_PORTAL },
-    { label: "Enrollments", icon: ClipboardList, to: ROUTES.STAFF_ENROLLMENTS },
+    { label: "Exams", icon: ClipboardList, to: ROUTES.STAFF_EXAMS },
     { label: "Questions", icon: FileText, to: ROUTES.STAFF_QUESTIONS },
     { label: "Candidates", icon: Users, to: ROUTES.STAFF_CANDIDATES },
     { label: "Settings", icon: Settings, to: ROUTES.STAFF_SETTINGS },
