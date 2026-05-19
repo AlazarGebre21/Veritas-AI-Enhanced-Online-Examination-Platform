@@ -7,10 +7,11 @@ import { ROUTES } from "@/config/routes.js";
 import { ExamOverviewTab } from "./ExamDetailOverviewTab.jsx";
 import { ExamQuestionsTab } from "./ExamDetailQuestionsTab.jsx";
 import { ExamEnrollmentsTab } from "./ExamDetailEnrollmentsTab.jsx";
+import { ExamProctoringTab } from "./ExamDetailProctoringTab.jsx";
 import { ExamSessionsTab } from "./ExamDetailSessionsTab.jsx";
 import { ExamSubmissionsTab } from "./ExamDetailSubmissionsTab.jsx";
 
-const TABS = ["Overview", "Questions", "Enrollments", "Sessions", "Submissions"];
+const TABS = ["Overview", "Questions", "Enrollments", "Proctoring", "Sessions", "Submissions"];
 
 const STATUS_VARIANT = {
   Draft: "neutral", Scheduled: "info", Active: "success",
@@ -90,6 +91,7 @@ export default function ExamDetailPage() {
         {activeTab === "Overview" && <ExamOverviewTab exam={exam} examId={id} />}
         {activeTab === "Questions" && <ExamQuestionsTab examId={id} exam={exam} />}
         {activeTab === "Enrollments" && <ExamEnrollmentsTab examId={id} exam={exam} />}
+        {activeTab === "Proctoring" && <ExamProctoringTab examId={id} />}
         {activeTab === "Sessions" && <ExamSessionsTab examId={id} />}
         {activeTab === "Submissions" && <ExamSubmissionsTab examId={id} />}
       </div>

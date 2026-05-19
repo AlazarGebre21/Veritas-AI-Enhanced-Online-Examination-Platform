@@ -26,7 +26,7 @@ export default function AnswerOptionList({ options = [], selectedIds = [], onSel
             }`}>
               {letter}
             </span>
-            <span className="pt-0.5 leading-relaxed">{opt.text}</span>
+            <span className="pt-0.5 leading-relaxed">{opt.text || opt.content}</span>
           </button>
         );
       })}

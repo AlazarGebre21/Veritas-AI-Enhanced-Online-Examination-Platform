@@ -21,7 +21,7 @@ export default function QuestionRenderer({ question, answer, onAnswer, onFlag, i
   }
 
   const questionType = snap.type || snap.questionType || "MCQ";
-  const questionText = snap.text || snap.questionText || "";
+  const questionText = snap.content || snap.text || snap.questionText || "";
   const options = snap.options || [];
   const points = question.points || 0;
   const negPoints = question.negativePoints || 0;

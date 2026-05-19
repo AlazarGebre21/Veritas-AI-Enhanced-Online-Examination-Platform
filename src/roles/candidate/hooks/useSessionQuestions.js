@@ -10,7 +10,15 @@ import { queryKeys } from "@/lib/api/queryKeys.js";
  * @returns {object|null}
  */
 function decodeSnapshot(snapshot) {
-  if (!snapshot || !Array.isArray(snapshot) || snapshot.length === 0) {
+  if (!snapshot) return null;
+
+  // Backend may return snapshot as an already-parsed JSON object
+  if (typeof snapshot === "object" && !Array.isArray(snapshot)) {
+    return snapshot;
+  }
+
+  // Otherwise decode from byte array (number[] → UTF-8 → JSON)
+  if (!Array.isArray(snapshot) || snapshot.length === 0) {
     return null;
   }
   try {

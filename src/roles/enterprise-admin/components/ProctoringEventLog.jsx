@@ -34,6 +34,8 @@ export default function ProctoringEventLog({ sessionId }) {
   const { data: eventsData, isLoading: eventsLoading } = useProctoringEvents(sessionId);
   const { data: scoreData, isLoading: scoreLoading } = useCheatingScore(sessionId);
 
+  console.log("eventsData", eventsData);
+  console.log("scoreData", scoreData);
   const events = eventsData?.events || [];
   const score = scoreData?.cheating_score;
   const eventCount = scoreData?.event_count ?? events.length;

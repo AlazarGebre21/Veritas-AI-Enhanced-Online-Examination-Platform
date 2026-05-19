@@ -32,6 +32,7 @@ export default function ExamSessionPage() {
   // Data fetching
   const { data: questionsData, isLoading } = useSessionQuestions(sessionId);
   const questions = questionsData?.data || [];
+  console.log(questions)
 
   // Answer state (local Map: sessionQuestionId → answerData)
   const [answers, setAnswers] = useState(new Map());

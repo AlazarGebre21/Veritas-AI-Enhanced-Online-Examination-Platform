@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 /**
  * Exam session store for the candidate flow.
@@ -36,7 +36,13 @@ export const useExamSessionStore = create()(
 
       /**
        * Called after POST /access/redeem succeeds.
-       * @param {{ rawToken: string, enrollmentId: string, enterpriseId: string, examId: string, candidateId: string }} payload
+       * @param {{
+       *   rawToken: string,
+       *   enrollmentId: string,
+       *   enterpriseId: string,
+       *   examId: string,
+       *   candidateId: string
+       * }} payload
        */
       startAccess: (payload) => set({ ...payload }),
 
@@ -47,7 +53,8 @@ export const useExamSessionStore = create()(
       setSessionId: (sessionId) => set({ sessionId }),
 
       /** @param {number} index */
-      setCurrentQuestion: (index) => set({ currentQuestionIndex: index }),
+      setCurrentQuestion: (index) =>
+        set({ currentQuestionIndex: index }),
 
       /** Clear everything — called on exam submit or expiry */
       clearSession: () =>
@@ -63,11 +70,17 @@ export const useExamSessionStore = create()(
     }),
     {
       name: "veritas-exam-session",
-      storage: {
-        getItem: (key) => sessionStorage.getItem(key),
-        setItem: (key, val) => sessionStorage.setItem(key, val),
-        removeItem: (key) => sessionStorage.removeItem(key),
-      },
+
+      /**
+       * createJSONStorage automatically handles:
+       * - JSON.stringify() when saving
+       * - JSON.parse() when reading
+       *
+       * Without this, sessionStorage would store:
+       * [object Object]
+       * instead of valid JSON.
+       */
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );
