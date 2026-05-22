@@ -25,6 +25,7 @@ const STATUS_VARIANT = {
   Draft: "neutral",
   Scheduled: "info",
   Active: "success",
+  
   Closed: "neutral",
   Archived: "neutral",
 };
