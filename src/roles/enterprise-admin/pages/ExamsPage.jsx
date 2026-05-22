@@ -9,6 +9,8 @@ import {
   Users,
   CalendarDays,
   Search,
+  Archive,
+  Trash2,
 } from "lucide-react";
 import { useExams } from "../hooks/useExams.js";
 import { Button, Badge, Skeleton } from "@/components/ui/index.js";
@@ -42,20 +44,25 @@ export default function ExamsPage() {
   const [expandedTopics, setExpandedTopics] = useState({});
 
   const debouncedSearch = useDebounce(searchInput, 300);
+  const isArchived = statusFilter === "Archived";
 
   const params = {
     limit: 100,
     sort: "created_at",
     sort_dir: "desc",
     ...(debouncedSearch ? { search: debouncedSearch } : {}),
+    ...(isArchived ? { archived: true } : {}),
   };
 
   const { data, isLoading } = useExams(params);
-  const allExams = data?.data || [];
+  const allExams = useMemo(() => data?.data || [], [data]);
 
-  // Filter by status
-  const filtered = useMemo(   
-    () => statusFilter === "All" ? allExams : allExams.filter((e) => e.status === statusFilter),
+  // Filter by status (Archived is handled via the API query param, not client-side)
+  const filtered = useMemo(
+    () =>
+      statusFilter === "All"
+        ? allExams
+        : allExams.filter((e) => e.status === statusFilter),
     [allExams, statusFilter]
   );
 
@@ -131,9 +138,21 @@ export default function ExamsPage() {
           ))}
         </div>
       ) : grouped.length === 0 ? (
-        <EmptyState onCreateClick={() => goCreate()} />
+        isArchived ? (
+          <ArchivedEmptyState />
+        ) : (
+          <EmptyState onCreateClick={() => goCreate()} />
+        )
       ) : (
         <div className="space-y-4">
+          {isArchived && (
+            <div className="flex items-center gap-2 px-4 py-3 text-[13px] text-warm-gray-500 bg-amber-50 border border-amber-200 rounded-comfortable">
+              <Trash2 size={14} className="text-amber-500 shrink-0" />
+              <span>
+                Archived exams are automatically deleted after <strong className="text-notion-black">30 days</strong>.
+              </span>
+            </div>
+          )}
           {grouped.map(([topic, exams]) => (
             <SubjectCard
               key={topic}
@@ -143,6 +162,7 @@ export default function ExamsPage() {
               onToggle={() => toggleTopic(topic)}
               onCreateInTopic={() => goCreate(topic)}
               onExamClick={(exam) => navigate(ROUTES.EXAM_DETAIL.replace(":id", exam.id))}
+              isArchived={isArchived}
             />
           ))}
         </div>
@@ -152,25 +172,31 @@ export default function ExamsPage() {
 }
 
 // ── SubjectCard ──────────────────────────────────────────────────────────
-function SubjectCard({ topic, exams, isExpanded, onToggle, onCreateInTopic, onExamClick }) {
+function SubjectCard({ topic, exams, isExpanded, onToggle, onCreateInTopic, onExamClick, isArchived = false }) {
   const activeCount = exams.filter((e) => e.status === "Active").length;
 
   return (
-    <div className="border border-whisper rounded-comfortable bg-white overflow-hidden shadow-sm hover:shadow-card transition-shadow">
+    <div className={`border rounded-comfortable overflow-hidden shadow-sm hover:shadow-card transition-shadow ${
+      isArchived ? "border-warm-gray-200 bg-warm-white/50" : "border-whisper bg-white"
+    }`}>
       {/* Card Header */}
       <div
         className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-warm-white/50 transition-colors"
         onClick={onToggle}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-notion-blue/10 flex items-center justify-center text-notion-blue shrink-0">
-            <ClipboardList size={18} />
+          <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+            isArchived ? "bg-warm-gray-100 text-warm-gray-400" : "bg-notion-blue/10 text-notion-blue"
+          }`}>
+            {isArchived ? <Archive size={18} /> : <ClipboardList size={18} />}
           </div>
           <div className="min-w-0">
-            <h3 className="text-[15px] font-semibold text-notion-black truncate">{topic}</h3>
+            <h3 className={`text-[15px] font-semibold truncate ${
+              isArchived ? "text-warm-gray-500" : "text-notion-black"
+            }`}>{topic}</h3>
             <p className="text-[12px] text-warm-gray-500 mt-0.5">
               {exams.length} exam{exams.length !== 1 ? "s" : ""}
-              {activeCount > 0 && (
+              {!isArchived && activeCount > 0 && (
                 <span className="ml-2 text-success font-medium">· {activeCount} active</span>
               )}
             </p>
@@ -178,13 +204,15 @@ function SubjectCard({ topic, exams, isExpanded, onToggle, onCreateInTopic, onEx
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {/* Add exam to this subject */}
-          <button
-            onClick={(e) => { e.stopPropagation(); onCreateInTopic(); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-notion-blue border border-notion-blue/30 rounded-micro hover:bg-notion-blue/5 transition-colors"
-          >
-            <Plus size={12} /> Add Exam
-          </button>
+          {/* Add exam to this subject — hide in archived view */}
+          {!isArchived && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onCreateInTopic(); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-notion-blue border border-notion-blue/30 rounded-micro hover:bg-notion-blue/5 transition-colors"
+            >
+              <Plus size={12} /> Add Exam
+            </button>
+          )}
           {isExpanded ? (
             <ChevronDown size={18} className="text-warm-gray-300" />
           ) : (
@@ -197,7 +225,7 @@ function SubjectCard({ topic, exams, isExpanded, onToggle, onCreateInTopic, onEx
       {isExpanded && (
         <div className="border-t border-whisper divide-y divide-whisper">
           {exams.map((exam) => (
-            <ExamRow key={exam.id} exam={exam} onClick={() => onExamClick(exam)} />
+            <ExamRow key={exam.id} exam={exam} onClick={() => onExamClick(exam)} isArchived={isArchived} />
           ))}
         </div>
       )}
@@ -206,18 +234,24 @@ function SubjectCard({ topic, exams, isExpanded, onToggle, onCreateInTopic, onEx
 }
 
 // ── ExamRow ──────────────────────────────────────────────────────────────
-function ExamRow({ exam, onClick }) {
+function ExamRow({ exam, onClick, isArchived = false }) {
   return (
     <div
       onClick={onClick}
-      className="flex items-center justify-between px-5 py-3.5 hover:bg-warm-white/60 cursor-pointer transition-colors group"
+      className={`flex items-center justify-between px-5 py-3.5 cursor-pointer transition-colors group ${
+        isArchived ? "hover:bg-warm-gray-50/60 opacity-75" : "hover:bg-warm-white/60"
+      }`}
     >
       <div className="flex items-center gap-3 min-w-0">
         <span
           className={`w-2 h-2 rounded-full shrink-0 ${STATUS_DOT[exam.status] || "bg-warm-gray-300"}`}
         />
         <div className="min-w-0">
-          <p className="text-[14px] font-medium text-notion-black group-hover:text-notion-blue transition-colors truncate">
+          <p className={`text-[14px] font-medium transition-colors truncate ${
+            isArchived
+              ? "text-warm-gray-500 group-hover:text-warm-gray-700"
+              : "text-notion-black group-hover:text-notion-blue"
+          }`}>
             {exam.title}
           </p>
           <div className="flex items-center gap-3 mt-0.5 text-[11px] text-warm-gray-500">
@@ -260,6 +294,21 @@ function EmptyState({ onCreateClick }) {
       <Button onClick={onCreateClick}>
         <Plus size={16} className="mr-2" /> Create Exam
       </Button>
+    </div>
+  );
+}
+
+// ── ArchivedEmptyState ────────────────────────────────────────────────────
+function ArchivedEmptyState() {
+  return (
+    <div className="text-center py-16 border border-dashed border-warm-gray-200 rounded-comfortable bg-warm-white/30">
+      <div className="w-14 h-14 rounded-full bg-warm-gray-100 flex items-center justify-center text-warm-gray-400 mx-auto mb-4">
+        <Archive size={24} />
+      </div>
+      <h3 className="text-[16px] font-semibold text-notion-black">No archived exams</h3>
+      <p className="text-warm-gray-500 text-[14px] mt-1">
+        Deleted exams will appear here for 30 days before permanent removal.
+      </p>
     </div>
   );
 }

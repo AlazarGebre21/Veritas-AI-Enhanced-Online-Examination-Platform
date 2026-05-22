@@ -39,7 +39,7 @@ export const examApi = {
 
   /**
    * List exams for the caller enterprise.
-   * @param {{ page?: number, limit?: number, sort?: string, sort_dir?: string }} [params]
+   * @param {{ page?: number, limit?: number, sort?: string, sort_dir?: string, archived?: boolean }} [params]
    * @returns {Promise<{ data: Exam[], metadata: any }>}
    */
   list: async (params = {}) => {

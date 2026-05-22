@@ -15,16 +15,6 @@ const DRAFT_KEY = "veritas_exam_wizard_draft";
 
 const STEPS = ["Setup Details", "Build & Enroll", "Review & Publish"];
 
-const DEFAULT_SETTINGS = {
-  randomizeQuestions: true,
-  randomizeOptions: true,
-  shufflePerStudent: true,
-  showResultsImmediately: false,
-  allowReview: true,
-  maxAttempts: 1,
-  proctoring: { enabled: false },
-};
-
 const setupSchema = z.object({
   title: z.string().min(1, "Title is required"),
   topic: z.string().min(1, "Subject/topic is required"),
@@ -33,14 +23,6 @@ const setupSchema = z.object({
   maxParticipants: z.coerce.number().min(1).optional(),
   passingScorePercent: z.coerce.number().min(0).max(100).optional().default(60),
   negativeMarking: z.boolean().optional().default(false),
-  // Settings toggles
-  randomizeQuestions: z.boolean().default(true),
-  randomizeOptions: z.boolean().default(true),
-  shufflePerStudent: z.boolean().default(true),
-  showResultsImmediately: z.boolean().default(false),
-  allowReview: z.boolean().default(true),
-  maxAttempts: z.coerce.number().min(1).default(1),
-  proctoringEnabled: z.boolean().default(false),
 });
 
 // ── Step Indicator ────────────────────────────────────────────────────────
@@ -86,14 +68,11 @@ function StepIndicator({ current }) {
 
 // ── Stage 1: Setup Details ────────────────────────────────────────────────
 function Stage1({ onNext, initialData }) {
-  const [advancedOpen, setAdvancedOpen] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(setupSchema),
     defaultValues: initialData || {
       title: "", topic: "", description: "",
-      durationMinutes: 60, passingScorePercent: 60, negativeMarking: false, maxAttempts: 1,
-      randomizeQuestions: true, randomizeOptions: true, shufflePerStudent: true,
-      showResultsImmediately: false, allowReview: true, proctoringEnabled: false,
+      durationMinutes: 60, passingScorePercent: 50, negativeMarking: true,
     },
   });
 
@@ -127,34 +106,6 @@ function Stage1({ onNext, initialData }) {
           className="w-4 h-4 rounded border-[#ddd] text-notion-blue focus:ring-notion-blue/20" />
         <span className="text-[14px] text-notion-black">Enable negative marking</span>
       </label>
-
-      {/* Advanced Settings */}
-      <div className="border border-whisper rounded-comfortable overflow-hidden">
-        <button type="button" onClick={() => setAdvancedOpen(!advancedOpen)}
-          className="flex items-center justify-between w-full px-4 py-3 text-[14px] font-medium text-notion-black hover:bg-warm-white/50 transition-colors">
-          Advanced Settings
-          <ChevronRight size={16} className={`text-warm-gray-300 transition-transform ${advancedOpen ? "rotate-90" : ""}`} />
-        </button>
-        {advancedOpen && (
-          <div className="px-4 py-4 border-t border-whisper space-y-3 bg-warm-white/30">
-            {[
-              { name: "randomizeQuestions", label: "Randomize question order" },
-              { name: "randomizeOptions", label: "Randomize MCQ option order" },
-              { name: "shufflePerStudent", label: "Unique shuffle per student" },
-              { name: "showResultsImmediately", label: "Show results immediately after submission" },
-              { name: "allowReview", label: "Allow answer review before submit" },
-              { name: "proctoringEnabled", label: "Enable AI proctoring" },
-            ].map(({ name, label }) => (
-              <label key={name} className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" {...register(name)}
-                  className="w-4 h-4 rounded border-[#ddd] text-notion-blue focus:ring-notion-blue/20" />
-                <span className="text-[13px] text-notion-black">{label}</span>
-              </label>
-            ))}
-            <Input label="Max Attempts" id="wiz-attempts" type="number" min={1} {...register("maxAttempts")} />
-          </div>
-        )}
-      </div>
 
       <div className="flex justify-end pt-2">
         <Button type="submit">Continue <ChevronRight size={15} className="ml-1" /></Button>
@@ -197,13 +148,6 @@ export default function ExamCreatePage() {
 
   function handleStage1Submit(values) {
     const settings = {
-      randomizeQuestions: values.randomizeQuestions,
-      randomizeOptions: values.randomizeOptions,
-      shufflePerStudent: values.shufflePerStudent,
-      showResultsImmediately: values.showResultsImmediately,
-      allowReview: values.allowReview,
-      maxAttempts: values.maxAttempts,
-      proctoring: { enabled: values.proctoringEnabled },
       topic: values.topic,
     };
     const payload = {
@@ -266,6 +210,7 @@ export default function ExamCreatePage() {
           examId={examId}
           onNext={() => { saveDraft({ examId, step: 2, stage1Data }); setStep(2); }}
           onBack={() => setStep(0)}
+          onSaveDraft={() => { clearDraft(); navigate(ROUTES.EXAMS); }}
         />
       )}
 
@@ -273,7 +218,7 @@ export default function ExamCreatePage() {
       {step === 2 && examId && (
         <ReviewPublishStage
           examId={examId}
-          onPublished={() => { clearDraft(); navigate(ROUTES.EXAM_DETAIL.replace(":id", examId)); }}
+          onSave={() => { clearDraft(); navigate(ROUTES.EXAM_DETAIL.replace(":id", examId)); }}
           onBack={() => setStep(1)}
           onSaveDraft={() => { clearDraft(); navigate(ROUTES.EXAMS); }}
         />

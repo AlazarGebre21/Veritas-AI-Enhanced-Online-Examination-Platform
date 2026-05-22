@@ -16,6 +16,7 @@ export function ExamQuestionsTab({ examId, exam }) {
   // Fetch attached questions
   const { data: attachedData, isLoading } = useExamQuestions(examId);
   const attached = attachedData?.data || [];
+  const sortedAttached = [...attached].sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
 
   // Fetch ALL bank questions once — client-side search filtering
   const { data: bankData, isLoading: bankLoading } = useQuestions({ limit: 1000 });
@@ -40,8 +41,9 @@ export function ExamQuestionsTab({ examId, exam }) {
 
 
   function handleAdd() {
+    const startIndex = attached.length + 1;
     addQuestions.mutate(
-      { questions: selected.map((id) => ({ questionId: id })) },
+      { questions: selected.map((id, index) => ({ questionId: id, orderIndex: startIndex + index })) },
       { onSuccess: () => { setSelected([]); setView("list"); } }
     );
   }
@@ -78,16 +80,31 @@ export function ExamQuestionsTab({ examId, exam }) {
             </p>
           ) : (
             <>
-              {attached.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-3 border border-whisper rounded-micro bg-white hover:bg-warm-white/50 transition-colors">
-                  <div className="min-w-0">
-                    <p className="text-[14px] font-medium text-notion-black truncate">
-                      {item.question?.title || item.question?.content?.slice(0, 80)}
+              {sortedAttached.map((item, index) => (
+                <div key={item.id} className="flex items-start gap-4 p-3 border border-whisper rounded-micro bg-white hover:bg-warm-white/50 transition-colors">
+                  <div className="shrink-0 w-6 h-6 mt-0.5 rounded-full bg-warm-gray-200 text-warm-gray-600 flex items-center justify-center text-[12px] font-semibold">
+                    {item.orderIndex ?? index + 1}
+                  </div>
+                  <div className="min-w-0 w-full">
+                    <p className="text-[14px] font-medium text-notion-black">
+                      {item.question?.content || item.question?.title}
                     </p>
-                    <div className="flex gap-1.5 mt-1">
+                    {item.question?.type === "MCQ" && item.question?.options && (
+                      <div className="mt-2 space-y-1">
+                        {item.question.options.map((opt, i) => (
+                          <div key={i} className={`text-[12px] flex items-center gap-2 ${opt.isCorrect ? "text-success font-medium" : "text-warm-gray-500"}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${opt.isCorrect ? "bg-success" : "bg-warm-gray-300"}`} />
+                            {opt.content}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex gap-1.5 mt-2">
                       <Badge variant="info">{item.question?.type}</Badge>
                       <Badge variant="neutral">{item.question?.difficulty}</Badge>
-                      <span className="text-[11px] text-warm-gray-500">{item.pointsOverride ?? item.question?.points} pts</span>
+                      <span className="text-[11px] text-warm-gray-500 font-medium bg-warm-white px-1.5 py-0.5 rounded-micro border border-whisper">
+                        {item.pointsOverride ?? item.question?.points} pts
+                      </span>
                     </div>
                   </div>
                   <button
@@ -100,7 +117,7 @@ export function ExamQuestionsTab({ examId, exam }) {
                       });
                     }}
                     disabled={removingId === (item.questionId ?? item.question?.id)}
-                    className="p-2 text-warm-gray-300 hover:text-destructive transition-colors shrink-0 ml-3 rounded-micro hover:bg-destructive/5 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="p-2 text-warm-gray-300 hover:text-destructive transition-colors shrink-0 ml-3 rounded-micro hover:bg-destructive/5 disabled:opacity-40 disabled:cursor-not-allowed self-start"
                     title="Remove question"
                   >
                     {removingId === (item.questionId ?? item.question?.id)
@@ -137,14 +154,32 @@ export function ExamQuestionsTab({ examId, exam }) {
               filteredBank.map((q) => {
                 const already = attached.some((a) => (a.questionId || a.question?.id) === q.id);
                 const isSel = selected.includes(q.id);
+                const selectionIndex = selected.indexOf(q.id);
+                const projectedOrder = attached.length + selectionIndex + 1;
+
                 return (
-                  <label key={q.id} className={`flex items-start gap-2.5 p-2.5 rounded-micro cursor-pointer transition-colors ${isSel ? "bg-notion-blue/5" : "hover:bg-warm-white"} ${already ? "opacity-40 cursor-not-allowed" : ""}`}>
+                  <label key={q.id} className={`flex items-start gap-4 p-3 border rounded-micro cursor-pointer transition-colors ${isSel ? "bg-notion-blue/5 border-notion-blue/30" : "bg-white border-whisper hover:bg-warm-white"} ${already ? "opacity-40 cursor-not-allowed" : ""}`}>
                     <input type="checkbox" disabled={already} checked={isSel}
                       onChange={() => setSelected((prev) => isSel ? prev.filter((x) => x !== q.id) : [...prev, q.id])}
-                      className="mt-0.5 w-3.5 h-3.5 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-[13px] text-notion-black truncate">{q.title}</p>
-                      <div className="flex gap-1.5 mt-0.5">
+                      className="mt-1 w-3.5 h-3.5 shrink-0 text-notion-blue focus:ring-notion-blue/20 rounded-sm" />
+                    {isSel && !already && (
+                      <div className="shrink-0 w-5 h-5 mt-0.5 rounded-full bg-notion-blue text-white flex items-center justify-center text-[11px] font-bold">
+                        {projectedOrder}
+                      </div>
+                    )}
+                    <div className="min-w-0 w-full">
+                      <p className="text-[13px] font-medium text-notion-black">{q.content || q.title}</p>
+                      {q.type === "MCQ" && q.options && (
+                        <div className="mt-2 space-y-1">
+                          {q.options.map((opt, i) => (
+                            <div key={i} className={`text-[12px] flex items-center gap-2 ${opt.isCorrect ? "text-success font-medium" : "text-warm-gray-500"}`}>
+                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${opt.isCorrect ? "bg-success" : "bg-warm-gray-300"}`} />
+                              {opt.content}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-1.5 mt-2">
                         <Badge variant="info">{q.type}</Badge>
                         <Badge variant="neutral">{q.difficulty}</Badge>
                         {q.topic && <span className="text-[11px] text-warm-gray-500">{q.topic}</span>}

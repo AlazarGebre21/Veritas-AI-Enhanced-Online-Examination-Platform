@@ -3,14 +3,17 @@ import { Copy, Check, RotateCcw, Ban, Search, Loader2, Mail, Link2, Send } from 
 import {
   useExamEnrollments, useEnrollCandidates,
   useNotifyEnrollment, useNotifyAllEnrollments, useEnrollmentLink,
-  useResetAttempts, useRevokeEnrollment,
+  useResetAttempts, useRevokeEnrollment, useExam,
 } from "../hooks/useExams.js";
 import { useCandidates } from "../hooks/useCandidates.js";
 import { Badge, Button, Skeleton } from "@/components/ui/index.js";
 import { Modal } from "@/components/ui/index.js";
 import { formatDate } from "@/lib/utils/date.js";
+import { toast } from "sonner";
 
 export function ExamEnrollmentsTab({ examId, exam }) {
+  const { data: fetchedExam } = useExam(examId);
+  const currentExam = exam || fetchedExam;
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
@@ -49,14 +52,15 @@ export function ExamEnrollmentsTab({ examId, exam }) {
       {
         candidateIds: selected,
         maxAttempts: 1,
-        tokenExpiresAt: exam?.scheduledEnd
-          ? new Date(new Date(exam.scheduledEnd).getTime() - 2 * 60 * 1000).toISOString()
+        tokenExpiresAt: currentExam?.scheduledEnd
+          ? new Date(new Date(currentExam.scheduledEnd).getTime() - 2 * 60 * 1000).toISOString()
           : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
       },
       {
         onSuccess: () => {
           setSelected([]);
           setEnrollOpen(false);
+          toast.success("Candidates enrolled successfully");
         },
       }
     );
@@ -64,13 +68,17 @@ export function ExamEnrollmentsTab({ examId, exam }) {
 
   function handleGetLink(id) {
     getLink.mutate(id, {
-      onSuccess: (res) => setLinkDisplay({ enrollmentId: id, link: res?.invitationUrl || res?.data?.link || "" }),
+      onSuccess: (res) => {
+        setLinkDisplay({ enrollmentId: id, link: res?.invitationUrl || res?.data?.link || "" });
+        toast.success("Link generated successfully");
+      },
     });
   }
 
   function handleCopy() {
     navigator.clipboard.writeText(linkDisplay?.link || "");
     setCopied(true);
+    toast.success("Link copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
   }
 
@@ -85,7 +93,7 @@ export function ExamEnrollmentsTab({ examId, exam }) {
           {enrollments.length > 0 && (
             <Button
               variant="secondary"
-              onClick={() => notifyAll.mutate()}
+              onClick={() => notifyAll.mutate(undefined, { onSuccess: () => toast.success("Notifications sent to all eligible candidates") })}
               disabled={notifyAll.isPending}
             >
               <Send size={14} className="mr-1.5" />
@@ -128,7 +136,7 @@ export function ExamEnrollmentsTab({ examId, exam }) {
 
                 <div className="flex items-center gap-1.5 shrink-0 ml-4">
                   <button
-                    onClick={() => notify.mutate(e.id)}
+                    onClick={() => notify.mutate(e.id, { onSuccess: () => toast.success("Sent invitation to candidate") })}
                     title="Send invitation notification"
                     disabled={notify.isPending}
                     className="p-2 rounded-micro text-warm-gray-400 hover:text-notion-blue hover:bg-notion-blue/5 transition-colors"
@@ -143,7 +151,7 @@ export function ExamEnrollmentsTab({ examId, exam }) {
                     <Link2 size={17} />
                   </button>
                   <button
-                    onClick={() => resetAttempts.mutate(e.id)}
+                    onClick={() => resetAttempts.mutate(e.id, { onSuccess: () => toast.success("Candidate attempts reset successfully") })}
                     title="Reset attempts to zero"
                     className="p-2 rounded-micro text-warm-gray-400 hover:text-notion-blue hover:bg-notion-blue/5 transition-colors"
                   >
@@ -151,7 +159,7 @@ export function ExamEnrollmentsTab({ examId, exam }) {
                   </button>
                   {!e.isRevoked && (
                     <button
-                      onClick={() => revoke.mutate(e.id)}
+                      onClick={() => revoke.mutate(e.id, { onSuccess: () => toast.success("Candidate access revoked successfully") })}
                       title="Revoke access"
                       className="p-2 rounded-micro text-warm-gray-400 hover:text-destructive hover:bg-destructive/5 transition-colors"
                     >

@@ -871,7 +871,6 @@ Attach multiple questions to an exam with optional override points and order ind
   "questions": [
     {
       "orderIndex": 0,
-      "pointsOverride": 0,
       "questionId": "string"
     }
   ]
@@ -892,7 +891,6 @@ Attach multiple questions to an exam with optional override points and order ind
     "examId": "string",
     "id": "string",
     "orderIndex": 0,
-    "pointsOverride": 0,
     "question": {
       "content": "string",
       "createdAt": "string",
