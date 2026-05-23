@@ -75,6 +75,17 @@ export function useCloseExam() {
   });
 }
 
+export function useRestoreExam() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => examApi.restore(id),
+    onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: queryKeys.exams.all });
+      qc.invalidateQueries({ queryKey: queryKeys.exams.detail(id) });
+    },
+  });
+}
+
 export function useScheduleExam() {
   const qc = useQueryClient();
   return useMutation({

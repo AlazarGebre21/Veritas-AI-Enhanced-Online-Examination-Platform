@@ -33,11 +33,11 @@ export const Input = forwardRef(
             id={id}
             type={inputType}
             className={cn(
-              "w-full border rounded-micro px-3.5 py-2 text-[14px] text-notion-black placeholder:text-warm-gray-300 transition-all focus:outline-none focus:ring-2",
+              "w-full border rounded-micro px-3.5 py-2 text-[14px] text-notion-black placeholder:text-warm-gray-300 transition-all outline-none focus:outline-none focus-visible:outline-none focus:ring-0",
               error 
-                ? "border-warning focus:border-warning focus:ring-warning/20 bg-warning/5"
-                : "border-[#ddd] focus:border-brand-primary focus:ring-brand-primary/20",
-              isPassword && "pr-10", // extra padding for the absolute icon
+                ? "border-warning bg-warning/5 focus:border-warning hover:border-warning"
+                : "border-[#ddd] focus:border-[#ddd] hover:border-[#ddd]",
+              isPassword && "pr-10",
               className
             )}
             {...props}

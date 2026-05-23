@@ -14,8 +14,9 @@ import {
 import { Badge, Skeleton, Card, CardContent, Button, Modal } from "@/components/ui/index.js";
 import { ROUTES } from "@/config/routes.js";
 import { formatDate } from "@/lib/utils/date.js";
+import { StaffExamSubmissionsTab } from "./StaffExamDetailSubmissionsTab.jsx";
 
-const TABS = ["Overview", "Questions", "Enrollments"];
+const TABS = ["Overview", "Questions", "Enrollments", "Submissions"];
 
 const STATUS_VARIANT = {
   Draft: "neutral", Scheduled: "info", Active: "success",
@@ -42,7 +43,7 @@ export default function StaffExamDetailPage() {
   if (!exam) {
     return (
       <div className="text-center py-16">
-        <p className="text-warm-gray-500">Exam not found or you do not have access.</p>
+        <p className="text-warm-gray-500">Exam not found</p>
       </div>
     );
   }
@@ -92,6 +93,7 @@ export default function StaffExamDetailPage() {
         {activeTab === "Overview" && <OverviewTab exam={exam} />}
         {activeTab === "Questions" && <QuestionsTab examId={id} />}
         {activeTab === "Enrollments" && <EnrollmentsTab exam={exam} />}
+        {activeTab === "Submissions" && <StaffExamSubmissionsTab examId={id} />}
       </div>
     </div>
   );

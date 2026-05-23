@@ -38,9 +38,8 @@ const AUDIT_COLUMNS = [
   },
   {
     header: "Actor ID",
-    className: "max-w-[160px]",
     accessor: (row) => (
-      <span className="text-[12px] font-mono text-warm-gray-500 truncate block">{row.actor_id || "—"}</span>
+      <span className="text-[12px] font-mono text-warm-gray-500 block break-all">{row.actor_id || "—"}</span>
     ),
   },
   {

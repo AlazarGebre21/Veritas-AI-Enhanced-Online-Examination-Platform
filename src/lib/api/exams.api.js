@@ -118,6 +118,16 @@ export const examApi = {
   },
 
   /**
+   * Restore an archived exam.
+   * @param {string} id
+   * @returns {Promise<Exam>}
+   */
+  restore: async (id) => {
+    const { data } = await apiClient.post(`/exams/${id}/restore`);
+    return data;
+  },
+
+  /**
    * Set start and end times for an exam.
    * @param {string} id
    * @param {{ startTime: string, endTime: string }} payload - ISO 8601 strings

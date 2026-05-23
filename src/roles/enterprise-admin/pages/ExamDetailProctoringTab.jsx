@@ -17,7 +17,6 @@ export function ExamProctoringTab({ examId }) {
   const sessions = data?.data || [];
   
   const relevantSessions = sessions.filter(s => s.status !== "Draft" && s.status !== "Scheduled");
-  console.log(relevantSessions)
   return (
     <div className="space-y-4">
       {isLoading ? (

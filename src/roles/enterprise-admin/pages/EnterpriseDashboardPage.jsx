@@ -8,12 +8,23 @@ import {
   ArrowRight,
   TrendingUp,
   UserCheck,
+  Timer,
+  Target,
+  BookOpen,
+  GraduationCap,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useMyEnterprise } from "../hooks/useMyEnterprise.js";
 import { useEnterpriseSummary } from "../hooks/useEnterpriseSummary.js";
 import { useEnterpriseSubscription } from "../hooks/useEnterpriseSubscription.js";
+import { useAnalytics } from "../hooks/useAnalytics.js";
 import { Card, CardContent, Badge, Skeleton } from "@/components/ui/index.js";
+import {
+  DonutChart,
+  AreaChartCard,
+  BarChartCard,
+  MiniStatCard,
+} from "@/components/charts/index.js";
 import { ROUTES } from "@/config/routes.js";
 import { formatDate } from "@/lib/utils/date.js";
 import { SUBSCRIPTION_STATUS } from "@/config/constants.js";
@@ -32,9 +43,16 @@ export default function EnterpriseDashboardPage() {
   const { data: enterprise, isLoading: entLoading } = useMyEnterprise();
   const { data: summary, isLoading: sumLoading } = useEnterpriseSummary(enterpriseId);
   const { data: subscription, isLoading: subLoading } = useEnterpriseSubscription(enterpriseId);
+  const {
+    isLoading: analyticsLoading,
+    examAnalytics,
+    questionAnalytics,
+    candidateAnalytics,
+    gradingAnalytics,
+    CHART_COLORS,
+  } = useAnalytics();
 
   const isLoading = entLoading || sumLoading;  
-  
 
   return (
     <div className="space-y-8">
@@ -119,6 +137,133 @@ export default function EnterpriseDashboardPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* ── Analytics Section ───────────────────────────────────────────── */}
+      <div>
+        <div className="flex items-center gap-2 mb-5">
+          <div className="w-1 h-5 rounded-full bg-notion-blue" />
+          <h2 className="text-lg font-semibold text-notion-black">Analytics Overview</h2>
+        </div>
+
+        {/* Analytics Mini Stats Row */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          <MiniStatCard
+            icon={ClipboardList}
+            label="Total Exams"
+            value={examAnalytics?.total ?? "—"}
+            color={CHART_COLORS.blue}
+            isLoading={analyticsLoading}
+          />
+          <MiniStatCard
+            icon={BookOpen}
+            label="Question Bank"
+            value={questionAnalytics?.total ?? "—"}
+            color={CHART_COLORS.orange}
+            isLoading={analyticsLoading}
+          />
+          <MiniStatCard
+            icon={UserCheck}
+            label="Candidates"
+            value={candidateAnalytics?.total ?? "—"}
+            color={CHART_COLORS.teal}
+            isLoading={analyticsLoading}
+          />
+          <MiniStatCard
+            icon={GraduationCap}
+            label="Avg Score"
+            value={gradingAnalytics ? `${gradingAnalytics.avgScore}%` : "—"}
+            color={CHART_COLORS.purple}
+            isLoading={analyticsLoading}
+          />
+        </div>
+
+        {/* Analytics Charts Grid */}
+        {analyticsLoading ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-5">
+                  <Skeleton className="h-4 w-32 mb-4" />
+                  <Skeleton className="h-52 w-full rounded-lg" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Exam Status Breakdown */}
+            <DonutChart
+              data={examAnalytics?.statusData ?? []}
+              title="Exam Status Breakdown"
+              centerValue={examAnalytics?.total ?? 0}
+              centerLabel="Total"
+            />
+
+            {/* Exams Created Over Time */}
+            <AreaChartCard
+              data={examAnalytics?.timeline ?? []}
+              title="Exams Created Over Time"
+              subtitle={examAnalytics ? `Avg ${examAnalytics.avgDuration} min` : ""}
+              dataKey="count"
+              xKey="month"
+              color={CHART_COLORS.blue}
+            />
+
+            {/* Question Type Distribution */}
+            <BarChartCard
+              data={questionAnalytics?.typeData ?? []}
+              title="Question Types"
+              subtitle={questionAnalytics ? `${questionAnalytics.total} total` : ""}
+              barKey="value"
+              categoryKey="name"
+            />
+
+            {/* Question Difficulty Distribution */}
+            <DonutChart
+              data={questionAnalytics?.difficultyData ?? []}
+              title="Question Difficulty"
+              centerValue={questionAnalytics?.total ?? 0}
+              centerLabel="Questions"
+            />
+
+            {/* Score Distribution Histogram */}
+            <BarChartCard
+              data={gradingAnalytics?.histogram ?? []}
+              title="Score Distribution"
+              subtitle={gradingAnalytics ? `${gradingAnalytics.totalGraded} graded` : ""}
+              barKey="count"
+              categoryKey="range"
+            />
+
+            {/* Pass/Fail Rate */}
+            <DonutChart
+              data={gradingAnalytics?.passFailData ?? []}
+              title="Pass / Fail Rate"
+              centerValue={
+                gradingAnalytics && gradingAnalytics.totalGraded > 0
+                  ? `${Math.round((gradingAnalytics.passed / gradingAnalytics.totalGraded) * 100)}%`
+                  : "—"
+              }
+              centerLabel="Pass Rate"
+            />
+
+            {/* Topic Coverage (full width) */}
+            {questionAnalytics?.topicData?.length > 0 && (
+              <div className="lg:col-span-2">
+                <BarChartCard
+                  data={questionAnalytics.topicData}
+                  title="Top Question Topics"
+                  subtitle="By question count"
+                  layout="vertical"
+                  height={Math.max(200, questionAnalytics.topicData.length * 40)}
+                  barKey="value"
+                  categoryKey="name"
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* ── Quick Actions ───────────────────────────────────────────────── */}
       <div>

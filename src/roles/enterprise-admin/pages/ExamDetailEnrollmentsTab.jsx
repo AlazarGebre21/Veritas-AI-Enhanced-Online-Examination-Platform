@@ -24,9 +24,11 @@ export function ExamEnrollmentsTab({ examId, exam }) {
   const { data, isLoading } = useExamEnrollments(examId);
   const enrollments = data?.data || [];
 
+
   // Fetch ALL candidates once — client-side search filtering (no server-side search param)
   const { data: candData, isLoading: candLoading } = useCandidates({ limit: 1000 });
   const allCandidates = candData?.data || [];
+
 
   // Client-side filter
   const filteredCandidates = useMemo(() => {
@@ -47,6 +49,18 @@ export function ExamEnrollmentsTab({ examId, exam }) {
   const resetAttempts = useResetAttempts();
   const revoke = useRevokeEnrollment(examId);
 
+  const examStatus = currentExam?.status;
+
+  function statusErrorToast(fallback) {
+    if (examStatus === "Closed") {
+      toast.error("This exam is closed. No enrollment actions can be performed.");
+    } else if (examStatus === "Draft") {
+      toast.error("This exam is still in draft. Publish it before performing enrollment actions.");
+    } else {
+      toast.error(fallback);
+    }
+  }
+
   function handleEnroll() {
     enroll.mutate(
       {
@@ -62,6 +76,7 @@ export function ExamEnrollmentsTab({ examId, exam }) {
           setEnrollOpen(false);
           toast.success("Candidates enrolled successfully");
         },
+        onError: () => statusErrorToast("Failed to enroll candidates."),
       }
     );
   }
@@ -72,6 +87,7 @@ export function ExamEnrollmentsTab({ examId, exam }) {
         setLinkDisplay({ enrollmentId: id, link: res?.invitationUrl || res?.data?.link || "" });
         toast.success("Link generated successfully");
       },
+      onError: () => statusErrorToast("Failed to generate link."),
     });
   }
 
@@ -93,7 +109,10 @@ export function ExamEnrollmentsTab({ examId, exam }) {
           {enrollments.length > 0 && (
             <Button
               variant="secondary"
-              onClick={() => notifyAll.mutate(undefined, { onSuccess: () => toast.success("Notifications sent to all eligible candidates") })}
+              onClick={() => notifyAll.mutate(undefined, {
+                onSuccess: () => toast.success("Notifications sent to all eligible candidates"),
+                onError: () => statusErrorToast("Failed to notify candidates."),
+              })}
               disabled={notifyAll.isPending}
             >
               <Send size={14} className="mr-1.5" />
@@ -121,9 +140,14 @@ export function ExamEnrollmentsTab({ examId, exam }) {
               <div key={e.id} className="flex items-center justify-between px-4 py-3.5 hover:bg-warm-white/50 transition-colors">
                 <div className="min-w-0">
                   <p className="text-[14px] font-medium text-notion-black">
-                    {candidate
-                      ? `${candidate.firstName} ${candidate.lastName}`
-                      : e.candidateId}
+                    {candidate ? (
+                      <>
+                        <span className="block">{candidate.firstName} {candidate.lastName}</span>
+                        <span className="block text-[12px] text-warm-gray-500 font-normal">{candidate.email}</span>
+                      </>
+                    ) : (
+                      e.candidateId
+                    )}
                   </p>
                   <div className="flex items-center gap-3 mt-0.5 text-[11px] text-warm-gray-500">
                     <span>Attempts: {e.attemptsUsed ?? 0}/{e.maxAttempts}</span>
@@ -136,7 +160,10 @@ export function ExamEnrollmentsTab({ examId, exam }) {
 
                 <div className="flex items-center gap-1.5 shrink-0 ml-4">
                   <button
-                    onClick={() => notify.mutate(e.id, { onSuccess: () => toast.success("Sent invitation to candidate") })}
+                    onClick={() => notify.mutate(e.id, {
+                      onSuccess: () => toast.success("Sent invitation to candidate"),
+                      onError: () => statusErrorToast("Failed to send invitation."),
+                    })}
                     title="Send invitation notification"
                     disabled={notify.isPending}
                     className="p-2 rounded-micro text-warm-gray-400 hover:text-notion-blue hover:bg-notion-blue/5 transition-colors"
@@ -151,7 +178,10 @@ export function ExamEnrollmentsTab({ examId, exam }) {
                     <Link2 size={17} />
                   </button>
                   <button
-                    onClick={() => resetAttempts.mutate(e.id, { onSuccess: () => toast.success("Candidate attempts reset successfully") })}
+                    onClick={() => resetAttempts.mutate(e.id, {
+                      onSuccess: () => toast.success("Candidate attempts reset successfully"),
+                      onError: () => statusErrorToast("Failed to reset attempts."),
+                    })}
                     title="Reset attempts to zero"
                     className="p-2 rounded-micro text-warm-gray-400 hover:text-notion-blue hover:bg-notion-blue/5 transition-colors"
                   >
@@ -159,7 +189,10 @@ export function ExamEnrollmentsTab({ examId, exam }) {
                   </button>
                   {!e.isRevoked && (
                     <button
-                      onClick={() => revoke.mutate(e.id, { onSuccess: () => toast.success("Candidate access revoked successfully") })}
+                      onClick={() => revoke.mutate(e.id, {
+                        onSuccess: () => toast.success("Candidate access revoked successfully"),
+                        onError: () => statusErrorToast("Failed to revoke access."),
+                      })}
                       title="Revoke access"
                       className="p-2 rounded-micro text-warm-gray-400 hover:text-destructive hover:bg-destructive/5 transition-colors"
                     >
@@ -186,6 +219,30 @@ export function ExamEnrollmentsTab({ examId, exam }) {
               className="w-full pl-9 pr-3 py-2 text-[13px] border border-[#ddd] rounded-micro focus:outline-none focus:border-notion-blue focus:ring-2 focus:ring-notion-blue/20"
             />
           </div>
+
+          {/* Select All / Deselect All */}
+          {(() => {
+            const eligible = filteredCandidates.filter((c) => !enrollments.some((e) => e.candidateId === c.id));
+            const allSelected = eligible.length > 0 && eligible.every((c) => selected.includes(c.id));
+            return eligible.length > 0 && (
+              <button
+                onClick={() => {
+                  if (allSelected) {
+                    setSelected((prev) => prev.filter((id) => !eligible.some((c) => c.id === id)));
+                  } else {
+                    setSelected((prev) => {
+                      const ids = new Set(prev);
+                      eligible.forEach((c) => ids.add(c.id));
+                      return [...ids];
+                    });
+                  }
+                }}
+                className="text-[12px] font-medium text-notion-black hover:text-notion-blue"
+              >
+                {allSelected ? "Deselect All" : `Select All (${eligible.length})`}
+              </button>
+            );
+          })()}
 
           <div className="max-h-60 overflow-y-auto space-y-1 border border-whisper rounded-micro p-2">
             {candLoading ? (

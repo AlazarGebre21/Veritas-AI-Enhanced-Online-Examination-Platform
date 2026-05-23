@@ -18,6 +18,8 @@ import { ROUTES } from "@/config/routes.js";
 // Public
 const LoginPage = lazy(() => import("@/roles/auth/pages/LoginPage.jsx"));
 const RegisterPage = lazy(() => import("@/roles/auth/pages/RegisterPage.jsx"));
+const ForgotPasswordPage = lazy(() => import("@/roles/auth/pages/ForgotPasswordPage.jsx"));
+const ResetPasswordPage = lazy(() => import("@/roles/auth/pages/ResetPasswordPage.jsx"));
 
 // SystemAdmin
 const SystemAdminDashboardPage = lazy(() =>
@@ -67,14 +69,14 @@ const SubjectQuestionsPage = lazy(() =>
 const QuestionDetailPage = lazy(() =>
   import("@/roles/enterprise-admin/pages/QuestionDetailPage.jsx")
 );
-const ResultsPage = lazy(() =>
-  import("@/roles/enterprise-admin/pages/ResultsPage.jsx")
-);
 const BillingPage = lazy(() =>
   import("@/roles/enterprise-admin/pages/BillingPage.jsx")
 );
 const EnterpriseSettingsPage = lazy(() =>
   import("@/roles/enterprise-admin/pages/EnterpriseSettingsPage.jsx")
+);
+const AuditLogsPage = lazy(() =>
+  import("@/roles/enterprise-admin/pages/AuditLogsPage.jsx")
 );
 
 // EnterpriseStaff
@@ -127,6 +129,8 @@ export const router = createBrowserRouter([
     children: [
       { path: ROUTES.LOGIN, element: <Page><LoginPage /></Page> },
       { path: ROUTES.REGISTER, element: <Page><RegisterPage /></Page> },
+      { path: ROUTES.FORGOT_PASSWORD, element: <Page><ForgotPasswordPage /></Page> },
+      { path: ROUTES.RESET_PASSWORD, element: <Page><ResetPasswordPage /></Page> },
     ],
   },
 
@@ -175,7 +179,7 @@ export const router = createBrowserRouter([
           { path: ROUTES.EXAM_NEW, element: <Page><ExamCreatePage /></Page> },
           { path: ROUTES.EXAM_DETAIL, element: <Page><ExamDetailPage /></Page> },
           { path: ROUTES.EXAM_MONITOR, element: <Page><ExamMonitoringPage /></Page> },
-          { path: ROUTES.RESULTS, element: <Page><ResultsPage /></Page> },
+          { path: ROUTES.AUDIT_LOGS, element: <Page><AuditLogsPage /></Page> },
           { path: ROUTES.BILLING, element: <Page><BillingPage /></Page> },
           { path: ROUTES.SETTINGS, element: <Page><EnterpriseSettingsPage /></Page> },
         ],

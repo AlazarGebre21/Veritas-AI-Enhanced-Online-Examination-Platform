@@ -33,7 +33,7 @@ const NAV_ITEMS = {
     { label: "Candidates", icon: Users, to: ROUTES.CANDIDATES },
     { label: "Questions", icon: FileText, to: ROUTES.QUESTIONS },
     { label: "Exams", icon: ClipboardList, to: ROUTES.EXAMS },
-    { label: "Results", icon: BarChart2, to: ROUTES.RESULTS },
+    { label: "Audit Log", icon: ScrollText, to: ROUTES.AUDIT_LOGS },
     { label: "Billing", icon: CreditCard, to: ROUTES.BILLING },
     { label: "Settings", icon: Settings, to: ROUTES.SETTINGS },
   ],

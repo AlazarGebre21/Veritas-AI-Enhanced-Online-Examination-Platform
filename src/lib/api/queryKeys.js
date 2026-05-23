@@ -74,4 +74,11 @@ export const queryKeys = {
     events: (sessionId) => ["proctoring", sessionId, "events"],
     score: (sessionId) => ["proctoring", sessionId, "score"],
   },
+
+  grading: {
+    all: ["grading"],
+    list: (params) => ["grading", "list", params],
+    detail: (sessionId) => ["grading", "detail", sessionId],
+    logs: (sessionId) => ["grading", "logs", sessionId],
+  },
 };

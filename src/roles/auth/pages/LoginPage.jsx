@@ -65,15 +65,27 @@ export default function LoginPage() {
           {...register("email")}
         />
 
-        <Input
-          id="password"
-          type="password"
-          label="Password"
-          autoComplete="current-password"
-          placeholder="••••••••"
-          error={errors.password?.message}
-          {...register("password")}
-        />
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="block text-[13px] font-medium text-notion-black">
+              Password
+            </span>
+            <Link
+              to={ROUTES.FORGOT_PASSWORD}
+              className="text-[12px] text-notion-blue hover:underline font-medium"
+            >
+              Forgot password?
+            </Link>
+          </div>
+          <Input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+            error={errors.password?.message}
+            {...register("password")}
+          />
+        </div>
 
         <Button
           type="submit"

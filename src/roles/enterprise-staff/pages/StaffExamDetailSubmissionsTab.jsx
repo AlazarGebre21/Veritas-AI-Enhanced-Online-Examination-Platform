@@ -1,18 +1,17 @@
 import { useState } from "react";
-import { useGradingResults } from "../hooks/useGrading.js";
+import { useGradingResults } from "../../enterprise-admin/hooks/useGrading.js"; // Reuse same hook
 import { Badge, Skeleton } from "@/components/ui/index.js";
 import { Trophy } from "lucide-react";
-import ResultDetailView from "../components/ResultDetailView.jsx";
+import ResultDetailView from "../../enterprise-admin/components/ResultDetailView.jsx"; // Reuse same component
 
-export function ExamSubmissionsTab({ examId }) {
+export function StaffExamSubmissionsTab({ examId }) {
   const [selectedSessionId, setSelectedSessionId] = useState(null);
   
-  const { data, isLoading } = useGradingResults({ exam_id: examId, limit: 30 });
+  const { data, isLoading } = useGradingResults({ exam_id: examId, limit: 100 });
   const submissions = data?.results || [];
 
-  // console.log(submissions);
   if (selectedSessionId) {
-    return <ResultDetailView sessionId={selectedSessionId} onBack={() => setSelectedSessionId(null)} />;
+    return <ResultDetailView sessionId={selectedSessionId} onBack={() => setSelectedSessionId(null)} isStaff={true} />;
   }
 
   if (isLoading) {
@@ -23,7 +22,7 @@ export function ExamSubmissionsTab({ examId }) {
     return (
       <div className="text-center py-12 border border-dashed border-whisper rounded-comfortable">
         <Trophy size={28} className="mx-auto text-warm-gray-300 mb-3" />
-        <p className="text-[13px] text-warm-gray-500">No submissions yet. Results will appear here after candidates complete the exam.</p>
+        <p className="text-[13px] text-warm-gray-500">No submissions yet.</p>
       </div>
     );
   }
@@ -33,7 +32,6 @@ export function ExamSubmissionsTab({ examId }) {
       <p className="text-[13px] text-warm-gray-500">{submissions.length} submission{submissions.length !== 1 ? "s" : ""}</p>
       <div className="border border-whisper rounded-comfortable overflow-hidden divide-y divide-whisper">
         {submissions.map((sub) => {
-          // Typically passing percent is part of exam.settings, default to 60 for UI mockup
           const passed = sub.percentage >= 60; 
           return (
             <div key={sub.id} onClick={() => setSelectedSessionId(sub.session_id)} className="flex items-center justify-between px-4 py-3 hover:bg-warm-white/50 transition-colors cursor-pointer">

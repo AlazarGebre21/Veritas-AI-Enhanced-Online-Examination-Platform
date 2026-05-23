@@ -1926,3 +1926,66 @@ Change password payload.
 | ------------------ | ------ | --------------------- |
 | `current_password` | string | Current user password |
 | `new_password`     | string | New password          |
+
+# POST `/auth/forgot-password`
+
+## Description
+
+Request a password reset link via email.  
+Always returns `200 OK`.
+
+---
+
+## Request Body
+
+### Content Type
+
+```json
+application/json
+```
+
+### Parameters
+
+| Name  | Type   | Required | Description   |
+| ----- | ------ | -------- | ------------- |
+| email | string | Yes      | Email address |
+
+### Example Request Body
+
+```json
+{
+  "email": "string"
+}
+```
+
+# POST `/auth/reset-password`
+
+## Description
+
+Set a new password using the token received in the password reset email.
+
+---
+
+## Request Body
+
+### Content Type
+
+```json
+application/json
+```
+
+### Parameters
+
+| Name         | Type   | Required | Description          |
+| ------------ | ------ | -------- | -------------------- |
+| token        | string | Yes      | Password reset token |
+| new_password | string | Yes      | New password         |
+
+### Example Request Body
+
+```json
+{
+  "new_password": "stringst",
+  "token": "string"
+}
+```

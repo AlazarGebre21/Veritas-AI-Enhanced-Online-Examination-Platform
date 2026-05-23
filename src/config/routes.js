@@ -7,6 +7,8 @@ export const ROUTES = {
   // Public
   LOGIN: "/login",
   REGISTER: "/register",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
 
   // Candidate exam (token auth, no JWT)
   EXAM_ACCESS: "/exam",
@@ -33,6 +35,7 @@ export const ROUTES = {
   EXAM_DETAIL: "/exams/:id",
   EXAM_MONITOR: "/exams/:id/monitor",
   RESULTS: "/results",
+  AUDIT_LOGS: "/audit-log",
   BILLING: "/billing",
   SETTINGS: "/settings",
 

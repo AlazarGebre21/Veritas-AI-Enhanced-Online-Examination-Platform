@@ -42,4 +42,22 @@ export const authApi = {
   logout: async (payload) => {
     await apiClient.post("/auth/logout", payload);
   },
+
+  /**
+   * Request a password reset email.
+   * @param {{ email: string }} payload
+   * @returns {Promise<void>}
+   */
+  forgotPassword: async (payload) => {
+    await apiClient.post("/auth/forgot-password", payload);
+  },
+
+  /**
+   * Reset the password using the token sent via email.
+   * @param {{ token: string, new_password: string }} payload
+   * @returns {Promise<void>}
+   */
+  resetPassword: async (payload) => {
+    await apiClient.post("/auth/reset-password", payload);
+  },
 };

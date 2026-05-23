@@ -10,13 +10,15 @@ import {
   CalendarDays,
   Search,
   Archive,
+  ArchiveRestore,
   Trash2,
 } from "lucide-react";
-import { useExams } from "../hooks/useExams.js";
+import { useExams, useRestoreExam } from "../hooks/useExams.js";
 import { Button, Badge, Skeleton } from "@/components/ui/index.js";
 import { ROUTES } from "@/config/routes.js";
 import { formatDate } from "@/lib/utils/date.js";
 import { useDebounce } from "@/lib/hooks/useDebounce.js";
+import { toast } from "sonner";
 
 // ── Status config ─────────────────────────────────────────────────────────
 const STATUS_TABS = ["All", "Draft", "Scheduled", "Active", "Closed", "Archived"];
@@ -25,7 +27,6 @@ const STATUS_VARIANT = {
   Draft: "neutral",
   Scheduled: "info",
   Active: "success",
-  
   Closed: "neutral",
   Archived: "neutral",
 };
@@ -52,10 +53,11 @@ export default function ExamsPage() {
     sort: "created_at",
     sort_dir: "desc",
     ...(debouncedSearch ? { search: debouncedSearch } : {}),
-    ...(isArchived ? { archived: true } : {}),
+    ...(isArchived ? { archived_only: true } : {}),
   };
 
   const { data, isLoading } = useExams(params);
+  const restoreExam = useRestoreExam();
   const allExams = useMemo(() => data?.data || [], [data]);
 
   // Filter by status (Archived is handled via the API query param, not client-side)
@@ -164,6 +166,11 @@ export default function ExamsPage() {
               onCreateInTopic={() => goCreate(topic)}
               onExamClick={(exam) => navigate(ROUTES.EXAM_DETAIL.replace(":id", exam.id))}
               isArchived={isArchived}
+              onRestoreClick={(exam) => {
+                restoreExam.mutate(exam.id, {
+                  onSuccess: () => toast.success(`"${exam.title}" has been restored.`)
+                });
+              }}
             />
           ))}
         </div>
@@ -173,7 +180,7 @@ export default function ExamsPage() {
 }
 
 // ── SubjectCard ──────────────────────────────────────────────────────────
-function SubjectCard({ topic, exams, isExpanded, onToggle, onCreateInTopic, onExamClick, isArchived = false }) {
+function SubjectCard({ topic, exams, isExpanded, onToggle, onCreateInTopic, onExamClick, isArchived = false, onRestoreClick }) {
   const activeCount = exams.filter((e) => e.status === "Active").length;
 
   return (
@@ -226,7 +233,13 @@ function SubjectCard({ topic, exams, isExpanded, onToggle, onCreateInTopic, onEx
       {isExpanded && (
         <div className="border-t border-whisper divide-y divide-whisper">
           {exams.map((exam) => (
-            <ExamRow key={exam.id} exam={exam} onClick={() => onExamClick(exam)} isArchived={isArchived} />
+            <ExamRow 
+              key={exam.id} 
+              exam={exam} 
+              onClick={() => onExamClick(exam)} 
+              isArchived={isArchived} 
+              onRestoreClick={() => onRestoreClick && onRestoreClick(exam)}
+            />
           ))}
         </div>
       )}
@@ -235,7 +248,7 @@ function SubjectCard({ topic, exams, isExpanded, onToggle, onCreateInTopic, onEx
 }
 
 // ── ExamRow ──────────────────────────────────────────────────────────────
-function ExamRow({ exam, onClick, isArchived = false }) {
+function ExamRow({ exam, onClick, isArchived = false, onRestoreClick }) {
   return (
     <div
       onClick={onClick}
@@ -274,6 +287,17 @@ function ExamRow({ exam, onClick, isArchived = false }) {
       </div>
 
       <div className="flex items-center gap-3 shrink-0 ml-4">
+        {isArchived && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRestoreClick();
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-notion-blue border border-notion-blue/30 rounded-micro hover:bg-notion-blue/10 transition-colors mr-2 opacity-0 group-hover:opacity-100 focus:opacity-100"
+          >
+            <ArchiveRestore size={14} /> Restore
+          </button>
+        )}
         <Badge variant={STATUS_VARIANT[exam.status] || "neutral"}>{exam.status}</Badge>
         <span className="text-[11px] text-warm-gray-300">{formatDate(exam.createdAt)}</span>
       </div>

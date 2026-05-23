@@ -4,3 +4,4 @@ export * from "./Card.jsx";
 export * from "./Badge.jsx";
 export * from "./Skeleton.jsx";
 export * from "./Modal.jsx";
+export * from "./Textarea.jsx";
