@@ -42,3 +42,12 @@ export function useGradingLogs(sessionId) {
     enabled: !!sessionId,
   });
 }
+
+export function useGradingStatus(sessionId) {
+  return useQuery({
+    queryKey: queryKeys.grading.status(sessionId),
+    queryFn: () => gradingApi.getGradingStatus(sessionId),
+    enabled: !!sessionId,
+    refetchInterval: (query) => (query?.state?.data?.status === 'pending' ? 5000 : false),
+  });
+}

@@ -80,5 +80,6 @@ export const queryKeys = {
     list: (params) => ["grading", "list", params],
     detail: (sessionId) => ["grading", "detail", sessionId],
     logs: (sessionId) => ["grading", "logs", sessionId],
+    status: (sessionId) => ["grading", "status", sessionId],
   },
 };

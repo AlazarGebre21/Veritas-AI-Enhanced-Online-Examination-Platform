@@ -47,4 +47,15 @@ export const gradingApi = {
     const { data } = await apiClient.get(`/grading/results/${sessionId}/logs`);
     return data;
   },
+
+  /**
+   * Get the current grading status
+   *
+   * @param {string} sessionId
+   * @returns {Promise<{session_id: string, status: string, graded_by: string, percentage: number, updated_at: string}>}
+   */
+  getGradingStatus: async (sessionId) => {
+    const { data } = await apiClient.get(`/grading/results/${sessionId}/status`);
+    return data;
+  },
 };

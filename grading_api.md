@@ -201,3 +201,83 @@ Get the immutable audit history / edit logs for an exam session's grade.
   }
 ]
 ```
+
+# GET `/grading/results/{session_id}/status` ENTERPRISEADMIN AND ENTERPRISESTAFF ENDPOINT
+
+## Get Grading Status
+
+Lightweight status check — poll this endpoint after exam submission.
+
+Returns the current `GradingStatus` for the session.
+
+---
+
+## Possible Status Values
+
+| Status     | Description                                         |
+| ---------- | --------------------------------------------------- |
+| `pending`  | Grading worker received the event and is processing |
+| `graded`   | Automated grading is complete                       |
+| `reviewed` | A human manually overrode the score                 |
+| `disputed` | The result is under dispute                         |
+| `404`      | No grading record exists (event not yet received)   |
+
+---
+
+## Parameters
+
+| Name         | Type            | Location | Required | Description |
+| ------------ | --------------- | -------- | -------- | ----------- |
+| `session_id` | `string($uuid)` | Path     | Yes      | Session ID  |
+
+---
+
+## Request
+
+```http
+GET /grading/results/{session_id}/status     j
+```
+
+---
+
+## Responses
+
+### `200 OK`
+
+Successful Response
+
+#### Content-Type
+
+```http
+application/json
+```
+
+---
+
+## Example Response
+
+```json
+{
+  "session_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "pending",
+  "graded_by": "string",
+  "percentage": 0,
+  "updated_at": "2026-05-25T10:47:54.893Z"
+}
+```
+
+---
+
+## Response Fields
+
+| Field        | Type               | Description                            |
+| ------------ | ------------------ | -------------------------------------- |
+| `session_id` | `string(uuid)`     | Unique exam session identifier         |
+| `status`     | `string`           | Current grading status                 |
+| `graded_by`  | `string`           | Identifier of grader or grading system |
+| `percentage` | `number`           | Calculated exam percentage             |
+| `updated_at` | `string(datetime)` | Timestamp of last grading update       |
+
+```
+
+```

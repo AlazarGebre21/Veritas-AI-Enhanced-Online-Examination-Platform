@@ -180,7 +180,10 @@ const GRADING_AUDIT_COLUMNS = [
   {
     header: "Actor",
     accessor: (row) => (
-      <span className="text-[13px] text-notion-black font-medium">{row.actor_role || "—"}</span>
+      <div>
+        <span className="text-[13px] text-notion-black font-medium block">{row.actor_role || "—"}</span>
+        {row.actor_id && <span className="text-[11px] text-warm-gray-500 font-mono block mt-0.5">{row.actor_id}</span>}
+      </div>
     ),
   },
   {
