@@ -26,10 +26,10 @@ export default function DashboardLayout() {
       <div
         className={cn(
           "flex flex-col flex-1 min-w-0 transition-all duration-200",
-          sidebarOpen ? "ml-64" : "ml-16"
+          sidebarOpen ? "ml-60" : "ml-16"
         )}
       >
-        <Topbar />
+        {/* <Topbar /> */}
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>

@@ -11,7 +11,6 @@ import {
   Circle,
   Upload,
   FileImage,
-  X,
   AlertCircle,
 } from "lucide-react";
 import { useQuestion, useCreateQuestion, useUpdateQuestion, useUploadQuestionMedia } from "../hooks/useQuestions.js";
@@ -23,20 +22,13 @@ import { ROUTES } from "@/config/routes.js";
 const questionSchema = z.object({
   title: z.string().min(1, "Subject is required"),
   content: z.string().min(1, "Question content is required"),
-  type: z.enum(["MCQ", "TrueFalse", "ShortAnswer", "Essay"]),
+  type: z.enum(["MCQ", "TrueFalse", "ShortAnswer"]),
   difficulty: z.enum(["Easy", "Medium", "Hard"]),
   points: z.coerce.number().min(0, "Must be >= 0"),
   negativePoints: z.coerce.number().min(0).optional().default(0),
-  topic: z.string().optional().default(""),
-  mediaUrl: z.string().optional().default(""),
+  topic: z.string().min(1, "Topic is required"),
+  expectedAnswer: z.string().optional().default(""),
   isActive: z.boolean().optional().default(true),
-  metadata: z.object({
-    gradeField: z.string().optional().default(""),
-    course: z.string().optional().default(""),
-    chapter: z.string().optional().default(""),
-    tags: z.string().optional().default(""),
-    examYear: z.string().optional().default(""),
-  }).optional(),
 });
 
 
@@ -44,7 +36,6 @@ const TYPES = [
   { value: "MCQ", label: "Multiple Choice" },
   { value: "TrueFalse", label: "True / False" },
   { value: "ShortAnswer", label: "Short Answer" },
-  { value: "Essay", label: "Essay" },
 ];
 
 const DIFFICULTIES = ["Easy", "Medium", "Hard"];
@@ -74,7 +65,6 @@ export default function QuestionDetailPage() {
     handleSubmit,
     watch,
     reset,
-    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(questionSchema),
@@ -86,25 +76,18 @@ export default function QuestionDetailPage() {
       points: 1,
       negativePoints: 0,
       topic: "",
-      mediaUrl: "",
+      expectedAnswer: "",
       isActive: true,
-      metadata: {
-        gradeField: "",
-        course: "",
-        chapter: "",
-        tags: "",
-        examYear: "",
-      },
     },
   });
 
   const questionType = watch("type");
-  const watchedMediaUrl = watch("mediaUrl");
   const needsOptions = questionType === "MCQ" || questionType === "TrueFalse";
 
   // ── Media upload refs / state ─────────────────────────────────────────
   const mediaFileRef = useRef(null);
   const [mediaDragOver, setMediaDragOver] = useState(false);
+  const [mediaLink, setMediaLink] = useState("");
 
   function handleMediaFile(file) {
     if (!file) return;
@@ -122,7 +105,7 @@ export default function QuestionDetailPage() {
       {
         onSuccess: (res) => {
           const url = res?.mediaUrl ?? res?.data?.mediaUrl ?? "";
-          if (url) setValue("mediaUrl", url);
+          if (url) setMediaLink(url);
         },
       }
     );
@@ -145,16 +128,12 @@ export default function QuestionDetailPage() {
         points: question.points || 0,
         negativePoints: question.negativePoints || 0,
         topic: question.topic || "",
-        mediaUrl: question.mediaUrl || "",
+        expectedAnswer: question.expectedAnswer || "",
         isActive: question.isActive ?? true,
-        metadata: {
-          gradeField: question.metadata?.gradeField || "",
-          course: question.metadata?.course || "",
-          chapter: question.metadata?.chapter || "",
-          tags: question.metadata?.tags || "",
-          examYear: question.metadata?.examYear || "",
-        },
       });
+      if (question.mediaUrl) {
+        setMediaLink(question.mediaUrl);
+      }
       if (question.options?.length) {
         setOptions(question.options.map((o) => ({ content: o.content, isCorrect: o.isCorrect })));
       }
@@ -194,24 +173,31 @@ export default function QuestionDetailPage() {
 
   // ── Submit ────────────────────────────────────────────────────────────
   function onSubmit(values) {
-    const payload = { ...values };
-    
-    // Omit optional fields if they are empty strings
-    if (payload.topic === "") delete payload.topic;
-    if (payload.mediaUrl === "") delete payload.mediaUrl;
+    // Build payload explicitly — only send what the API accepts
+    const payload = {
+      title: values.title,
+      content: values.content,
+      type: values.type,
+      difficulty: values.difficulty,
+      points: values.points,
+      topic: values.topic,
+      isActive: values.isActive,
+    };
 
-    // Ensure options is always an array
-    if (needsOptions) {
-      payload.options = options.filter((o) => o.content.trim());
-    } else {
-      payload.options = [];
+    // Only send negativePoints if non-zero
+    if (values.negativePoints > 0) {
+      payload.negativePoints = values.negativePoints;
     }
 
-    // Ensure metadata is at least an empty object and omit empty strings
-    payload.metadata = payload.metadata || {};
-    Object.keys(payload.metadata).forEach((key) => {
-      if (!payload.metadata[key]) delete payload.metadata[key];
-    });
+    // expectedAnswer only for ShortAnswer
+    if (values.type === "ShortAnswer" && values.expectedAnswer?.trim()) {
+      payload.expectedAnswer = values.expectedAnswer.trim();
+    }
+
+    // Options only for MCQ / TrueFalse
+    if (needsOptions) {
+      payload.options = options.filter((o) => o.content.trim());
+    }
 
     if (isNew) {
       createQuestion.mutate(payload, {
@@ -336,6 +322,21 @@ export default function QuestionDetailPage() {
                     {...register("negativePoints")}
                   />
                 </div>
+
+                <Input
+                  label="Topic"
+                  id="q-topic"
+                  placeholder="e.g. Algebra"
+                  error={errors.topic?.message}
+                  {...register("topic")}
+                />
+                
+                <div className="pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer w-fit group" title="Inactive questions will not be in exams">
+                    <input type="checkbox" {...register("isActive")} className="w-4 h-4 rounded border-[#ddd] text-notion-blue focus:ring-notion-blue/20" />
+                    <span className="text-[14px] text-notion-black font-medium">Active Status</span>
+                  </label>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -412,153 +413,102 @@ export default function QuestionDetailPage() {
               </Card>
             )}
 
-            {/* Metadata / Additional Details */}
-            <Card>
-              <CardContent className="p-6 space-y-4">
-                <h3 className="text-[16px] font-semibold text-notion-black">Additional Details</h3>
-                
-                <Input
-                  label="Topic (optional)"
-                  id="q-topic"
-                  placeholder="e.g. Algebra"
-                  {...register("topic")}
-                />
-                
-                {/* ── Media upload / URL ──────────────────────────────── */}
-                {isNew ? (
-                  <Input
-                    label="Media URL (optional)"
-                    id="q-media"
-                    placeholder="https://..."
-                    {...register("mediaUrl")}
-                  />
-                ) : (
-                  <div>
-                    <label className="block text-[14px] font-medium text-notion-black mb-1.5">
-                      Media (optional)
-                    </label>
-
-                    {/* Current media preview */}
-                    {watchedMediaUrl && (
-                      <div className="mb-3 flex items-center gap-2 p-2.5 rounded-micro border border-whisper bg-warm-white/60">
-                        <FileImage size={15} className="text-notion-blue shrink-0" />
-                        <a
-                          href={watchedMediaUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[12px] text-notion-blue hover:underline truncate flex-1"
-                        >
-                          {watchedMediaUrl}
-                        </a>
-                        <button
-                          type="button"
-                          onClick={() => setValue("mediaUrl", "")}
-                          className="p-0.5 text-warm-gray-300 hover:text-destructive transition-colors shrink-0"
-                          title="Remove media"
-                        >
-                          <X size={13} />
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Drop zone */}
-                    <div
-                      onDragOver={(e) => { e.preventDefault(); setMediaDragOver(true); }}
-                      onDragLeave={() => setMediaDragOver(false)}
-                      onDrop={handleMediaDrop}
-                      onClick={() => mediaFileRef.current?.click()}
-                      className={`border-2 border-dashed rounded-micro p-5 text-center cursor-pointer transition-colors ${
-                        mediaDragOver
-                          ? "border-notion-blue bg-notion-blue/5"
-                          : "border-whisper hover:border-warm-gray-300 bg-warm-white/50"
-                      }`}
-                    >
-                      <input
-                        ref={mediaFileRef}
-                        type="file"
-                        accept="image/*,video/*,.pdf"
-                        className="hidden"
-                        onChange={(e) => handleMediaFile(e.target.files?.[0])}
-                      />
-                      <Upload size={20} className="mx-auto text-warm-gray-300 mb-2" />
-                      {uploadQuestionMedia.isPending ? (
-                        <p className="text-[13px] text-warm-gray-500">Uploading…</p>
-                      ) : (
-                        <>
-                          <p className="text-[13px] text-warm-gray-500">
-                            Drop a file or{" "}
-                            <span className="text-notion-blue font-medium">browse</span>
-                          </p>
-                          <p className="text-[11px] text-warm-gray-300 mt-1">
-                            Image, video or PDF · Max 5 MB
-                          </p>
-                        </>
-                      )}
-                    </div>
-
-                    {uploadQuestionMedia.isError && (
-                      <p className="flex items-center gap-1 text-[12px] text-destructive mt-1.5">
-                        <AlertCircle size={12} />
-                        {uploadQuestionMedia.error?.response?.data?.error || "Upload failed."}
-                      </p>
-                    )}
-                    {uploadQuestionMedia.isSuccess && (
-                      <p className="flex items-center gap-1 text-[12px] text-success mt-1.5">
-                        <CheckCircle2 size={12} /> Media uploaded successfully.
-                      </p>
-                    )}
-
-                    {/* Hidden field keeps the URL in the form payload */}
-                    <input type="hidden" {...register("mediaUrl")} />
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-whisper mt-2">
-                  <Input
-                    label="Grade/Field"
-                    id="q-meta-grade"
-                    placeholder="e.g. 12"
-                    {...register("metadata.gradeField")}
-                  />
-                  <Input
-                    label="Course"
-                    id="q-meta-course"
-                    placeholder="e.g. Physics"
-                    {...register("metadata.course")}
-                  />
-                  <Input
-                    label="Chapter"
-                    id="q-meta-chapter"
-                    placeholder="e.g. Electricity"
-                    {...register("metadata.chapter")}
-                  />
-                  <Input
-                    label="Exam Year"
-                    id="q-meta-year"
-                    placeholder="e.g. 2022"
-                    {...register("metadata.examYear")}
-                  />
-                </div>
-                
-                <Input
-                  label="Tags"
-                  id="q-meta-tags"
-                  placeholder="e.g. conceptual"
-                  {...register("metadata.tags")}
-                />
-
-                <div className="pt-4 border-t border-whisper mt-2">
-                  {/* Active toggle */}
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" {...register("isActive")} className="w-4 h-4 rounded border-[#ddd] text-notion-blue focus:ring-notion-blue/20" />
-                    <span className="text-[14px] text-notion-black font-medium">Active Status</span>
-                  </label>
-                  <p className="text-[12px] text-warm-gray-500 mt-1">
-                    Inactive questions will not appear in exams.
+            {/* Expected Answer Editor (ShortAnswer) */}
+            {questionType === "ShortAnswer" && (
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  <h3 className="text-[16px] font-semibold text-notion-black">Expected Answer</h3>
+                  <p className="text-[13px] text-warm-gray-500 -mt-2">
+                    Provide the expected answer.
                   </p>
-                </div>
-              </CardContent>
-            </Card>
+                  <div>
+                    <textarea
+                      id="q-expected"
+                      rows={4}
+                      placeholder="Enter the expected correct answer..."
+                      className="w-full border border-[#ddd] rounded-micro px-3.5 py-2.5 text-[14px] text-notion-black focus:outline-none focus:border-notion-blue focus:ring-2 focus:ring-notion-blue/20 transition-all resize-y placeholder:text-warm-gray-300"
+                      {...register("expectedAnswer")}
+                    />
+                    {errors.expectedAnswer && (
+                      <p className="text-warning text-[12px] mt-1">{errors.expectedAnswer.message}</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Media Upload (!isNew) */}
+            {!isNew && (
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  <h3 className="text-[16px] font-semibold text-notion-black">Media</h3>
+                  <p className="text-[13px] text-warm-gray-500 -mt-2">
+                    Upload an image, video, or PDF. Max 5MB.
+                  </p>
+
+                  {mediaLink && (
+                    <div className="mb-3 flex items-center gap-2 p-2.5 rounded-micro border border-whisper bg-warm-white/60">
+                      <FileImage size={15} className="text-notion-blue shrink-0" />
+                      <a
+                        href={mediaLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[12px] text-notion-blue hover:underline truncate flex-1"
+                      >
+                        {mediaLink}
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Drop zone */}
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); setMediaDragOver(true); }}
+                    onDragLeave={() => setMediaDragOver(false)}
+                    onDrop={handleMediaDrop}
+                    onClick={() => mediaFileRef.current?.click()}
+                    className={`border-2 border-dashed rounded-micro p-5 text-center cursor-pointer transition-colors ${
+                      mediaDragOver
+                        ? "border-notion-blue bg-notion-blue/5"
+                        : "border-whisper hover:border-warm-gray-300 bg-warm-white/50"
+                    }`}
+                  >
+                    <input
+                      ref={mediaFileRef}
+                      type="file"
+                      accept="image/*,video/*,.pdf"
+                      className="hidden"
+                      onChange={(e) => handleMediaFile(e.target.files?.[0])}
+                    />
+                    <Upload size={20} className="mx-auto text-warm-gray-300 mb-2" />
+                    {uploadQuestionMedia.isPending ? (
+                      <p className="text-[13px] text-warm-gray-500">Uploading…</p>
+                    ) : (
+                      <>
+                        <p className="text-[13px] text-warm-gray-500">
+                          Drop a file or{" "}
+                          <span className="text-notion-blue font-medium">browse</span>
+                        </p>
+                        <p className="text-[11px] text-warm-gray-300 mt-1">
+                          Image, video or PDF · Max 5 MB
+                        </p>
+                      </>
+                    )}
+                  </div>
+
+                  {uploadQuestionMedia.isError && (
+                    <p className="flex items-center gap-1 text-[12px] text-destructive mt-1.5">
+                      <AlertCircle size={12} />
+                      {uploadQuestionMedia.error?.response?.data?.error || "Upload failed."}
+                    </p>
+                  )}
+                  {uploadQuestionMedia.isSuccess && (
+                    <p className="flex items-center gap-1 text-[12px] text-success mt-1.5">
+                      <CheckCircle2 size={12} /> Media uploaded successfully.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
 

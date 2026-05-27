@@ -56,7 +56,7 @@ export default function Sidebar() {
 
   const { data: enterprise } = useMyEnterprise({ enabled: isAdmin });
 
-  const logoUrl = isAdmin ? enterprise?.logoUrl : null;
+  const logoUrl = (isAdmin ? enterprise?.logoUrl : null) || "/logo.png";
   const brandName = (isAdmin && enterprise?.displayName) || "Veritas";
 
   const navItems = NAV_ITEMS[user?.role] ?? [];
@@ -71,24 +71,25 @@ export default function Sidebar() {
       className={cn(
         "fixed inset-y-0 left-0 z-40 flex flex-col bg-brand-sidebar border-r border-whisper",
         "transition-all duration-200",
-        sidebarOpen ? "w-64" : "w-16"
+        sidebarOpen ? "w-60" : "w-16"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 h-14 px-4 border-b border-whisper shrink-0">
-        {logoUrl ? (
-          <img
-            src={logoUrl}
-            alt={brandName}
-            className="w-7 h-7 rounded object-cover shrink-0"
-          />
+      <div className="flex items-center gap-3 h-20 border-b border-whisper shrink-0 overflow-hidden px-4">
+        {sidebarOpen ? (
+          <>
+            <img
+              src={logoUrl}
+              alt={brandName}
+              className="w-15 h-15 rounded-md object-contain shrink-0"
+            />
+            <span className="font-bold text-notion-black text-[18px] truncate">{brandName}</span>
+          </>
         ) : (
-          <div className="w-7 h-7 rounded bg-brand-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
-            {brandName.charAt(0).toUpperCase()}
+          <div className="w-10 h-10 rounded-md bg-transparent flex items-center justify-center shrink-0 mx-auto">
+            {/* If they explicitly want the name, we use the first letter as a bold recognizable emblem when space is tight */}
+            <span className="font-bold text-notion-black text-[22px]">{brandName.charAt(0).toUpperCase()}</span>
           </div>
-        )}
-        {sidebarOpen && (
-          <span className="font-semibold text-notion-black text-[15px] truncate">{brandName}</span>
         )}
       </div>
 
@@ -100,7 +101,7 @@ export default function Sidebar() {
             to={to}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 rounded-[5px] px-2 py-2 text-[14px] font-medium transition-colors",
+                "flex items-center gap-3 rounded-subtle px-2 py-2 text-[14px] font-medium transition-colors",
                 "text-warm-gray-500 hover:bg-warm-white hover:text-notion-black",
                 isActive && "bg-warm-white text-notion-black font-semibold"
               )
@@ -116,14 +117,14 @@ export default function Sidebar() {
       <div className="border-t border-whisper px-2 py-3 space-y-0.5">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full rounded-[5px] px-2 py-2 text-[14px] font-medium text-warm-gray-500 hover:bg-warm-white hover:text-notion-black transition-colors"
+          className="flex items-center gap-3 w-full rounded-subtle px-2 py-2 text-[14px] font-medium text-warm-gray-500 hover:bg-warm-white hover:text-notion-black transition-colors"
         >
           <LogOut size={18} className="shrink-0" />
           {sidebarOpen && <span>Logout</span>}
         </button>
         <button
           onClick={toggleSidebar}
-          className="flex items-center gap-3 w-full rounded-[5px] px-2 py-2 text-[14px] font-medium text-warm-gray-300 hover:text-notion-black transition-colors"
+          className="flex items-center gap-3 w-full rounded-subtle px-2 py-2 text-[14px] font-medium text-warm-gray-300 hover:text-notion-black transition-colors"
         >
           {sidebarOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
           {sidebarOpen && <span className="text-xs">Collapse</span>}

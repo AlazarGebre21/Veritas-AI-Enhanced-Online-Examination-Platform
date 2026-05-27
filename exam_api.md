@@ -1352,32 +1352,27 @@ List questions with sorting and filtering support for the caller enterprise.
 }
 ```
 
-# Create Question ENTERPRISEADMIN and ENTERPRISESTAFF ENDPOINT
+````md
+# Create Question
 
 ## Endpoint
 
-```http
-POST /questions
-```
-
-## Description
+`POST /questions`
 
 Create one question under the caller enterprise.
 
 ---
 
-## Parameters
+## Headers
 
-### Headers
-
-| Name            | Type   | Required | Description          |
-| --------------- | ------ | -------- | -------------------- |
-| X-Enterprise-ID | string | Yes      | Enterprise ID (UUID) |
-| X-User-ID       | string | Yes      | Actor user ID (UUID) |
+| Header            | Type     | Required | Description          |
+| ----------------- | -------- | -------- | -------------------- |
+| `X-Enterprise-ID` | `string` | Yes      | Enterprise ID (UUID) |
+| `X-User-ID`       | `string` | Yes      | Actor user ID (UUID) |
 
 ---
 
-### Body Parameters
+## Request Body
 
 **Content-Type:** `application/json`
 
@@ -1385,13 +1380,14 @@ Create one question under the caller enterprise.
 {
   "content": "string",
   "difficulty": "Easy",
-  "isActive": true,
-  "mediaUrl": "string",
-  "metadata": {
+  "evaluationCriteria": {
     "additionalProp1": "string",
     "additionalProp2": "string",
     "additionalProp3": "string"
   },
+  "expectedAnswer": "string",
+  "isActive": true,
+  "mediaUrl": "string",
   "negativePoints": 0,
   "options": [
     {
@@ -1405,12 +1401,32 @@ Create one question under the caller enterprise.
   "type": "MCQ"
 }
 ```
+````
 
 ---
 
-## Responses
+## Request Body Fields
 
-### 201 Created
+| Field                | Type      | Description                                |
+| -------------------- | --------- | ------------------------------------------ |
+| `content`            | `string`  | Question content/body                      |
+| `difficulty`         | `string`  | Difficulty level (e.g. Easy, Medium, Hard) |
+| `evaluationCriteria` | `object`  | Evaluation rules or grading criteria       |
+| `expectedAnswer`     | `string`  | Expected answer for the question           |
+| `isActive`           | `boolean` | Whether the question is active             |
+| `mediaUrl`           | `string`  | Optional media attachment URL              |
+| `negativePoints`     | `number`  | Points deducted for incorrect answers      |
+| `options`            | `array`   | List of answer options (for MCQ)           |
+| `points`             | `number`  | Points assigned to the question            |
+| `title`              | `string`  | Question title                             |
+| `topic`              | `string`  | Related topic/category                     |
+| `type`               | `string`  | Question type (e.g. `MCQ`)                 |
+
+---
+
+## Response
+
+### `201 Created`
 
 **Content-Type:** `application/json`
 
@@ -1421,14 +1437,15 @@ Create one question under the caller enterprise.
   "createdBy": "string",
   "difficulty": "Easy",
   "enterpriseId": "string",
-  "id": "string",
-  "isActive": true,
-  "mediaUrl": "string",
-  "metadata": {
+  "evaluationCriteria": {
     "additionalProp1": "string",
     "additionalProp2": "string",
     "additionalProp3": "string"
   },
+  "expectedAnswer": "string",
+  "id": "string",
+  "isActive": true,
+  "mediaUrl": "string",
   "negativePoints": 0,
   "options": [
     {
@@ -1443,18 +1460,6 @@ Create one question under the caller enterprise.
   "topic": "string",
   "type": "MCQ",
   "updatedAt": "string"
-}
-```
-
----
-
-### 400 Bad Request
-
-**Content-Type:** `application/json`
-
-```json
-{
-  "error": "string"
 }
 ```
 
