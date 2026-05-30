@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Plus, BookOpen } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useQuestions } from "../hooks/useQuestions.js";
 import { Button, Skeleton } from "@/components/ui/index.js";
 import { ROUTES } from "@/config/routes.js";
@@ -60,25 +60,34 @@ export default function QuestionsPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {subjects.map((subject) => {
-            const count = subjectsMap[subject].length;
+            const subjectQuestions = subjectsMap[subject];
+            const count = subjectQuestions.length;
+            const totalPoints = subjectQuestions.reduce((sum, q) => sum + (Number(q.points) || 0), 0);
+            const uniqueTopics = [...new Set(subjectQuestions.map(q => q.topic).filter(Boolean))];
+            
             return (
               <div
                 key={subject}
                 onClick={() => navigate(ROUTES.QUESTIONS_SUBJECT.replace(":subjectName", encodeURIComponent(subject)))}
-                className="group flex flex-col justify-between p-5 bg-white border border-whisper rounded-md hover:border-notion-blue/40 hover:shadow-sm transition-all cursor-pointer"
+                className="group flex flex-col justify-between p-5 bg-white border border-whisper rounded-md hover:border-notion-blue/40 hover:shadow-sm hover:bg-warm-white transition-all cursor-pointer"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 bg-notion-blue/5 text-notion-blue rounded-md group-hover:bg-notion-blue group-hover:text-white transition-colors">
-                    <BookOpen size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-[15px] text-notion-black line-clamp-2" title={subject}>
-                      {subject}
-                    </h3>
-                  </div>
+                <div className="mb-4">
+                  <h3 className="font-semibold text-[15px] text-notion-black line-clamp-2 mb-1" title={subject}>
+                    {subject}
+                  </h3>
+                  <p className="text-[13px] text-warm-gray-500 font-medium">
+                    {count} {count === 1 ? "question" : "questions"}
+                  </p>
                 </div>
-                <div className="text-[13px] text-warm-gray-500 font-medium">
-                  {count} {count === 1 ? "question" : "questions"}
+                <div className="mt-auto pt-3 border-t border-whisper flex items-center justify-between text-[12px] text-warm-gray-500">
+                  <div className="flex gap-2 items-center truncate mr-2">
+                    <span className="truncate" title={uniqueTopics.join(", ")}>
+                      {uniqueTopics.length > 0 ? uniqueTopics.slice(0, 2).join(", ") + (uniqueTopics.length > 2 ? "..." : "") : "No topics"}
+                    </span>
+                  </div>
+                  <div className="font-medium text-notion-black whitespace-nowrap">
+                    {totalPoints} pts
+                  </div>
                 </div>
               </div>
             );

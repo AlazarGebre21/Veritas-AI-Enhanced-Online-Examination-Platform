@@ -221,6 +221,7 @@ export default function ExamSessionPage() {
           <div className="flex-1 overflow-y-auto px-6 md:px-10 py-8 max-w-3xl mx-auto w-full">
             {currentQuestion ? (
               <QuestionRenderer
+                key={currentQuestion.id}
                 question={currentQuestion}
                 answer={answers.get(currentQuestion.id) || null}
                 onAnswer={handleAnswer}

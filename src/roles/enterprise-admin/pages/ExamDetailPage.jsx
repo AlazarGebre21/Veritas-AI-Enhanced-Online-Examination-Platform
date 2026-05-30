@@ -93,7 +93,7 @@ export default function ExamDetailPage() {
         {activeTab === "Enrollments" && <ExamEnrollmentsTab examId={id} exam={exam} />}
         {activeTab === "Proctoring" && <ExamProctoringTab examId={id} />}
         {activeTab === "Sessions" && <ExamSessionsTab examId={id} />}
-        {activeTab === "Submissions" && <ExamSubmissionsTab examId={id} />}
+        {activeTab === "Submissions" && <ExamSubmissionsTab examId={id} exam={exam} />}
       </div>
     </div>
   );

@@ -19,9 +19,9 @@ export default function PublicLayout() {
         <div className="relative z-20 flex flex-col items-center text-center -mt-16">
           <div className="flex items-center justify-center gap-4 mb-4">
             <img src="/logo.png" alt="Veritas Logo" className="w-[72px] h-[72px] object-contain" />
-            <span className="text-[48px] font-bold text-notion-black tracking-tight" style={{ marginBottom: "-4px" }}>Veritas</span>
+            <span className="text-[24px] font-bold text-notion-black tracking-tight" style={{ marginBottom: "-4px" }}>Veritas</span>
           </div>
-          <h2 className="text-[20px] text-warm-gray-500 italic max-w-md font-medium leading-[1.3]">
+          <h2 className="text-[9px] text-warm-gray-500 italic max-w-md font-medium leading-[1.3]">
             AI-Enhanced Assessment Platform for Enterprises
           </h2>
         </div>

@@ -11,7 +11,6 @@ export function ExamSubmissionsTab({ examId, exam }) {
   const submissions = data?.results || [];
 
 
-  console.log(exam)
 
   if (selectedSessionId) {
     return <ResultDetailView sessionId={selectedSessionId} onBack={() => setSelectedSessionId(null)} />;
@@ -35,7 +34,7 @@ export function ExamSubmissionsTab({ examId, exam }) {
       <p className="text-[13px] text-warm-gray-500">{submissions.length} submission{submissions.length !== 1 ? "s" : ""}</p>
       <div className="border border-whisper rounded-comfortable overflow-hidden divide-y divide-whisper">
         {submissions.map((sub) => (
-          <SubmissionRow key={sub.id} sub={sub} passingScore={exam?.passingScore} onClick={() => setSelectedSessionId(sub.session_id)} />
+          <SubmissionRow key={sub.id} sub={sub} passingScore={exam?.passingScorePercent} onClick={() => setSelectedSessionId(sub.session_id)} />
         ))}
       </div>
     </div>
@@ -46,10 +45,9 @@ function SubmissionRow({ sub, passingScore, onClick }) {
   const { data: statusData } = useGradingStatus(sub.session_id);
   const status = statusData?.status || "graded";
   const isPending = status === 'pending';
-  
   const displayPercentage = statusData?.percentage ?? sub.percentage ?? 0;
   const gradedBy = statusData?.graded_by || sub.graded_by || 'System';
-  const passed = displayPercentage >= 50;
+  const passed = displayPercentage >= passingScore || 50;
 
   return (
     <div onClick={onClick} className="flex items-center justify-between px-4 py-3 hover:bg-warm-white/50 transition-colors cursor-pointer">

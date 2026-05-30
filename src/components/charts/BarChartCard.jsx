@@ -26,9 +26,9 @@ export default function BarChartCard({
 }) {
   if (!data.length) {
     return (
-      <Card>
+      <Card className="bg-transparent shadow-sm border border-warm-gray-300">
         <CardContent className="p-5">
-          <h3 className="text-[14px] font-semibold text-notion-black mb-3">{title}</h3>
+          <h3 className="text-[14px] font-medium text-notion-black mb-3">{title}</h3>
           <div className="flex items-center justify-center text-warm-gray-300 text-[13px]" style={{ height }}>
             No data available
           </div>
@@ -40,10 +40,10 @@ export default function BarChartCard({
   const isVertical = layout === "vertical";
 
   return (
-    <Card className="hover:shadow-card transition-shadow duration-200">
+    <Card className="bg-transparent border border-warm-gray-300 shadow-sm hover:border-notion-blue/50 transition-colors duration-200">
       <CardContent className="p-5">
         <div className="flex items-baseline justify-between mb-3">
-          <h3 className="text-[14px] font-semibold text-notion-black">{title}</h3>
+          <h3 className="text-[14px] font-medium text-notion-black">{title}</h3>
           {subtitle && (
             <span className="text-[12px] text-warm-gray-500">{subtitle}</span>
           )}

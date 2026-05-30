@@ -15,7 +15,7 @@ export default function StaffDashboardPage() {
   return (
     <div className="space-y-8">
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="border-b border-whisper pb-6">
+      <div className="pb-2">
         <h1 className="text-2xl font-bold text-notion-black">
           Welcome, {user?.firstName || "Staff"} 👋
         </h1>
@@ -83,7 +83,7 @@ function QuickAction({ to, icon: Icon, title, description, color }) {
   return (
     <Link
       to={to}
-      className="group flex items-start gap-4 p-5 rounded-comfortable border border-whisper bg-white hover:shadow-card hover:border-notion-blue/30 hover:-translate-y-0.5 transition-all duration-200"
+      className="group flex items-start gap-4 p-5 rounded-md border border-whisper bg-white hover:shadow-card hover:border-notion-blue/30 hover:-translate-y-0.5 transition-all duration-200"
     >
       <div
         className={`w-10 h-10 rounded-lg bg-${color}/10 flex items-center justify-center text-${color} shrink-0 group-hover:scale-110 transition-transform`}

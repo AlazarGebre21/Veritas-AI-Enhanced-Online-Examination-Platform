@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import { Flag } from "lucide-react";
 import AnswerOptionList from "./AnswerOptionList.jsx";
 
@@ -74,11 +74,8 @@ export default function QuestionRenderer({ question, answer, onAnswer, onFlag, i
 
 /** Internal component that renders the correct input based on question type */
 function AnswerInput({ type, options, answer, onAnswer }) {
-  const [textValue, setTextValue] = useState(answer?.text || "");
-
   function handleTextChange(e) {
     const val = e.target.value;
-    setTextValue(val);
     onAnswer({ text: val });
   }
 
@@ -112,7 +109,7 @@ function AnswerInput({ type, options, answer, onAnswer }) {
       return (
         <input
           type="text"
-          value={textValue}
+          value={answer?.text || ""}
           onChange={handleTextChange}
           placeholder="Type your answer..."
           className="w-full border border-whisper rounded-subtle px-4 py-3 text-[14px] text-notion-black focus:outline-none focus:ring-2 focus:ring-focus-blue focus:border-transparent"
@@ -123,14 +120,14 @@ function AnswerInput({ type, options, answer, onAnswer }) {
       return (
         <div className="space-y-1.5">
           <textarea
-            value={textValue}
+            value={answer?.text || ""}
             onChange={handleTextChange}
             placeholder="Write your essay answer..."
             rows={8}
             className="w-full border border-whisper rounded-subtle px-4 py-3 text-[14px] text-notion-black leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-focus-blue focus:border-transparent"
           />
           <p className="text-[11px] text-warm-gray-400 text-right">
-            {textValue.trim().split(/\s+/).filter(Boolean).length} words
+            {(answer?.text || "").trim().split(/\s+/).filter(Boolean).length} words
           </p>
         </div>
       );

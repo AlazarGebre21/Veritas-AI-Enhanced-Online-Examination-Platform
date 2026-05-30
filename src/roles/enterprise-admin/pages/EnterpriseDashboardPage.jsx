@@ -57,15 +57,15 @@ export default function EnterpriseDashboardPage() {
   return (
     <div className="space-y-8">
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="border-b border-whisper pb-6">
-        <h1 className="text-2xl font-bold text-notion-black">
+      <div className="pb-2">
+        <h1 className="text-xl font-medium text-notion-black">
           {entLoading ? (
             <Skeleton className="h-8 w-64" />
           ) : (
-            <>Welcome back, {enterprise?.legalName}👋</>
+            <>Welcome back, {enterprise?.legalName}</>
           )}
         </h1>
-        <p className="text-warm-gray-500 text-[15px] mt-1">
+        <p className="text-warm-gray-500 text-[10px] mt-1">
           {entLoading ? (
             <Skeleton className="h-4 w-48 mt-2" />
           ) : (
@@ -110,12 +110,12 @@ export default function EnterpriseDashboardPage() {
 
       {/* ── Subscription Info Banner ────────────────────────────────────── */}
       {!subLoading && subscription && (
-        <Card className="border-l-4 border-l-notion-blue">
+        <Card className="bg-transparent shadow-sm border border-warm-gray-300 border-l-4 border-l-notion-blue">
           <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <TrendingUp size={20} className="text-notion-blue shrink-0" />
+              <TrendingUp size={18} className="text-notion-blue shrink-0" />
               <div>
-                <p className="text-[14px] font-semibold text-notion-black">
+                <p className="text-[13px] font-medium text-notion-black">
                   Subscription Plan
                 </p>
                 <p className="text-[13px] text-warm-gray-500 mt-0.5">
@@ -142,7 +142,7 @@ export default function EnterpriseDashboardPage() {
       <div>
         <div className="flex items-center gap-2 mb-5">
           <div className="w-1 h-5 rounded-full bg-notion-blue" />
-          <h2 className="text-lg font-semibold text-notion-black">Analytics Overview</h2>
+          <h2 className="text-md font-medium text-notion-black">Analytics Overview</h2>
         </div>
 
         {/* Analytics Mini Stats Row */}
@@ -181,7 +181,7 @@ export default function EnterpriseDashboardPage() {
         {analyticsLoading ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {[1, 2, 3, 4].map((i) => (
-              <Card key={i}>
+              <Card key={i} className="bg-transparent shadow-sm border border-warm-gray-300">
                 <CardContent className="p-5">
                   <Skeleton className="h-4 w-32 mb-4" />
                   <Skeleton className="h-52 w-full rounded-lg" />
@@ -197,6 +197,7 @@ export default function EnterpriseDashboardPage() {
               title="Exam Status Breakdown"
               centerValue={examAnalytics?.total ?? 0}
               centerLabel="Total"
+              className="bg-transparent border-warm-gray-300 shadow-sm border hover:border-notion-blue/50 transition-colors duration-200"
             />
 
             {/* Exams Created Over Time */}
@@ -207,6 +208,7 @@ export default function EnterpriseDashboardPage() {
               dataKey="count"
               xKey="month"
               color={CHART_COLORS.blue}
+              className="bg-transparent border-warm-gray-300 shadow-sm border hover:border-notion-blue/50 transition-colors duration-200"
             />
 
             {/* Question Type Distribution */}
@@ -216,6 +218,7 @@ export default function EnterpriseDashboardPage() {
               subtitle={questionAnalytics ? `${questionAnalytics.total} total` : ""}
               barKey="value"
               categoryKey="name"
+              className="bg-transparent border-warm-gray-300 shadow-sm border hover:border-notion-blue/50 transition-colors duration-200"
             />
 
             {/* Question Difficulty Distribution */}
@@ -224,6 +227,7 @@ export default function EnterpriseDashboardPage() {
               title="Question Difficulty"
               centerValue={questionAnalytics?.total ?? 0}
               centerLabel="Questions"
+              className="bg-transparent border-warm-gray-300 shadow-sm border hover:border-notion-blue/50 transition-colors duration-200"
             />
 
             {/* Score Distribution Histogram */}
@@ -233,6 +237,7 @@ export default function EnterpriseDashboardPage() {
               subtitle={gradingAnalytics ? `${gradingAnalytics.totalGraded} graded` : ""}
               barKey="count"
               categoryKey="range"
+              className="bg-transparent border-warm-gray-300 shadow-sm border hover:border-notion-blue/50 transition-colors duration-200"
             />
 
             {/* Pass/Fail Rate */}
@@ -245,6 +250,7 @@ export default function EnterpriseDashboardPage() {
                   : "—"
               }
               centerLabel="Pass Rate"
+              className="bg-transparent border-warm-gray-300 shadow-sm border hover:border-notion-blue/50 transition-colors duration-200"
             />
 
             {/* Topic Coverage (full width) */}
@@ -258,6 +264,7 @@ export default function EnterpriseDashboardPage() {
                   height={Math.max(200, questionAnalytics.topicData.length * 40)}
                   barKey="value"
                   categoryKey="name"
+                  className="bg-transparent border-warm-gray-300 shadow-sm border hover:border-notion-blue/50 transition-colors duration-200"
                 />
               </div>
             )}
@@ -300,7 +307,7 @@ export default function EnterpriseDashboardPage() {
 
 function StatCard({ icon: Icon, label, value, color, isLoading, isStatus, statusVariant }) {
   return (
-    <Card className="hover:shadow-card hover:-translate-y-0.5 transition-all duration-200">
+    <Card className="bg-transparent border border-warm-gray-300 shadow-sm hover:border-notion-blue/50 transition-colors duration-200">
       <CardContent className="flex items-center p-5">
         <div
           className={`w-11 h-11 rounded-full bg-${color}/10 flex items-center justify-center text-${color} mr-4 shrink-0`}
@@ -308,7 +315,7 @@ function StatCard({ icon: Icon, label, value, color, isLoading, isStatus, status
           <Icon size={20} />
         </div>
         <div className="min-w-0">
-          <p className="text-[12px] font-medium text-warm-gray-500 uppercase tracking-wide truncate">
+          <p className="text-[13px] font-medium text-warm-gray-500 truncate">
             {label}
           </p>
           {isLoading ? (
@@ -316,7 +323,7 @@ function StatCard({ icon: Icon, label, value, color, isLoading, isStatus, status
           ) : isStatus ? (
             <Badge variant={statusVariant} className="mt-1.5">{value}</Badge>
           ) : (
-            <h3 className="text-2xl font-bold text-notion-black mt-0.5">{value ?? "—"}</h3>
+            <h3 className="text-2xl font-normal text-notion-black mt-0.5">{value ?? "—"}</h3>
           )}
         </div>
       </CardContent>
@@ -328,15 +335,15 @@ function QuickAction({ to, icon: Icon, title, description, color }) {
   return (
     <Link
       to={to}
-      className="group flex items-start gap-4 p-5 rounded-comfortable border border-whisper bg-white hover:shadow-card hover:border-notion-blue/30 hover:-translate-y-0.5 transition-all duration-200"
+      className="group flex items-start gap-4 p-5 rounded-md border border-warm-gray-300 bg-transparent hover:border-notion-blue/50 transition-colors duration-200"
     >
       <div
         className={`w-10 h-10 rounded-lg bg-${color}/10 flex items-center justify-center text-${color} shrink-0 group-hover:scale-110 transition-transform`}
       >
         <Icon size={18} />
       </div>
-      <div className="min-w-0">
-        <h3 className="text-[15px] font-semibold text-notion-black group-hover:text-notion-blue transition-colors">
+      <div className="min-w-0 flex-1">
+        <h3 className="text-[14px] font-medium text-notion-black group-hover:text-notion-blue transition-colors">
           {title}
         </h3>
         <p className="text-[13px] text-warm-gray-500 mt-0.5 line-clamp-1">{description}</p>

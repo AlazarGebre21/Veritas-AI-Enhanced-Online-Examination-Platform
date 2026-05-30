@@ -35,7 +35,7 @@ export default function SystemAdminDashboardPage() {
   return (
     <div className="space-y-8">
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="border-b border-whisper pb-6">
+      <div className="pb-2">
         <h1 className="text-2xl font-bold text-notion-black">System Overview</h1>
         <p className="text-warm-gray-500 text-[15px] mt-1">
           Monitor enterprise tenants, subscriptions, and system health.
@@ -62,7 +62,7 @@ export default function SystemAdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-transparent border-warm-gray-300 shadow-none">
+        <Card className="bg-transparent border-warm-gray-300 shadow-sm">
           <CardContent className="flex items-center p-6">
             <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center text-success mr-4 shrink-0">
               <CreditCard size={24} />
@@ -80,7 +80,7 @@ export default function SystemAdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-transparent border-warm-gray-300 shadow-none">
+        <Card className="bg-transparent border-warm-gray-300 shadow-sm">
           <CardContent className="flex items-center p-6">
             <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 shrink-0 bg-[#d9730d]/10 text-[#d9730d]`}>
               <Users size={24} />
@@ -98,7 +98,7 @@ export default function SystemAdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-transparent border-warm-gray-300 shadow-none">
+        <Card className="bg-transparent border-warm-gray-300 shadow-sm">
           <CardContent className="flex items-center p-6">
             <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 shrink-0 ${isHealthy ? "bg-success/10 text-success" : healthError ? "bg-destructive/10 text-destructive" : "bg-warm-gray-100 text-warm-gray-400"}`}>
               <HealthIcon size={24} className={healthLoading ? "animate-spin" : ""} />
@@ -125,7 +125,7 @@ export default function SystemAdminDashboardPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {[1, 2].map((i) => (
-              <Card key={i} className="bg-transparent border-warm-gray-300 shadow-none">
+              <Card key={i} className="bg-transparent border-warm-gray-300 shadow-sm">
                 <CardContent className="p-5">
                   <Skeleton className="h-4 w-32 mb-4" />
                   <Skeleton className="h-52 w-full rounded-lg" />
@@ -143,7 +143,7 @@ export default function SystemAdminDashboardPage() {
               xKey="month"
               color={CHART_COLORS.purple}
               height={260}
-              className="bg-transparent border-warm-gray-300 shadow-none border"
+              className="bg-transparent border-warm-gray-300 shadow-sm border hover:border-notion-blue/50 transition-colors duration-200"
             />
 
             {/* Subscription Distribution */}
@@ -153,7 +153,7 @@ export default function SystemAdminDashboardPage() {
                centerValue={analytics?.total ?? 0}
                centerLabel="Subscriptions"
                height={260}
-               className="bg-transparent border-warm-gray-300 shadow-none border"
+               className="bg-transparent border-warm-gray-300 shadow-sm border hover:border-notion-blue/50 transition-colors duration-200"
              />
           </div>
         )}
@@ -165,7 +165,7 @@ export default function SystemAdminDashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Link
             to={ROUTES.SYSTEM_ENTERPRISES}
-            className="group flex items-start gap-4 p-5 rounded-comfortable border border-warm-gray-300 bg-transparent hover:border-notion-blue/50 transition-colors duration-200"
+            className="group flex items-start gap-4 p-5 rounded-md border border-warm-gray-300 bg-transparent hover:border-notion-blue/50 transition-colors duration-200"
           >
             <div className="w-10 h-10 rounded-lg bg-notion-blue/10 flex items-center justify-center text-notion-blue shrink-0 group-hover:scale-110 transition-transform">
               <Building2 size={18} />
@@ -181,7 +181,7 @@ export default function SystemAdminDashboardPage() {
 
           <Link
             to={ROUTES.SYSTEM_PLANS}
-            className="group flex items-start gap-4 p-5 rounded-comfortable border border-warm-gray-300 bg-transparent hover:border-[#2a9d99]/50 transition-colors duration-200"
+            className="group flex items-start gap-4 p-5 rounded-md border border-warm-gray-300 bg-transparent hover:border-[#2a9d99]/50 transition-colors duration-200"
           >
             <div className="w-10 h-10 rounded-lg bg-[#2a9d99]/10 flex items-center justify-center text-[#2a9d99] shrink-0 group-hover:scale-110 transition-transform">
               <CreditCard size={18} />

@@ -11,7 +11,7 @@ export default function DonutChart({
   centerLabel,
   centerValue,
   height = 240,
-  className = "hover:shadow-card transition-shadow duration-200",
+  className = "bg-transparent border border-warm-gray-300 shadow-sm hover:border-notion-blue/50 transition-colors duration-200",
 }) {
   const total = data.reduce((s, d) => s + d.value, 0);
 
@@ -19,7 +19,7 @@ export default function DonutChart({
     return (
       <Card className={className}>
         <CardContent className="p-5">
-          <h3 className="text-[14px] font-semibold text-notion-black mb-3">{title}</h3>
+          <h3 className="text-[14px] font-medium text-notion-black mb-3">{title}</h3>
           <div className="flex items-center justify-center text-warm-gray-300 text-[13px]" style={{ height }}>
             No data available
           </div>
@@ -31,7 +31,7 @@ export default function DonutChart({
   return (
     <Card className={className}>
       <CardContent className="p-5">
-        <h3 className="text-[14px] font-semibold text-notion-black mb-1">{title}</h3>
+        <h3 className="text-[14px] font-medium text-notion-black mb-1">{title}</h3>
         <div className="relative" style={{ height }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -69,10 +69,10 @@ export default function DonutChart({
           {(centerLabel || centerValue !== undefined) && (
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               {centerValue !== undefined && (
-                <span className="text-2xl font-bold text-notion-black">{centerValue}</span>
+                <span className="text-2xl font-medium text-notion-black">{centerValue}</span>
               )}
               {centerLabel && (
-                <span className="text-[11px] text-warm-gray-500 uppercase tracking-wider mt-0.5">
+                <span className="text-[13px] text-warm-gray-500 mt-0.5">
                   {centerLabel}
                 </span>
               )}
