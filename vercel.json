@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "http://ec2-13-53-209-242.eu-north-1.compute.amazonaws.com/:path*"
+      "destination": "http://34.57.137.78/:path*"
     }
   ]
 }
