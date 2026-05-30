@@ -14,7 +14,7 @@ import OfflineBanner from "../components/OfflineBanner.jsx";
 import SubmissionConfirmModal from "../components/SubmissionConfirmModal.jsx";
 import ProctoringMonitor from "../components/ProctoringMonitor.jsx";
 import { Skeleton } from "@/components/ui/index.js";
-import { ChevronLeft, ChevronRight, Send } from "lucide-react";
+import { ChevronLeft, ChevronRight, Send, ArrowLeft, ArrowRight } from "lucide-react";
 
 const DEBOUNCE_MS = 2000;
 
@@ -217,8 +217,28 @@ export default function ExamSessionPage() {
         </aside>
 
         {/* Question area */}
-        <main className="flex-1 flex flex-col min-h-0 bg-white">
-          <div className="flex-1 overflow-y-auto px-6 md:px-10 py-8 max-w-3xl mx-auto w-full">
+        <main className="flex-1 flex flex-col min-h-0 bg-white relative">
+          {/* Left Arrow Navigation Button */}
+          <button
+            type="button"
+            onClick={() => goToQuestion(currentIndex - 1)}
+            disabled={currentIndex === 0}
+            className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-whisper bg-white text-notion-black shadow-sm disabled:opacity-30 transition-colors hover:bg-blue-50 hover:text-notion-blue z-20 hover:border-blue-100 disabled:hover:border-whisper disabled:hover:bg-white disabled:hover:text-notion-black"
+          >
+            <ArrowLeft size={20} />
+          </button>
+
+          {/* Right Arrow Navigation Button */}
+          <button
+            type="button"
+            onClick={() => goToQuestion(currentIndex + 1)}
+            disabled={currentIndex >= questions.length - 1}
+            className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-whisper bg-white text-notion-black shadow-sm disabled:opacity-30 transition-colors hover:bg-blue-50 hover:text-notion-blue z-20 hover:border-blue-100 disabled:hover:border-whisper disabled:hover:bg-white disabled:hover:text-notion-black"
+          >
+            <ArrowRight size={20} />
+          </button>
+
+          <div className="flex-1 overflow-y-auto px-6 md:px-10 py-8 max-w-3xl mx-auto w-full relative z-10">
             {currentQuestion ? (
               <QuestionRenderer
                 key={currentQuestion.id}

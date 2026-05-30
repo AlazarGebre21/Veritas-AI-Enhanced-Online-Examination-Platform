@@ -26,6 +26,7 @@ export default function ExamHeader({ examTitle, expiresAt, onExpire }) {
     >
       {/* Left: Exam title */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
+        <img src="/logo.png" alt="Veritas" className="w-[18px] h-[18px] object-contain opacity-90" />
         <h1
           className="text-[15px] font-semibold text-notion-black truncate"
           title={examTitle}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   CreditCard, Receipt, Clock, DollarSign, CalendarDays,
   ArrowUpRight, FileText, RefreshCw, XCircle, ChevronLeft, ChevronRight,
-  ExternalLink, Download, Loader2,
+  ExternalLink, Download, Loader2, Check,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useBillingSummary } from "../hooks/useBillingSummary.js";
@@ -11,6 +11,8 @@ import { usePaymentHistory } from "../hooks/usePaymentHistory.js";
 import { useEnterpriseSubscription } from "../hooks/useEnterpriseSubscription.js";
 import { useCancelSubscription } from "../hooks/useCancelSubscription.js";
 import { useReactivateSubscription } from "../hooks/useReactivateSubscription.js";
+import { useUpgradeSubscription } from "../hooks/useUpgradeSubscription.js";
+import { usePlans } from "@/hooks/usePlans.js";
 import { Card, CardContent, Badge, Skeleton, Button } from "@/components/ui/index.js";
 import { formatDate } from "@/lib/utils/date.js";
 
@@ -75,6 +77,9 @@ export default function BillingPage() {
         isCancelling={cancelMutation.isPending}
         isReactivating={reactivateMutation.isPending}
       />
+
+      {/* Available Plans */}
+      <PlansSection currentPlanId={subscription?.plan_id} />
 
       {/* Invoices Table */}
       <InvoicesSection />
@@ -395,6 +400,87 @@ function PaymentHistorySection() {
       </CardContent>
     </Card>
   );
+}
+
+/* ─── Plans Section ──────────────────────────────────────────────────────────── */
+
+function PlansSection({ currentPlanId }) {
+  const enterpriseId = useAuthStore((s) => s.user?.enterpriseId);
+  const { data: plansData, isLoading } = usePlans();
+  const upgradeMutation = useUpgradeSubscription(enterpriseId);
+  
+  const plans = plansData?.data || [];
+  const activePlans = plans.filter(p => p.is_active);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-64 w-full rounded-comfortable" />
+        ))}
+      </div>
+    );
+  }
+
+  if (activePlans.length === 0) return null;
+
+  return (
+    <div className="mt-8 mb-8">
+      <div className="mb-6 border-t border-whisper pt-8">
+        <h2 className="text-[18px] font-semibold text-notion-black tracking-tight">Available Plans</h2>
+        <p className="text-warm-gray-500 text-[14px] mt-1">
+          Upgrade your subscription to unlock more features.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {activePlans.map(plan => {
+          const isCurrent = currentPlanId === plan.id;
+          return (
+            <Card key={plan.id} className={`relative h-full flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-subtle ${isCurrent ? 'border-notion-blue ring-1 ring-notion-blue/20' : ''}`}>
+              {isCurrent && (
+                <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-2 z-10">
+                  <Badge variant="success" className="shadow-sm">Current Plan</Badge>
+                </div>
+              )}
+              <CardContent className="p-6 flex flex-col flex-1">
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-notion-black">{plan.name}</h3>
+                  <div className="mt-2 flex items-baseline gap-1">
+                    <span className="text-2xl font-bold text-notion-black tracking-tight">{formatPrice(plan.price, plan.currency || "ETB")}</span>
+                    <span className="text-warm-gray-400 text-sm">/{plan.billing_cycle === 'yearly' ? 'yr' : 'mo'}</span>
+                  </div>
+                  <p className="text-sm text-warm-gray-500 mt-2 min-h-[40px]">{plan.description || "The ideal plan for growing teams."}</p>
+                </div>
+                
+                <div className="space-y-3 mb-8 flex-1">
+                  {Object.entries(plan.features || {}).map(([key, val]) => (
+                    <div key={key} className="flex items-start gap-2.5">
+                      <div className="mt-0.5 rounded-full bg-notion-blue/10 p-[2px] shrink-0 text-notion-blue">
+                        <Check size={12} strokeWidth={3} />
+                      </div>
+                      <span className="text-sm text-notion-black font-medium tracking-tight">
+                        {key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}: <span className="font-normal text-warm-gray-500">{val}</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <Button 
+                  className={`w-full mt-auto ${isCurrent ? 'bg-warm-gray-100 text-warm-gray-500 hover:bg-warm-gray-200 cursor-not-allowed border-none' : 'bg-notion-blue text-white hover:bg-[#004dc2] shadow-sm'}`}
+                  disabled={isCurrent || upgradeMutation.isPending}
+                  isLoading={upgradeMutation.isPending && upgradeMutation.variables === plan.id}
+                  onClick={() => upgradeMutation.mutate(plan.id)}
+                >
+                  {isCurrent ? "Current Plan" : "Upgrade to " + plan.name}
+                </Button>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 /* ─── Pagination Controls ────────────────────────────────────────────────────── */

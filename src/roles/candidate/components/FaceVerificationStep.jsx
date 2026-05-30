@@ -99,18 +99,25 @@ export default function FaceVerificationStep({ onCapture, isLoading }) {
   }
 
   return (
-    <div className="w-full">
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-comfortable bg-notion-blue/10 mb-4">
-          <Camera size={28} className="text-notion-blue" />
-        </div>
-        <h2 className="text-[20px] font-bold text-notion-black leading-tight">
-          Face Registration
-        </h2>
-        <p className="text-[14px] text-warm-gray-500 mt-1.5">
-          Take a clear photo of your face for identity verification.
-        </p>
+    <div className="w-full relative overflow-hidden rounded-comfortable">
+      {/* Watermark */}
+      <div className="absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-[0.04]">
+        <img src="/logo.png" alt="Veritas" className="w-[150px] object-contain mb-2" />
+        <span className="text-[32px] md:text-[48px] font-black tracking-[0.3em] text-notion-black">VERITAS</span>
       </div>
+
+      <div className="relative z-10">
+        <div className="text-center mb-6 pt-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-comfortable bg-notion-blue/10 mb-4 shadow-sm border border-notion-blue/5">
+            <Camera size={28} className="text-notion-blue" />
+          </div>
+          <h2 className="text-[20px] font-bold text-notion-black leading-tight">
+            Face Registration
+          </h2>
+          <p className="text-[14px] text-warm-gray-500 mt-1.5">
+            Take a clear photo of your face for identity verification.
+          </p>
+        </div>
 
       {/* Camera / Preview area */}
       <div className="relative w-full max-w-sm mx-auto aspect-[4/3] rounded-standard overflow-hidden bg-warm-dark mb-4">
@@ -220,6 +227,7 @@ export default function FaceVerificationStep({ onCapture, isLoading }) {
             Capture Photo
           </button>
         )}
+      </div>
       </div>
     </div>
   );

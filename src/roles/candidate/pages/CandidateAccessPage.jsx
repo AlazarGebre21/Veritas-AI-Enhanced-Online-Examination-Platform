@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useExamSessionStore } from "@/stores/examSessionStore.js";
 import { useRedeemCode } from "../hooks/useRedeemCode.js";
@@ -101,12 +102,26 @@ export default function CandidateAccessPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-warm-white px-4">
       <div className="bg-white rounded-comfortable shadow-card p-8 w-full max-w-md border border-whisper">
-        {step === "token" && (
+        {step === "token" && !codeFromUrl && (
           <TokenEntryForm
             onSubmit={handleTokenSubmit}
             isLoading={redeem.isPending}
             error={tokenError}
           />
+        )}
+        
+        {step === "token" && codeFromUrl && (
+          <div className="relative w-full flex flex-col items-center justify-center py-12">
+            <div className="absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-[0.04]">
+              <img src="/logo.png" alt="Veritas" className="w-[120px] object-contain mb-2" />
+              <span className="text-[40px] font-black tracking-widest text-notion-black">VERITAS</span>
+            </div>
+            <div className="relative z-10 flex flex-col items-center gap-4">
+              <Loader2 size={32} className="animate-spin text-notion-blue" />
+              <p className="text-[15px] font-medium text-notion-black">Verifying invitation code...</p>
+              {tokenError && <p className="text-[13px] text-destructive px-4 py-2 bg-destructive/10 rounded-subtle">{tokenError}</p>}
+            </div>
+          </div>
         )}
 
         {step === "face" && (
