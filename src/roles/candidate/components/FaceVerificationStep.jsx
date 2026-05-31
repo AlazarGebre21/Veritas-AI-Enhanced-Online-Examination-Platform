@@ -101,9 +101,11 @@ export default function FaceVerificationStep({ onCapture, isLoading }) {
   return (
     <div className="w-full relative overflow-hidden rounded-comfortable">
       {/* Watermark */}
-      <div className="absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-[0.04]">
-        <img src="/logo.png" alt="Veritas" className="w-[150px] object-contain mb-2" />
-        <span className="text-[32px] md:text-[48px] font-black tracking-[0.3em] text-notion-black">VERITAS</span>
+      <div className="absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-[0.03]">
+        <div className="flex flex-col items-center transform -rotate-45 scale-[2.5] md:scale-[3.5]">
+          <img src="/logo.png" alt="Veritas" className="w-[200px] object-contain mb-4" />
+          <span className="text-[60px] md:text-[80px] font-black tracking-[0.3em] text-notion-black">VERITAS</span>
+        </div>
       </div>
 
       <div className="relative z-10">

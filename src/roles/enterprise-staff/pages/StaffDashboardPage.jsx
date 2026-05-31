@@ -4,9 +4,9 @@ import {
   Users,
   FileText,
   ArrowRight,
+  LucideClipboardList,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore.js";
-import { Card, CardContent } from "@/components/ui/index.js";
 import { ROUTES } from "@/config/routes.js";
 
 export default function StaffDashboardPage() {
@@ -16,10 +16,10 @@ export default function StaffDashboardPage() {
     <div className="space-y-8">
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="pb-2">
-        <h1 className="text-2xl font-bold text-notion-black">
-          Welcome, {user?.firstName || "Staff"} 👋
+        <h1 className="text-xl font-normal text-notion-black">
+          Welcome, {user?.firstName || "Staff"}
         </h1>
-        <p className="text-warm-gray-500 text-[15px] mt-1">
+        <p className="text-warm-gray-500 text-[10px] mt-1">
           Staff Portal — Manage enrollments, questions, and candidates.
         </p>
       </div>
@@ -29,11 +29,11 @@ export default function StaffDashboardPage() {
         <h2 className="text-lg font-semibold text-notion-black mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <QuickAction
-            to={ROUTES.STAFF_ENROLLMENTS}
-            icon={ClipboardList}
-            title="Manage Enrollments"
-            description="Enroll candidates and send invitations"
-            color="notion-blue"
+          to={ROUTES.EXAMS}
+          icon={LucideClipboardList}
+          title="Exams"
+          description="Create, edit, and organize exams"
+          color="[#d10523]"
           />
           <QuickAction
             to={ROUTES.STAFF_QUESTIONS}
@@ -52,27 +52,7 @@ export default function StaffDashboardPage() {
         </div>
       </div>
 
-      {/* ── Info Cards ──────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <InfoCard
-          icon={ClipboardList}
-          title="Enrollments"
-          description="Enroll candidates into exams using exam IDs provided by your administrator."
-          color="notion-blue"
-        />
-        <InfoCard
-          icon={FileText}
-          title="Questions"
-          description="Build and organize your question bank. Create, edit, and manage question content."
-          color="[#d9730d]"
-        />
-        <InfoCard
-          icon={Users}
-          title="Candidates"
-          description="View the candidate pool. Candidate management is handled by your administrator."
-          color="success"
-        />
-      </div>
+    
     </div>
   );
 }
@@ -101,23 +81,5 @@ function QuickAction({ to, icon: Icon, title, description, color }) {
         className="text-warm-gray-300 group-hover:text-notion-blue group-hover:translate-x-0.5 transition-all mt-0.5 ml-auto shrink-0"
       />
     </Link>
-  );
-}
-
-function InfoCard({ icon: Icon, title, description, color }) {
-  return (
-    <Card className="hover:shadow-card transition-shadow duration-200">
-      <CardContent className="p-5">
-        <div className="flex items-center gap-3 mb-3">
-          <div
-            className={`w-9 h-9 rounded-lg bg-${color}/10 flex items-center justify-center text-${color} shrink-0`}
-          >
-            <Icon size={16} />
-          </div>
-          <h3 className="text-[15px] font-semibold text-notion-black">{title}</h3>
-        </div>
-        <p className="text-[13px] text-warm-gray-500 leading-relaxed">{description}</p>
-      </CardContent>
-    </Card>
   );
 }

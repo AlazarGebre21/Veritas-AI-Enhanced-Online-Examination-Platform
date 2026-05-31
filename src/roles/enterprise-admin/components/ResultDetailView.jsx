@@ -5,11 +5,15 @@ import { Badge, Skeleton, Button, Card, CardContent } from "@/components/ui/inde
 import { formatDateTime } from "@/lib/utils/date.js";
 import { DataTable } from "@/components/shared/DataTable.jsx";
 import OverrideGradeModal from "./OverrideGradeModal.jsx";
+import OverrideQuestionGradeModal from "./OverrideQuestionGradeModal.jsx";
 
-export default function ResultDetailView({ sessionId, onBack, isStaff }) {
+export default function ResultDetailView({ sessionId, onBack, isStaff, passingScore }) {
   const { data: detail, isLoading, isError } = useGradingDetail(sessionId);
   const [overrideModalOpen, setOverrideModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("result");
+  const [overrideQuestion, setOverrideQuestion] = useState(null);
+
+  // console.log(detail)
   
   if (isLoading) {
     return (
@@ -31,7 +35,7 @@ export default function ResultDetailView({ sessionId, onBack, isStaff }) {
     );
   }
 
-  const passed = detail.percentage >= 60; // Or whatever is the passing score
+  const passed = detail.percentage >= (passingScore || 50);
 
   return (
     <div className="space-y-6">
@@ -80,7 +84,7 @@ export default function ResultDetailView({ sessionId, onBack, isStaff }) {
                     {detail.total_awarded_points} / {detail.total_max_points} points
                   </span>
                   <span>•</span>
-                  <span>Graded By: {detail.graded_by || 'System'}</span>
+                  <span>Graded By: {typeof detail.graded_by === 'object' ? (detail.graded_by?.type || 'System') : (detail.graded_by || 'System')}</span>
                   {detail.is_tampered && <Badge variant="destructive">Tampered</Badge>}
                 </div>
               </div>
@@ -119,12 +123,33 @@ export default function ResultDetailView({ sessionId, onBack, isStaff }) {
                       ) : (
                         <XCircle className="text-destructive" size={20} />
                       )}
+                      {!isStaff && (
+                        <Button variant="secondary" size="sm" onClick={() => setOverrideQuestion(qr)}>
+                          Override
+                        </Button>
+                      )}
                     </div>
                   </div>
-                  <div className="px-5 py-4">
-                    <p className="text-[15px] text-notion-black leading-relaxed">
-                      {qr.title || "Question Content"}
-                    </p>
+                  <div className="px-5 py-4 space-y-4">
+                    <div>
+                      <p className="text-[13px] text-warm-gray-500 font-medium mb-1">Question Content</p>
+                      <p className="text-[15px] text-notion-black leading-relaxed">
+                        {qr.title && <span className="block font-semibold mb-1">{qr.title}</span>}
+                        {qr.content || "No detailed content provided."}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[13px] text-warm-gray-500 font-medium mb-1">Candidate Answer</p>
+                      <div className="bg-warm-white p-3 rounded-md border border-whisper text-[14px] text-notion-black font-mono whitespace-pre-wrap">
+                        {qr.candidate_answer ? (
+                          typeof qr.candidate_answer === "object" 
+                            ? JSON.stringify(qr.candidate_answer, null, 2) 
+                            : qr.candidate_answer
+                        ) : (
+                          <span className="text-warm-gray-400 italic font-sans">No answer provided</span>
+                        )}
+                      </div>
+                    </div>
                     <div className="mt-4 p-3 bg-warm-white/50 rounded-md border border-whisper">
                       <p className="text-[13px] text-warm-gray-500 font-medium mb-1">Status / Feedback</p>
                       <p className="text-[14px] text-notion-black">{qr.status || "Graded"}</p>
@@ -150,6 +175,16 @@ export default function ResultDetailView({ sessionId, onBack, isStaff }) {
         sessionId={sessionId}
         currentScore={detail.total_awarded_points}
       />
+      
+      {overrideQuestion && (
+        <OverrideQuestionGradeModal
+          isOpen={true}
+          onClose={() => setOverrideQuestion(null)}
+          sessionId={sessionId}
+          question={overrideQuestion}
+          currentScore={overrideQuestion.awarded_points}
+        />
+      )}
     </div>
   );
 }

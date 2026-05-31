@@ -101,7 +101,7 @@ export default function CandidateAccessPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-warm-white px-4">
-      <div className="bg-white rounded-comfortable shadow-card p-8 w-full max-w-md border border-whisper">
+      <div className="bg-white rounded-comfortable shadow-card p-8 w-full max-w-md border border-whisper overflow-hidden relative">
         {step === "token" && !codeFromUrl && (
           <TokenEntryForm
             onSubmit={handleTokenSubmit}
@@ -112,9 +112,11 @@ export default function CandidateAccessPage() {
         
         {step === "token" && codeFromUrl && (
           <div className="relative w-full flex flex-col items-center justify-center py-12">
-            <div className="absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-[0.04]">
-              <img src="/logo.png" alt="Veritas" className="w-[120px] object-contain mb-2" />
-              <span className="text-[40px] font-black tracking-widest text-notion-black">VERITAS</span>
+            <div className="absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-[0.03]">
+              <div className="flex flex-col items-center transform -rotate-45 scale-[2.5] md:scale-[3.5]">
+                <img src="/logo.png" alt="Veritas" className="w-[180px] object-contain mb-4" />
+                <span className="text-[60px] md:text-[80px] font-black tracking-[0.3em] text-notion-black">VERITAS</span>
+              </div>
             </div>
             <div className="relative z-10 flex flex-col items-center gap-4">
               <Loader2 size={32} className="animate-spin text-notion-blue" />

@@ -1,5 +1,5 @@
 import ExamTimer from "./ExamTimer.jsx";
-import { Type, Minus, Plus } from "lucide-react";
+import { Type, Minus, Plus, Clock } from "lucide-react";
 import { useState } from "react";
 
 /**
@@ -7,7 +7,7 @@ import { useState } from "react";
  *
  * @param {{ examTitle: string, expiresAt: string, onExpire: () => void }} props
  */
-export default function ExamHeader({ examTitle, expiresAt, onExpire }) {
+export default function ExamHeader({ examTitle, expiresAt, onExpire, children }) {
   const [fontScale, setFontScale] = useState(100);
 
   function adjustFont(delta) {
@@ -24,8 +24,8 @@ export default function ExamHeader({ examTitle, expiresAt, onExpire }) {
       "
       style={{ "--exam-font-scale": `${fontScale}%` }}
     >
-      {/* Left: Exam title */}
-      <div className="flex items-center gap-3 min-w-0 flex-1">
+      {/* Left: Logo & Exam title */}
+      <div className="flex items-center gap-2.5 min-w-0 flex-1">
         <img src="/logo.png" alt="Veritas" className="w-[18px] h-[18px] object-contain opacity-90" />
         <h1
           className="text-[15px] font-semibold text-notion-black truncate"
@@ -35,35 +35,44 @@ export default function ExamHeader({ examTitle, expiresAt, onExpire }) {
         </h1>
       </div>
 
-      {/* Center: Timer */}
-      <div className="flex-shrink-0 mx-4">
-        {expiresAt && <ExamTimer expiresAt={expiresAt} onExpire={onExpire} />}
-      </div>
+      {/* Right side controls */}
+      <div className="flex shrink-0 items-center justify-end gap-6 ml-4">
+        {/* Timer */}
+        {expiresAt && (
+          <div className="flex items-center gap-1.5">
+            <Clock size={16} className="text-warm-gray-400" />
+            <ExamTimer expiresAt={expiresAt} onExpire={onExpire} />
+          </div>
+        )}
 
-      {/* Right: Font size controls */}
-      <div className="flex items-center gap-1 flex-shrink-0">
-        <button
-          type="button"
-          onClick={() => adjustFont(-10)}
-          disabled={fontScale <= 75}
-          title="Decrease font size"
-          className="p-1.5 rounded-micro text-warm-gray-400 hover:text-notion-black hover:bg-warm-white transition-colors disabled:opacity-30"
-        >
-          <Minus size={14} />
-        </button>
-        <span className="flex items-center gap-1 text-[12px] text-warm-gray-500 tabular-nums min-w-[3rem] justify-center">
-          <Type size={13} />
-          {fontScale}%
-        </span>
-        <button
-          type="button"
-          onClick={() => adjustFont(10)}
-          disabled={fontScale >= 150}
-          title="Increase font size"
-          className="p-1.5 rounded-micro text-warm-gray-400 hover:text-notion-black hover:bg-warm-white transition-colors disabled:opacity-30"
-        >
-          <Plus size={14} />
-        </button>
+        {/* Font size controls */}
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => adjustFont(-10)}
+            disabled={fontScale <= 75}
+            title="Decrease font size"
+            className="p-1.5 rounded-micro text-warm-gray-400 hover:text-notion-black hover:bg-warm-white transition-colors disabled:opacity-30"
+          >
+            <Minus size={14} />
+          </button>
+          <span className="flex items-center gap-1 text-[12px] text-warm-gray-500 tabular-nums min-w-12 justify-center">
+            <Type size={13} />
+            {fontScale}%
+          </span>
+          <button
+            type="button"
+            onClick={() => adjustFont(10)}
+            disabled={fontScale >= 150}
+            title="Increase font size"
+            className="p-1.5 rounded-micro text-warm-gray-400 hover:text-notion-black hover:bg-warm-white transition-colors disabled:opacity-30"
+          >
+            <Plus size={14} />
+          </button>
+        </div>
+
+        {/* Video Recorder */}
+        {children}
       </div>
     </header>
   );

@@ -24,12 +24,26 @@ export function useOverrideGrade() {
   return useMutation({
     mutationFn: gradingApi.overrideGrade,
     onSuccess: (data) => {
-      // Invalidate both the detail for this session, and the main list
       queryClient.invalidateQueries({ queryKey: queryKeys.grading.all });
       toast.success(data.message || 'Grade manually overridden successfully.');
     },
     onError: (error) => {
       const message = error.response?.data?.error || 'Failed to override grade.';
+      toast.error(message);
+    },
+  });
+}
+
+export function useOverrideQuestionGrade() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: gradingApi.overrideQuestionGrade,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.grading.all });
+      toast.success(data.message || 'Question grade overridden successfully.');
+    },
+    onError: (error) => {
+      const message = error.response?.data?.error || 'Failed to override question grade.';
       toast.error(message);
     },
   });

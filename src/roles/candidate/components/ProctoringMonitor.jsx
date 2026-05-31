@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Shield, ShieldAlert, Maximize, X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Shield, Maximize } from "lucide-react";
 
 /**
  * Proctoring overlay displayed during the exam.
@@ -7,22 +7,16 @@ import { Shield, ShieldAlert, Maximize, X } from "lucide-react";
  *
  * @param {{
  *   webcamStream: MediaStream|null,
- *   violationCount: number,
- *   lastResult: object|null,
  *   isFullscreen: boolean,
  *   onRequestFullscreen: () => void,
  * }} props
  */
 export default function ProctoringMonitor({
   webcamStream,
-  violationCount,
-  lastResult,
   isFullscreen,
   onRequestFullscreen,
 }) {
   const videoRef = useRef(null);
-  const [warning, setWarning] = useState(null);
-  const warningTimer = useRef(null);
 
   // Attach webcam stream to video element
   useEffect(() => {
@@ -31,38 +25,11 @@ export default function ProctoringMonitor({
     }
   }, [webcamStream]);
 
-  // Show warnings based on face verification results
-  useEffect(() => {
-    if (!lastResult) return;
-    let msg = null;
-
-    if (lastResult.face_count === 0) {
-      msg = "Face not detected — please face the camera";
-    } else if (lastResult.face_count > 1) {
-      msg = "Multiple faces detected";
-    } else if (!lastResult.is_match) {
-      msg = "Identity mismatch detected";
-    }
-
-    if (msg) {
-      setWarning(msg);
-      if (warningTimer.current) clearTimeout(warningTimer.current);
-      warningTimer.current = setTimeout(() => setWarning(null), 4000);
-    }
-  }, [lastResult]);
-
-  // Cleanup timer
-  useEffect(() => {
-    return () => {
-      if (warningTimer.current) clearTimeout(warningTimer.current);
-    };
-  }, []);
-
   return (
-    <div className="fixed top-16 right-4 z-40 flex flex-col items-end gap-2">
+    <div className="flex items-center gap-3 relative z-40">
       {/* Webcam thumbnail */}
       <div className="relative">
-        <div className="w-24 h-18 rounded-standard overflow-hidden border-2 border-whisper shadow-card bg-warm-dark">
+        <div className="w-[84px] h-[58px] rounded-standard overflow-hidden border border-gray-100 shadow-sm bg-warm-dark">
           {webcamStream ? (
             <video
               ref={videoRef}
@@ -79,25 +46,11 @@ export default function ProctoringMonitor({
           )}
         </div>
 
-        {/* Violation badge */}
-        {violationCount > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 flex items-center justify-center px-1 text-[10px] font-bold text-white bg-destructive rounded-full">
-            {violationCount}
-          </span>
-        )}
       </div>
 
       {/* Proctoring status indicator */}
-      <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium ${
-        violationCount === 0
-          ? "bg-success/10 text-success"
-          : "bg-destructive/10 text-destructive"
-      }`}>
-        {violationCount === 0 ? (
-          <><Shield size={10} /> Proctoring Active</>
-        ) : (
-          <><ShieldAlert size={10} /> {violationCount} violation{violationCount !== 1 ? "s" : ""}</>
-        )}
+      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium bg-success/10 text-success">
+        <Shield size={10} /> AI-Powered Live Proctoring
       </div>
 
       {/* Fullscreen prompt */}
@@ -105,22 +58,12 @@ export default function ProctoringMonitor({
         <button
           type="button"
           onClick={onRequestFullscreen}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-white bg-warning rounded-subtle hover:bg-warning/90 transition-colors"
+          className="absolute top-full right-0 mt-2.5 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-white bg-warning rounded-subtle hover:bg-warning/90 transition-colors shadow-md z-50 animate-slide-in"
         >
           <Maximize size={12} /> Return to Fullscreen
         </button>
       )}
 
-      {/* Warning banner */}
-      {warning && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-destructive text-white rounded-subtle text-[12px] font-medium shadow-deep max-w-[220px] animate-slide-in">
-          <ShieldAlert size={14} className="flex-shrink-0" />
-          <span className="flex-1">{warning}</span>
-          <button type="button" onClick={() => setWarning(null)} className="flex-shrink-0 hover:opacity-70">
-            <X size={12} />
-          </button>
-        </div>
-      )}
     </div>
   );
 }

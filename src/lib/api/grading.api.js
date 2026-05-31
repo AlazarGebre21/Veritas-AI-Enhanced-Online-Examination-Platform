@@ -38,6 +38,19 @@ export const gradingApi = {
   },
 
   /**
+   * Override a single question's score (EnterpriseAdmin or EnterpriseStaff)
+   *
+   * @param {{ sessionId: string, sessionQuestionId: string, new_score: number, reason: string }} payload
+   */
+  overrideQuestionGrade: async ({ sessionId, sessionQuestionId, new_score, reason }) => {
+    const { data } = await apiClient.post(
+      `/grading/results/${sessionId}/questions/${sessionQuestionId}/override`,
+      { new_score, reason }
+    );
+    return data;
+  },
+
+  /**
    * Get the immutable audit history / edit logs for an exam session's grade
    *
    * @param {string} sessionId

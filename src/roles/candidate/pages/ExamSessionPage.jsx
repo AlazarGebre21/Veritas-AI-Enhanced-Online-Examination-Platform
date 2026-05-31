@@ -172,7 +172,7 @@ export default function ExamSessionPage() {
   if (isLoading) {
     return (
       <div className="flex-1 flex flex-col">
-        <div className="h-14 border-b border-whisper bg-white" />
+        <div className="h-14 border-b border-gray-100 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.01)]" />
         <div className="flex-1 flex items-center justify-center">
           <div className="space-y-3 w-full max-w-xl px-6">
             <Skeleton className="h-6 w-48" />
@@ -188,25 +188,27 @@ export default function ExamSessionPage() {
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <OfflineBanner isOnline={isOnline} pendingCount={pendingCount} />
-      <ProctoringMonitor
-        webcamStream={webcamStream}
-        violationCount={violationCount}
-        lastResult={lastResult}
-        isFullscreen={isFullscreen}
-        onRequestFullscreen={requestFullscreen}
-      />
+      <OfflineBanner isOnline={isOnline} pendingCount={pendingCount} />
 
       {/* Header */}
       <ExamHeader
         examTitle={examTitle}
         expiresAt={expiresAt}
         onExpire={handleExpire}
-      />
+      >
+        <ProctoringMonitor
+          webcamStream={webcamStream}
+          violationCount={violationCount}
+          lastResult={lastResult}
+          isFullscreen={isFullscreen}
+          onRequestFullscreen={requestFullscreen}
+        />
+      </ExamHeader>
 
       {/* Main content */}
-      <div className="flex-1 flex min-h-0">
+      <div className="flex-1 flex min-h-0 bg-white">
         {/* Sidebar: Question navigation */}
-        <aside className="w-56 flex-shrink-0 border-r border-whisper bg-white hidden md:flex md:flex-col">
+        <aside className="w-56 shrink-0 border-r border-gray-100 bg-white hidden md:flex md:flex-col shadow-[2px_0_10px_rgba(0,0,0,0.01)] z-10">
           <QuestionNavigation
             questions={questions}
             answers={answers}
@@ -217,50 +219,56 @@ export default function ExamSessionPage() {
         </aside>
 
         {/* Question area */}
-        <main className="flex-1 flex flex-col min-h-0 bg-white relative">
-          {/* Left Arrow Navigation Button */}
-          <button
-            type="button"
-            onClick={() => goToQuestion(currentIndex - 1)}
-            disabled={currentIndex === 0}
-            className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-whisper bg-white text-notion-black shadow-sm disabled:opacity-30 transition-colors hover:bg-blue-50 hover:text-notion-blue z-20 hover:border-blue-100 disabled:hover:border-whisper disabled:hover:bg-white disabled:hover:text-notion-black"
-          >
-            <ArrowLeft size={20} />
-          </button>
+        <main className="flex-1 flex flex-col min-h-0 bg-white relative items-center">
+          <div className="flex-1 overflow-y-auto py-8 w-full relative flex justify-center max-w-5xl">
+            {/* Left Arrow Navigation Button */}
+            <div className="hidden md:flex flex-col justify-start pt-16 pr-2 lg:pr-6 shrink-0 z-20">
+              <button
+                type="button"
+                onClick={() => goToQuestion(currentIndex - 1)}
+                disabled={currentIndex === 0}
+                className="flex items-center justify-center w-10 h-10 lg:w-11 lg:h-11 rounded-full border border-gray-100 bg-white text-notion-black shadow-[0_2px_12px_rgba(0,0,0,0.03)] disabled:opacity-30 transition-colors hover:bg-blue-50 hover:text-notion-blue hover:border-blue-100 disabled:hover:border-gray-100 disabled:hover:bg-white disabled:hover:text-notion-black"
+              >
+                <ArrowLeft size={20} />
+              </button>
+            </div>
 
-          {/* Right Arrow Navigation Button */}
-          <button
-            type="button"
-            onClick={() => goToQuestion(currentIndex + 1)}
-            disabled={currentIndex >= questions.length - 1}
-            className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-whisper bg-white text-notion-black shadow-sm disabled:opacity-30 transition-colors hover:bg-blue-50 hover:text-notion-blue z-20 hover:border-blue-100 disabled:hover:border-whisper disabled:hover:bg-white disabled:hover:text-notion-black"
-          >
-            <ArrowRight size={20} />
-          </button>
+            <div className="flex-1 px-6 w-full max-w-3xl shrink-0">
+              {currentQuestion ? (
+                <QuestionRenderer
+                  key={currentQuestion.id}
+                  question={currentQuestion}
+                  answer={answers.get(currentQuestion.id) || null}
+                  onAnswer={handleAnswer}
+                  onFlag={toggleFlag}
+                  isFlagged={flagged.has(currentQuestion.id)}
+                />
+              ) : (
+                <p className="text-warm-gray-500 text-[14px]">No questions available.</p>
+              )}
+            </div>
 
-          <div className="flex-1 overflow-y-auto px-6 md:px-10 py-8 max-w-3xl mx-auto w-full relative z-10">
-            {currentQuestion ? (
-              <QuestionRenderer
-                key={currentQuestion.id}
-                question={currentQuestion}
-                answer={answers.get(currentQuestion.id) || null}
-                onAnswer={handleAnswer}
-                onFlag={toggleFlag}
-                isFlagged={flagged.has(currentQuestion.id)}
-              />
-            ) : (
-              <p className="text-warm-gray-500 text-[14px]">No questions available.</p>
-            )}
+            {/* Right Arrow Navigation Button */}
+            <div className="hidden md:flex flex-col justify-start pt-16 pl-2 lg:pl-6 shrink-0 z-20">
+              <button
+                type="button"
+                onClick={() => goToQuestion(currentIndex + 1)}
+                disabled={currentIndex >= questions.length - 1}
+                className="flex items-center justify-center w-10 h-10 lg:w-11 lg:h-11 rounded-full border border-gray-100 bg-white text-notion-black shadow-[0_2px_12px_rgba(0,0,0,0.03)] disabled:opacity-30 transition-colors hover:bg-blue-50 hover:text-notion-blue hover:border-blue-100 disabled:hover:border-gray-100 disabled:hover:bg-white disabled:hover:text-notion-black"
+              >
+                <ArrowRight size={20} />
+              </button>
+            </div>
           </div>
 
           {/* Bottom bar */}
-          <div className="border-t border-whisper bg-white px-6 py-3 flex items-center justify-between">
+          <div className="border-t border-gray-100 bg-white px-6 py-3 w-full flex items-center justify-between shadow-[0_-2px_10px_rgba(0,0,0,0.01)] relative z-20">
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => goToQuestion(currentIndex - 1)}
                 disabled={currentIndex === 0}
-                className="flex items-center gap-1 px-3 py-2 text-[13px] font-medium text-notion-black border border-whisper rounded-subtle hover:bg-warm-white transition-colors disabled:opacity-30"
+                className="flex items-center gap-1 px-3 py-2 text-[13px] font-medium text-notion-black border border-gray-100 rounded-subtle hover:bg-gray-50 transition-colors disabled:opacity-30 shadow-sm"
               >
                 <ChevronLeft size={15} /> Previous
               </button>
@@ -268,7 +276,7 @@ export default function ExamSessionPage() {
                 type="button"
                 onClick={() => goToQuestion(currentIndex + 1)}
                 disabled={currentIndex >= questions.length - 1}
-                className="flex items-center gap-1 px-3 py-2 text-[13px] font-medium text-notion-black border border-whisper rounded-subtle hover:bg-warm-white transition-colors disabled:opacity-30"
+                className="flex items-center gap-1 px-3 py-2 text-[13px] font-medium text-notion-black border border-gray-100 rounded-subtle hover:bg-gray-50 transition-colors disabled:opacity-30 shadow-sm"
               >
                 Next <ChevronRight size={15} />
               </button>
@@ -291,7 +299,7 @@ export default function ExamSessionPage() {
       </div>
 
       {/* Mobile question nav (bottom sheet) */}
-      <div className="md:hidden border-t border-whisper bg-white px-3 py-2 overflow-x-auto">
+      <div className="md:hidden border-t border-gray-100 bg-white px-3 py-2 overflow-x-auto shadow-[0_-2px_10px_rgba(0,0,0,0.01)] relative z-20">
         <div className="flex gap-1.5">
           {questions.map((q, idx) => {
             const isAnswered = answers.has(q.id);

@@ -21,7 +21,7 @@ const setupSchema = z.object({
   description: z.string().optional().default(""),
   durationMinutes: z.coerce.number().min(1, "Must be at least 1 minute"),
   maxParticipants: z.coerce.number().min(1).optional(),
-  passingScorePercent: z.coerce.number().min(0).max(100).optional().default(60),
+  passingScorePercent: z.coerce.number().min(0).max(100).optional().default(50),
   negativeMarking: z.boolean().optional().default(false),
 });
 
@@ -72,7 +72,7 @@ function Stage1({ onNext, initialData }) {
     resolver: zodResolver(setupSchema),
     defaultValues: initialData || {
       title: "", topic: "", description: "",
-      durationMinutes: 60, passingScorePercent: 50, negativeMarking: true,
+      durationMinutes: 120, maxParticipants: 250, passingScorePercent: 50, negativeMarking: true,
     },
   });
 
@@ -101,11 +101,11 @@ function Stage1({ onNext, initialData }) {
           {...register("passingScorePercent")} />
       </div>
 
-      <label className="flex items-center gap-2 cursor-pointer">
+      {/* <label className="flex items-center gap-2 cursor-pointer">
         <input type="checkbox" {...register("negativeMarking")}
           className="w-4 h-4 rounded border-[#ddd] text-notion-blue focus:ring-notion-blue/20" />
         <span className="text-[14px] text-notion-black">Enable negative marking</span>
-      </label>
+      </label> */}
 
       <div className="flex justify-end pt-2">
         <Button type="submit">Continue <ChevronRight size={15} className="ml-1" /></Button>
@@ -199,7 +199,7 @@ export default function ExamCreatePage() {
           )}
           <Stage1
             onNext={handleStage1Submit}
-            initialData={stage1Data || (prefillTopic ? { topic: prefillTopic } : null)}
+            initialData={stage1Data || (prefillTopic ? { topic: prefillTopic, title: "", description: "", durationMinutes: 120, maxParticipants: 250, passingScorePercent: 50, negativeMarking: true } : null)}
           />
         </div>
       )}

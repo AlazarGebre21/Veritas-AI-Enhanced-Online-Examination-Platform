@@ -37,12 +37,15 @@ Access restricted to admins of the specific enterprise.
       "total_max_points": 0,
       "total_awarded_points": 0,
       "percentage": 0,
-      "status": "string",
-      "graded_by": "string",
+      "graded_by": {
+        "id": "string",
+        "type": "string"
+      },
+      "status": "pending",
       "is_tampered": true,
       "version": 0,
-      "created_at": "2026-05-23T03:04:39.653Z",
-      "updated_at": "2026-05-23T03:04:39.653Z"
+      "created_at": "2026-05-31T09:56:25.202Z",
+      "updated_at": "2026-05-31T09:56:25.202Z"
     }
   ],
   "total": 0,
@@ -86,23 +89,132 @@ Verifies data integrity and enforces multi-tenant boundaries.
   "total_max_points": 0,
   "total_awarded_points": 0,
   "percentage": 0,
-  "status": "string",
-  "graded_by": "string",
+  "graded_by": {
+    "id": "string",
+    "type": "string"
+  },
+  "status": "pending",
   "is_tampered": true,
   "version": 0,
-  "created_at": "2026-05-23T03:11:13.738Z",
-  "updated_at": "2026-05-23T03:11:13.738Z",
+  "created_at": "2026-05-31T09:58:26.117Z",
+  "updated_at": "2026-05-31T09:58:26.117Z",
   "question_results": [
     {
       "question_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "session_question_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "question_type": "string",
+      "question_type": "MCQ",
       "title": "string",
+      "content": "string",
+      "candidate_answer": "string",
       "max_points": 0,
       "awarded_points": 0,
-      "status": "string"
+      "status": "correct"
     }
   ]
+}
+```
+
+# Override Question Grade
+
+`POST /grading/results/{session_id}/questions/{session_question_id}/override` ENTERPRISEADMIN AND ENTERPRISESTAFF ENDPOINT
+
+## Description
+
+Manually overrides the score for a specific question within an exam session. The system recalculates the overall score, generates a new cryptographic checksum to ensure data integrity, and records the modification in an append-only audit trail.
+
+---
+
+## Path Parameters
+
+| Parameter             | Type   | Required | Description                                                |
+| --------------------- | ------ | -------- | ---------------------------------------------------------- |
+| `session_id`          | `UUID` | Yes      | Unique identifier of the exam session.                     |
+| `session_question_id` | `UUID` | Yes      | Unique identifier of the question within the exam session. |
+
+---
+
+## Request Body
+
+**Content-Type:** `application/json`
+
+### Schema
+
+```json
+{
+  "new_score": 0,
+  "reason": "string"
+}
+```
+
+### Fields
+
+| Field       | Type     | Required | Description                               |
+| ----------- | -------- | -------- | ----------------------------------------- |
+| `new_score` | `number` | Yes      | New score to assign to the question.      |
+| `reason`    | `string` | Yes      | Reason for manually overriding the score. |
+
+### Example Request
+
+```json
+{
+  "new_score": 8,
+  "reason": "Answer was incorrectly graded due to evaluation error."
+}
+```
+
+---
+
+## Responses
+
+### 200 OK
+
+Question grade successfully overridden.
+
+**Content-Type:** `application/json`
+
+#### Response Schema
+
+```json
+{
+  "session_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "session_question_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "previous_question_score": 0,
+  "new_question_score": 0,
+  "previous_total_score": 0,
+  "new_total_score": 0,
+  "new_percentage": 0,
+  "status": "string",
+  "message": "Question grade manually overridden successfully."
+}
+```
+
+#### Response Fields
+
+| Field                     | Type     | Description                                   |
+| ------------------------- | -------- | --------------------------------------------- |
+| `session_id`              | `UUID`   | Exam session identifier.                      |
+| `session_question_id`     | `UUID`   | Question identifier within the session.       |
+| `previous_question_score` | `number` | Original score before override.               |
+| `new_question_score`      | `number` | Updated score after override.                 |
+| `previous_total_score`    | `number` | Total exam score before the override.         |
+| `new_total_score`         | `number` | Total exam score after the override.          |
+| `new_percentage`          | `number` | Updated percentage score after recalculation. |
+| `status`                  | `string` | Operation status.                             |
+| `message`                 | `string` | Confirmation message.                         |
+
+#### Example Response
+
+```json
+{
+  "session_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "session_question_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "previous_question_score": 6,
+  "new_question_score": 8,
+  "previous_total_score": 72,
+  "new_total_score": 74,
+  "new_percentage": 92.5,
+  "status": "success",
+  "message": "Question grade manually overridden successfully."
 }
 ```
 

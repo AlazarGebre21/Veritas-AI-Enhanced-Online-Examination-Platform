@@ -7,13 +7,14 @@ import ResultDetailView from "../components/ResultDetailView.jsx";
 export function ExamSubmissionsTab({ examId, exam }) {
   const [selectedSessionId, setSelectedSessionId] = useState(null);
   
+  
   const { data, isLoading } = useGradingResults({ exam_id: examId, limit: 30 });
   const submissions = data?.results || [];
 
 
 
   if (selectedSessionId) {
-    return <ResultDetailView sessionId={selectedSessionId} onBack={() => setSelectedSessionId(null)} />;
+    return <ResultDetailView sessionId={selectedSessionId} passingScore={exam?.passingScorePercent} onBack={() => setSelectedSessionId(null)} />;
   }
 
   if (isLoading) {
@@ -46,8 +47,13 @@ function SubmissionRow({ sub, passingScore, onClick }) {
   const status = statusData?.status || "graded";
   const isPending = status === 'pending';
   const displayPercentage = statusData?.percentage ?? sub.percentage ?? 0;
-  const gradedBy = statusData?.graded_by || sub.graded_by || 'System';
-  const passed = displayPercentage >= passingScore || 50;
+  const gradedBy = statusData?.graded_by || sub.graded_by;
+  const gradedByLabel = gradedBy
+    ? typeof gradedBy === 'object'
+      ? gradedBy.type || 'System'
+      : gradedBy
+    : 'System';
+  const passed = displayPercentage >= (passingScore || 50);
 
   return (
     <div onClick={onClick} className="flex items-center justify-between px-4 py-3 hover:bg-warm-white/50 transition-colors cursor-pointer">
@@ -61,7 +67,7 @@ function SubmissionRow({ sub, passingScore, onClick }) {
           </Badge>
         </div>
         <div className="flex items-center gap-3 mt-0.5 text-[11px] text-warm-gray-500">
-          <span>Graded By: {gradedBy}</span>
+          <span>Graded By: {gradedByLabel}</span>
           {sub.is_tampered && <Badge variant="destructive">Tampered</Badge>}
         </div>
       </div>
